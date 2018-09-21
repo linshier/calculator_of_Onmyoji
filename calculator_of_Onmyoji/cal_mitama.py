@@ -138,7 +138,7 @@ def sep_utf_str_to_dict(utf_str):
 
 def main():
     args = parser.parse_args()
-    print('Input args: %s' % args)
+    #print('Input args: %s' % args)
 
     file_name = args.source_data
 
@@ -173,29 +173,13 @@ def main():
     locate_sep_data = load_data.sep_mitama_by_loc(origin_data)
 
     print('Start calculating')
-    locate_sep_data = cal.filter_loc_and_type(locate_sep_data,
-                                              l2_prop, int(l2_prop_value),
-                                              l4_prop, int(l4_prop_value),
-                                              l6_prop, int(l6_prop_value),
-                                              args.attack_only)
+    cal.filter_1st_speed(locate_sep_data)
+    return
 
-    mitama_comb, total_comb = cal.make_combination(locate_sep_data,
-                                                   mitama_type_limit,
-                                                   args.all_suit)
+    locate_sep_data = cal.filter_loc(locate_sep_data)
 
-    filter_result = cal.filter_mitama(mitama_comb,
-                                      mitama_type_limit,
-                                      prop_limit,
-                                      upper_prop_limit,
-                                      total_comb,
-                                      all_suit=args.all_suit)
-
-    if damage_limit > 0:
-        filter_result = cal.fit_damage_limit(filter_result, base_att,
-                                             base_critdamage, damage_limit)
-    if hp_crit_limit > 0:
-        filter_result = cal.fit_hp_crit_limit(filter_result, base_hp,
-                                              base_critdamage, hp_crit_limit)
+    filter_result = cal.make_combination(locate_sep_data,
+                                         mitama_type_limit, args.all_suit)
 
     write_data.write_mitama_result(args.output_file, filter_result,
                                    base_att, base_hp, base_critdamage)
