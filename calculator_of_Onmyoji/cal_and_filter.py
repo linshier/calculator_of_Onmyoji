@@ -29,6 +29,10 @@ def filter_loc_prop(data_list, prop_type, prop_min_value):
 def filter_1st_speed(data_dict):
     done = set()
 
+    def prop_value_none(mitama):
+        if mitama.keys()[0] in done:
+            return False
+        return True
     def prop_value_speed(mitama):
         if mitama.keys()[0] in done:
             return False
@@ -43,6 +47,21 @@ def filter_1st_speed(data_dict):
         if (mitama_info[speed] and mitama_info[speed] >= 57):
             return True
         return False
+    def prop_value_l2_attack(mitama):
+        if mitama.keys()[0] in done:
+            return False
+        mitama_info = mitama.values()[0]
+        if (mitama_info[attack_buf] and mitama_info[attack_buf] >= 55):
+            return True
+        return False
+    def prop_value_l6_crit_damage(mitama):
+        if mitama.keys()[0] in done:
+            return False
+        mitama_info = mitama.values()[0]
+        if (mitama_info[crit_damage] and mitama_info[crit_damage] >= 89):
+            return True
+        return False
+
     def build_mask_none():
         return [], int(0), int(0)
     def build_mask_fortune():
@@ -71,18 +90,57 @@ def filter_1st_speed(data_dict):
                 soul.append(k)
                 break
         return soul, soul_2p_fortune_mask, soul_4p_fortune_mask
+    def build_mask_seductress():
+        soul = []
+        soul_2p_fortune_mask = int(0)
+        soul_4p_fortune_mask = int(0)
+        for (k, v) in data_format.MITAMA_ENHANCE.items():
+            enhance_type = v[u"加成类型"]
+            if k == data_format.MITAMA_TYPES[4]:
+                print(k)
+                soul_2p_fortune_mask |= (2 << (3 * len(soul)))
+                soul_4p_fortune_mask |= (4 << (3 * len(soul)))
+                soul.append(k)
+                continue
+            if enhance_type == u"暴击":
+                soul_2p_fortune_mask |= (2 << (3 * len(soul)))
+                soul.append(k)
+                continue
+        return soul, soul_2p_fortune_mask, soul_4p_fortune_mask
     def test_limit_1p_speed(n):
         return (n & 0xff) < speed_1p_limit
-    def test_suit_buf_max_speed(buf_max, n):
+
+    def test_suit_buf_max_speed(soul_2p_mask, buf_max, n, t):
         if buf_max == 0:
             buf_max = 1
         if buf_max > (n & 0xff):
-            return buf_max, True
-        return (n & 0xff) + 1, False
+            return buf_max, n, True
+        return (n & 0xff) + 1, n, False
+    def test_suit_buf_max_damage(soul_2p_mask, damage_max, n, t):
+        #test speed
+        if (n & 0xff) < 11:
+            return damage_max, n, True
+        #test crit rate with suit enhance
+        if t & soul_2p_mask == 0:
+            return damage_max, n, True
+        n += (30 << 16)
+        if ((n >> 16) & 0xff) < 89:
+            return damage_max, n, True
+
+        attack_buf_base = 100
+        crit_damage_base = 160
+        ab = (n >> 24) & 0xff
+        cd = (n >>  8) & 0xff
+        d = (attack_buf_base + ab) * (crit_damage_base + cd)
+        if d < damage_max:
+            return damage_max, n, True
+        return d + 1, n, False
 
     if 1:
         res = filter_soul(prop_value_speed,
                           prop_value_l2_speed,
+                          prop_value_speed,
+                          prop_value_speed,
                           build_mask_none,
                           speed,
                           True,
@@ -91,40 +149,56 @@ def filter_1st_speed(data_dict):
         for x in res:
             done.add(x)
 
-    res = filter_soul(prop_value_speed,
-                      prop_value_l2_speed,
-                      build_mask_fire,
-                      speed,
-                      True,
-                      test_suit_buf_max_speed,
-                      data_dict)
-    for x in res:
-        done.add(x)
+    if 1:
+        res = filter_soul(prop_value_speed,
+                          prop_value_l2_speed,
+                          prop_value_speed,
+                          prop_value_speed,
+                          build_mask_fire,
+                          speed,
+                          True,
+                          test_suit_buf_max_speed,
+                          data_dict)
+        for x in res:
+            done.add(x)
 
-def filter_soul(prop_value, prop_value_l2, build_mask, sortkey,
+    if 1:
+        res = filter_soul(prop_value_none,
+                          prop_value_l2_attack,
+                          prop_value_l2_attack,
+                          prop_value_l6_crit_damage,
+                          build_mask_seductress,
+                          crit_rate,
+                          False,
+                          test_suit_buf_max_damage,
+                          data_dict)
+
+def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
+                build_mask, sortkey,
                 find_one,
                 test_suit_buf_max,
                 data_dict):
     d1, d2, d3, d4, d5, d6 = data_dict.values()
 
     d2 = filter(prop_value_l2, d2)
-    d4 = filter(prop_value, d4)
-    d6 = filter(prop_value, d6)
+    d4 = filter(prop_value_l4, d4)
+    d6 = filter(prop_value_l6, d6)
     d1 = filter(prop_value, d1)
     d3 = filter(prop_value, d3)
     d5 = filter(prop_value, d5)
-    #print('%d x %d x %d x %d x %d x %d' % (len(d1), len(d2), len(d3), len(d4), len(d5), len(d5)))
+    print('%d x %d x %d x %d x %d x %d' % (len(d1), len(d2), len(d3), len(d4), len(d5), len(d5)))
     #for i in d1:
     #    print('%s' % i.values()[0][suit])
     #    #print(('%s' % i.values()[0][suit]).decode('raw_unicode_escape'))
     #return []
 
-    d1.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
-    d2.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
-    d3.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
-    d4.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
-    d5.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
-    d6.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
+    if sortkey is not None:
+        d1.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
+        d2.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
+        d3.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
+        d4.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
+        d5.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
+        d6.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
 
     soul, soul_2p_mask, soul_4p_mask = build_mask()
     #print('%s %s %s' % (soul, soul_2p_mask, soul_4p_mask))
@@ -157,13 +231,19 @@ def filter_soul(prop_value, prop_value_l2, build_mask, sortkey,
                         for i5 in l5:
                             n6 = n5 + i5[0]
                             t6 = t5 + i5[1]
+                            d = suit_buf_max
                             if soul_4p_mask == 0 or (t6 & soul_4p_mask):
-                                suit_buf_max, ok = test_suit_buf_max(suit_buf_max, n6)
+                                suit_buf_max, n6, ok = test_suit_buf_max(soul_2p_mask,
+                                                                         suit_buf_max,
+                                                                         n6, t6)
                                 if ok:
                                     continue
                             else:
                                 continue
-                            d = 0
+                            if d != suit_buf_max:
+                                d = suit_buf_max - 1
+                            else:
+                               d = 0
                             result_num += 1
                             result = [i1[2], i2[2], i3[2], i4[2], i5[2], i6[2]]
                             comb_sum = list2map(soul,
@@ -340,120 +420,74 @@ def make_combination(mitama_data, mitama_type_limit={}, all_suit=True):
     fortune_speed_max = 120
     speed_max = 145
     for i2 in l2:
-        speedsuit = ((i2[0] & 0xff) >= 57)
         for i4 in l4:
-            if speedsuit:
-                if ((i4[0] & 0xff) < speed_1p_limit):
-                    continue
-            else:
-                if ((i4[0] >> 24) & 0xff) < 55:
-                    continue
-                if i4[0] & 0xffffff00 == 0:
-                    continue
+            if ((i4[0] >> 24) & 0xff) < 55:
+                continue
+            if i4[0] & 0xffffff00 == 0:
+                continue
             t2 = i2[1] + i4[1]
             n2 = i2[0] + i4[0]
             for i6 in l6:
-                if speedsuit:
-                    if ((i6[0] & 0xff) < speed_1p_limit):
-                        continue
-                else:
-                    if i6[0] & 0xffffff00 == 0:
-                        continue
-                    if ((i6[0] >> 16) & 0xff) < 55 and ((i6[0] >> 8) & 0xff) < 89:
-                        continue
+                if i6[0] & 0xffffff00 == 0:
+                    continue
+                if ((i6[0] >> 16) & 0xff) < 55 and ((i6[0] >> 8) & 0xff) < 89:
+                    continue
                 t3 = t2 + i6[1]
                 n3 = n2 + i6[0]
                 for i1 in l1:
                     t4 = t3 + i1[1]
-                    if speedsuit:
-                        if ((i1[0] & 0xff) < speed_1p_limit):
-                            continue
-                        #if (t4 & mitama_codes_2p_fortune_mask) == 0 and (t4 & mitama_codes_4p_fortune_mask) == 0:
-                        #    continue
-                    else:
-                        if i1[0] & 0xffffff00 == 0:
-                            continue
-                        if (t4 & mitama_codes_2p_suit_mask) == 0 and (t4 & mitama_codes_4p_suit_mask) == 0:
-                            continue
+                    if i1[0] & 0xffffff00 == 0:
+                        continue
+                    if (t4 & mitama_codes_2p_suit_mask) == 0 and (t4 & mitama_codes_4p_suit_mask) == 0:
+                        continue
                     n4 = n3 + i1[0]
                     for i3 in l3:
-                        if speedsuit:
-                            if ((i3[0] & 0xff) < speed_1p_limit):
-                                continue
-                        else:
-                            if i3[0] & 0xffffff00 == 0:
-                                continue
+                        if i3[0] & 0xffffff00 == 0:
+                            continue
                         t5 = t4 + i3[1]
                         n5 = n4 + i3[0]
                         for i5 in l5:
-                            if speedsuit:
-                                if (i5[0] & 0xff) < speed_1p_limit:
+                            if i5[0] & 0xffffff00 == 0:
+                                continue
+                            t6 = t5 + i5[1]
+                            if (t6 & mitama_codes_4p_suit_mask) == 0:
+                                continue
+                            suit_num += 1
+                            n6 = n5 + i5[0]
+                            #test crit rate with suit enhance
+                            if t6 & mitama_codes_2p_crit_rate_mask:
+                                n6 += (15 << 16)
+                            if t6 & mitama_codes_4p_crit_rate_mask:
+                                n6 += (15 << 16)
+                            if ((n6 >> 16) & 0xff) < 89:
+                                continue
+                            #test attack
+                            if t6 & mitama_codes_2p_attack_buf_mask:
+                                n6 += (15 << 24)
+                            if t6 & mitama_codes_4p_attack_buf_mask:
+                                n6 += (15 << 24)
+                            #test speed
+                            #test crit damage
+                            ab = (n6 >> 24) & 0xff
+                            cd = (n6 >> 8) & 0xff
+                            d = (attack_buf_base + ab) * (crit_damage_base + cd)
+                            if (n6 & 0xff) < 11:
+                                if d < damage_max:
                                     continue
-                                n6 = n5 + i5[0]
-                                t6 = t5 + i5[1]
-                                if (t6 & mitama_codes_4p_fortune_mask):
-                                    if fortune_speed_max > (n6 & 0xff):
-                                        continue
-                                    fortune_speed_max = (n6 & 0xff) + 1
-                                else:
-                                    if speed_max > (n6 & 0xff):
-                                        continue
-                                    speed_max = (n6 & 0xff) + 1
-                                    t6 = 0
-                                d = 0
+                                damage_max = d + 1
                             else:
-                                if i5[0] & 0xffffff00 == 0:
-                                    continue
-                                t6 = t5 + i5[1]
-                                if (t6 & mitama_codes_4p_suit_mask) == 0:
-                                    continue
-                                suit_num += 1
-                                n6 = n5 + i5[0]
-                                #test crit rate with suit enhance
-                                if t6 & mitama_codes_2p_crit_rate_mask:
-                                    n6 += (15 << 16)
-                                if t6 & mitama_codes_4p_crit_rate_mask:
-                                    n6 += (15 << 16)
-                                if ((n6 >> 16) & 0xff) < 89:
-                                    continue
-                                #test attack
-                                if t6 & mitama_codes_2p_attack_buf_mask:
-                                    n6 += (15 << 24)
-                                if t6 & mitama_codes_4p_attack_buf_mask:
-                                    n6 += (15 << 24)
-                                #test speed
-                                #test crit damage
-                                ab = (n6 >> 24) & 0xff
-                                cd = (n6 >> 8) & 0xff
-                                d = (attack_buf_base + ab) * (crit_damage_base + cd)
-                                if (n6 & 0xff) < 11:
-                                    if d < damage_max:
+                                if t6 & mitama_codes_4p_seductress_mask:
+                                    if d < fast_seductress_damage_max:
                                         continue
-                                    damage_max = d + 1
-                                    #if cd < crit_damage_max:
-                                    #    continue
-                                    #if attack_buf_max <= ab:
-                                    #    attack_buf_max = ab + 1
-                                    #    crit_damage_max = cd + 1
+                                    fast_seductress_damage_max = d + 1
+                                elif t6 & mitama_codes_4p_shadow_mask:
+                                    if d < fast_shadow_damage_max:
+                                        continue
+                                    fast_shadow_damage_max = d + 1
                                 else:
-                                    if t6 & mitama_codes_4p_seductress_mask:
-                                        if d < fast_seductress_damage_max:
-                                            continue
-                                        fast_seductress_damage_max = d + 1
-                                    elif t6 & mitama_codes_4p_shadow_mask:
-                                        if d < fast_shadow_damage_max:
-                                            continue
-                                        fast_shadow_damage_max = d + 1
-                                    else:
-                                        if d < fast_damage_max:
-                                            continue
-                                        fast_damage_max = d + 1
-                                    #if cd < fast_crit_damage_max:
-                                    #    continue
-                                    #if 1:
-                                    #    fast_crit_damage_max = cd + 1
-                                    #    if crit_damage_max < fast_crit_damage_max:
-                                    #        crit_damage_max = fast_crit_damage_max
+                                    if d < fast_damage_max:
+                                        continue
+                                    fast_damage_max = d + 1
 
                             result_num += 1
                             comb_sum = list2map(mitama_codes, n6, t6 & (mitama_codes_4p_suit_mask | mitama_codes_4p_fortune_mask), '', 4, '')
