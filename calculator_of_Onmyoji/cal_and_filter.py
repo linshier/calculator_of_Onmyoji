@@ -135,7 +135,11 @@ def filter_fast(data_dict):
                 soul_2p_fortune_mask |= (2 << (3 * len(soul)))
                 soul_4p_fortune_mask |= (4 << (3 * len(soul)))
                 soul.append(k)
-                break
+                continue
+            if enhance_type == u'效果命中':
+                soul_2p_fortune_mask |= (2 << (3 * len(soul)))
+                soul.append(k)
+                continue
         return soul, soul_2p_fortune_mask, soul_4p_fortune_mask
     def build_mask_shadow():
         soul = []
@@ -317,10 +321,10 @@ def filter_fast(data_dict):
                 res = r
                 com = c
         if len(res) > 0:
-            comb_data = make_result(data_dict, res, com)
-            print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
             for x in res:
                 done.add(x)
+            comb_data = make_result(data_dict, res, com)
+            print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
     soul_effect = []
     for (k, v) in data_format.MITAMA_ENHANCE.items():
@@ -328,7 +332,7 @@ def filter_fast(data_dict):
         if enhance_type == u'效果命中':
             soul_effect.append(k)
             continue
-    if 1:
+    for i in xrange(2):
         effect_buf = 0
         res = []
         com = {}
@@ -348,18 +352,20 @@ def filter_fast(data_dict):
                 res = r
                 com = c
         if len(res) > 0:
+            for x in res:
+                done.add(x)
             comb_data = make_result(data_dict, res, com)
             print(('%d %s' % (effect_buf, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
-    if 1:
+    if 0:
         res, com, n = filter_soul(prop_value_none,
                           prop_value_none,
                           prop_value_none,
                           prop_value_none,
-                          build_mask_sprite,
+                          build_mask_fire,
                           speed,
                           True,
-                          test_suit_buf_max_speed,
+                          score_suit_buf_max_effect,
                           data_dict)
         if len(res) > 0:
             comb_data = make_result(data_dict, res, com)
