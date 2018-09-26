@@ -45,8 +45,7 @@ def filter_fast(data_dict):
         if mitama.keys()[0] in done:
             return False
         mitama_info = mitama.values()[0]
-        #print(('===%s %s' % (effect, mitama_info)).decode('raw_unicode_escape'))
-        if (mitama_info[effect] and mitama_info[effect] >= 2):
+        if (mitama_info[effect] and mitama_info[effect] > 0):
             return True
         return False
     def prop_value_damage(mitama):
@@ -91,7 +90,7 @@ def filter_fast(data_dict):
         for (k, v) in data_format.MITAMA_ENHANCE.items():
             enhance_type = v[u"加成类型"]
             if k == data_format.MITAMA_TYPES[18]:
-                print(k)
+                #print(k)
                 soul_2p_fortune_mask |= (2 << (3 * len(soul)))
                 soul_4p_fortune_mask |= (4 << (3 * len(soul)))
                 soul.append(k)
@@ -107,11 +106,23 @@ def filter_fast(data_dict):
                 soul_2p_fortune_mask |= (2 << (3 * len(soul)))
                 soul_4p_fortune_mask |= (4 << (3 * len(soul)))
                 soul.append(k)
-                break
+                continue
             if enhance_type == u'效果命中':
                 soul_2p_fortune_mask |= (2 << (3 * len(soul)))
                 soul.append(k)
                 continue
+        return soul, soul_2p_fortune_mask, soul_4p_fortune_mask
+    def build_mask_sprite():
+        soul = []
+        soul_2p_fortune_mask = int(0)
+        soul_4p_fortune_mask = int(0)
+        for (k, v) in data_format.MITAMA_ENHANCE.items():
+            if k == data_format.MITAMA_TYPES[2]:
+                print(k)
+                soul_2p_fortune_mask |= (2 << (3 * len(soul)))
+                soul_4p_fortune_mask |= (4 << (3 * len(soul)))
+                soul.append(k)
+                break
         return soul, soul_2p_fortune_mask, soul_4p_fortune_mask
     def build_mask_fire():
         soul = []
@@ -125,6 +136,23 @@ def filter_fast(data_dict):
                 soul_4p_fortune_mask |= (4 << (3 * len(soul)))
                 soul.append(k)
                 break
+        return soul, soul_2p_fortune_mask, soul_4p_fortune_mask
+    def build_mask_shadow():
+        soul = []
+        soul_2p_fortune_mask = int(0)
+        soul_4p_fortune_mask = int(0)
+        for (k, v) in data_format.MITAMA_ENHANCE.items():
+            enhance_type = v[u"加成类型"]
+            if k == data_format.MITAMA_TYPES[34]:
+                soul_2p_fortune_mask |= (2 << (3 * len(soul)))
+                soul_4p_fortune_mask |= (4 << (3 * len(soul)))
+                soul.append(k)
+                continue
+            if enhance_type == u"暴击":
+                #print(k)
+                soul_2p_fortune_mask |= (2 << (3 * len(soul)))
+                soul.append(k)
+                continue
         return soul, soul_2p_fortune_mask, soul_4p_fortune_mask
     def build_mask_seductress():
         soul = []
@@ -153,8 +181,8 @@ def filter_fast(data_dict):
         return (n & 0xff), n, False
     def score_suit_buf_max_effect(soul_2p_mask, buf_max, n, t):
         #test effect with suit enhance
-        if t & soul_2p_mask == 0:
-            return buf_max, n, True
+        if t & soul_2p_mask:
+            n += (15 << 32)
         #test speed
         if (n & 0xff) < 11:
             return buf_max, n, True
@@ -194,7 +222,6 @@ def filter_fast(data_dict):
             comb_data = make_result(data_dict, res, com)
             print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
-
     if 1:
         res, com, n = filter_soul(prop_value_speed,
                           prop_value_l2_speed,
@@ -211,8 +238,7 @@ def filter_fast(data_dict):
             comb_data = make_result(data_dict, res, com)
             print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
-
-    if 1:
+    if 0:
         res, com, n = filter_soul(prop_value_speed,
                           prop_value_l2_speed,
                           prop_value_speed,
@@ -228,13 +254,42 @@ def filter_fast(data_dict):
             comb_data = make_result(data_dict, res, com)
             print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
-
     soul_crit = []
     for (k, v) in data_format.MITAMA_ENHANCE.items():
         enhance_type = v[u"加成类型"]
         if enhance_type == u"暴击":
             soul_crit.append(k)
             continue
+    if 0:
+        type_shadow = u'破势'
+        damage = 0
+        res = []
+        com = {}
+        for s in soul_crit:
+            print('4%s + 2%s' % (type_shadow, s))
+            def prop_value_crit(mitama):
+                if mitama.keys()[0] in done:
+                    return False
+                enhance_type = mitama.values()[0][u'御魂类型']
+                return enhance_type == type_shadow or enhance_type == s
+
+            r, c, n = filter_soul(prop_value_crit,
+                                    prop_value_l2_attack,
+                                    prop_value_l2_attack,
+                                    prop_value_l6_crit_damage,
+                                    build_mask_shadow,
+                                    crit_rate,
+                                    False,
+                                    test_suit_buf_max_damage,
+                                    data_dict)
+            if n > damage:
+                damage = n
+                res = r
+                com = c
+        if len(res) > 0:
+            comb_data = make_result(data_dict, res, com)
+            print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
+            yield comb_data
     if 1:
         type_seductress = u'针女'
         damage = 0
@@ -295,6 +350,20 @@ def filter_fast(data_dict):
         if len(res) > 0:
             comb_data = make_result(data_dict, res, com)
             print(('%d %s' % (effect_buf, comb_data['sum'])).decode('raw_unicode_escape'))
+            yield comb_data
+    if 1:
+        res, com, n = filter_soul(prop_value_none,
+                          prop_value_none,
+                          prop_value_none,
+                          prop_value_none,
+                          build_mask_sprite,
+                          speed,
+                          True,
+                          test_suit_buf_max_speed,
+                          data_dict)
+        if len(res) > 0:
+            comb_data = make_result(data_dict, res, com)
+            print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
 
 
