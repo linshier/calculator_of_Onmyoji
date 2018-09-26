@@ -193,12 +193,13 @@ def filter_fast(data_dict):
         if buf_max >= ((n >> 32) & 0xff):
             return buf_max, n, True
         return ((n >> 32) & 0xff), n, False
+    damage_min_speed = 11
     def test_suit_buf_max_damage(soul_2p_mask, buf_max, n, t):
         #test crit rate with suit enhance
         if t & soul_2p_mask == 0:
             return buf_max, n, True
         #test speed
-        if (n & 0xff) < 11:
+        if (n & 0xff) < damage_min_speed:
             return buf_max, n, True
         n += (30 << 16)
         if ((n >> 16) & 0xff) < 89:
@@ -295,6 +296,38 @@ def filter_fast(data_dict):
             print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
     if 1:
+        damage_min_speed = 57
+        type_seductress = u'针女'
+        damage = 0
+        res = []
+        com = {}
+        for s in soul_crit:
+            print('4%s + 2%s' % (type_seductress, s))
+            def prop_value_crit(mitama):
+                if mitama.keys()[0] in done:
+                    return False
+                enhance_type = mitama.values()[0][u'御魂类型']
+                return enhance_type == type_seductress or enhance_type == s
+
+            r, c, n = filter_soul(prop_value_crit,
+                                  prop_value_l2_speed,
+                                  prop_value_l2_attack,
+                                  prop_value_l6_crit_damage,
+                                  build_mask_seductress,
+                                  speed,
+                                  False,
+                                  test_suit_buf_max_damage,
+                                  data_dict)
+            if n > damage:
+                damage = n
+                res = r
+                com = c
+        if len(res) > 0:
+            comb_data = make_result(data_dict, res, com)
+            print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
+            yield comb_data
+    if 1:
+        damage_min_speed = 11
         type_seductress = u'针女'
         damage = 0
         res = []
