@@ -173,13 +173,7 @@ def main():
     locate_sep_data = load_data.sep_mitama_by_loc(origin_data)
 
     print('Start calculating')
-    cal.filter_1st_speed(locate_sep_data)
-    return
-
-    locate_sep_data = cal.filter_loc(locate_sep_data)
-
-    filter_result = cal.make_combination(locate_sep_data,
-                                         mitama_type_limit, args.all_suit)
+    filter_result = cal.filter_fast(locate_sep_data)
 
     write_data.write_mitama_result(args.output_file, filter_result,
                                    base_att, base_hp, base_critdamage)

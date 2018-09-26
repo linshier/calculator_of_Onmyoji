@@ -26,7 +26,7 @@ def filter_loc_prop(data_list, prop_type, prop_min_value):
             return False
     return filter(prop_value_le_min, data_list)
 
-def filter_1st_speed(data_dict):
+def filter_fast(data_dict):
     done = set()
 
     def prop_value_none(mitama):
@@ -143,7 +143,7 @@ def filter_1st_speed(data_dict):
         return d + 1, n, False
 
     if 1:
-        res, _, _ = filter_soul(prop_value_speed,
+        res, com, _ = filter_soul(prop_value_speed,
                           prop_value_l2_speed,
                           prop_value_speed,
                           prop_value_speed,
@@ -152,11 +152,13 @@ def filter_1st_speed(data_dict):
                           True,
                           test_suit_buf_max_speed,
                           data_dict)
-        for x in res:
-            done.add(x)
+        if len(res) > 0:
+            for x in res:
+                done.add(x)
+            yield make_result(data_dict, res, com)
 
     if 1:
-        res, _, _ = filter_soul(prop_value_speed,
+        res, com, _ = filter_soul(prop_value_speed,
                           prop_value_l2_speed,
                           prop_value_speed,
                           prop_value_speed,
@@ -165,8 +167,10 @@ def filter_1st_speed(data_dict):
                           True,
                           test_suit_buf_max_speed,
                           data_dict)
-        for x in res:
-            done.add(x)
+        if len(res) > 0:
+            for x in res:
+                done.add(x)
+            yield make_result(data_dict, res, com)
 
     crit_soul = []
     for (k, v) in data_format.MITAMA_ENHANCE.items():
@@ -176,9 +180,9 @@ def filter_1st_speed(data_dict):
             continue
 
     if 1:
-        d1, d2, d3, d4, d5, d6 = data_dict.values()
         type_seductress = u'针女'
         damage = 0
+        res = []
         com = {}
         for s in crit_soul:
             print('4%s + 2%s' % (type_seductress, s))
@@ -202,17 +206,24 @@ def filter_1st_speed(data_dict):
                 res = r
                 com = c
 
-        comb_data = {'sum': com,
-                     'info': [find_item(d1, res[0]),
-                              find_item(d2, res[1]),
-                              find_item(d3, res[2]),
-                              find_item(d4, res[3]),
-                              find_item(d5, res[4]),
-                              find_item(d6, res[5])]
-                    }
-        print(('map2list: %s' % comb_data).decode('raw_unicode_escape'))
-        for x in res:
-            done.add(x)
+        comb_data = make_result(data_dict, res, com)
+        print(('%s' % comb_data).decode('raw_unicode_escape'))
+        if len(res) > 0:
+            for x in res:
+                done.add(x)
+            yield make_result(data_dict, res, com)
+
+def make_result(data_dict, res, com):
+    d1, d2, d3, d4, d5, d6 = data_dict.values()
+    comb_data = {'sum': com,
+                 'info': [find_item(d1, res[0]),
+                          find_item(d2, res[1]),
+                          find_item(d3, res[2]),
+                          find_item(d4, res[3]),
+                          find_item(d5, res[4]),
+                          find_item(d6, res[5])]
+                }
+    return comb_data
 
 def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
                 build_mask, sortkey,
