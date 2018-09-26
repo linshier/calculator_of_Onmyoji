@@ -9,6 +9,7 @@ attack_buf  = data_format.MITAMA_PROPS[1]
 crit_rate   = data_format.MITAMA_PROPS[4]
 crit_damage = data_format.MITAMA_PROPS[5]
 speed       = data_format.MITAMA_PROPS[10]
+effect      = data_format.MITAMA_PROPS[8]
 suit        = data_format.MITAMA_COL_NAME_ZH[1]
 
 speed_1p_limit = 3
@@ -40,6 +41,14 @@ def filter_fast(data_dict):
         if (mitama_info[speed] and mitama_info[speed] >= speed_1p_limit):
             return True
         return False
+    def prop_value_effect(mitama):
+        if mitama.keys()[0] in done:
+            return False
+        mitama_info = mitama.values()[0]
+        #print(('===%s %s' % (effect, mitama_info)).decode('raw_unicode_escape'))
+        if (mitama_info[effect] and mitama_info[effect] >= 2):
+            return True
+        return False
     def prop_value_damage(mitama):
         if mitama.keys()[0] in done:
             return False
@@ -50,6 +59,13 @@ def filter_fast(data_dict):
             return False
         mitama_info = mitama.values()[0]
         if (mitama_info[speed] and mitama_info[speed] >= 57):
+            return True
+        return False
+    def prop_value_l4_effect(mitama):
+        if mitama.keys()[0] in done:
+            return False
+        mitama_info = mitama.values()[0]
+        if (mitama_info[effect] and mitama_info[effect] >= 55):
             return True
         return False
     def prop_value_l2_attack(mitama):
@@ -66,7 +82,6 @@ def filter_fast(data_dict):
         if (mitama_info[crit_damage] and mitama_info[crit_damage] >= 89):
             return True
         return False
-
     def build_mask_none():
         return [], int(0), int(0)
     def build_mask_fortune():
@@ -81,6 +96,22 @@ def filter_fast(data_dict):
                 soul_4p_fortune_mask |= (4 << (3 * len(soul)))
                 soul.append(k)
                 break
+        return soul, soul_2p_fortune_mask, soul_4p_fortune_mask
+    def build_mask_fortune_effect():
+        soul = []
+        soul_2p_fortune_mask = int(0)
+        soul_4p_fortune_mask = int(0)
+        for (k, v) in data_format.MITAMA_ENHANCE.items():
+            enhance_type = v[u"加成类型"]
+            if k == data_format.MITAMA_TYPES[18]:
+                soul_2p_fortune_mask |= (2 << (3 * len(soul)))
+                soul_4p_fortune_mask |= (4 << (3 * len(soul)))
+                soul.append(k)
+                break
+            if enhance_type == u'效果命中':
+                soul_2p_fortune_mask |= (2 << (3 * len(soul)))
+                soul.append(k)
+                continue
         return soul, soul_2p_fortune_mask, soul_4p_fortune_mask
     def build_mask_fire():
         soul = []
@@ -117,33 +148,55 @@ def filter_fast(data_dict):
         return (n & 0xff) < speed_1p_limit
 
     def test_suit_buf_max_speed(soul_2p_mask, buf_max, n, t):
-        if buf_max == 0:
-            buf_max = 1
-        if buf_max > (n & 0xff):
+        if buf_max >= (n & 0xff):
             return buf_max, n, True
-        return (n & 0xff) + 1, n, False
-    def test_suit_buf_max_damage(soul_2p_mask, damage_max, n, t):
-        #test crit rate with suit enhance
+        return (n & 0xff), n, False
+    def score_suit_buf_max_effect(soul_2p_mask, buf_max, n, t):
+        #test effect with suit enhance
         if t & soul_2p_mask == 0:
-            return damage_max, n, True
+            return buf_max, n, True
         #test speed
         if (n & 0xff) < 11:
-            return damage_max, n, True
+            return buf_max, n, True
+        if buf_max >= ((n >> 32) & 0xff):
+            return buf_max, n, True
+        return ((n >> 32) & 0xff), n, False
+    def test_suit_buf_max_damage(soul_2p_mask, buf_max, n, t):
+        #test crit rate with suit enhance
+        if t & soul_2p_mask == 0:
+            return buf_max, n, True
+        #test speed
+        if (n & 0xff) < 11:
+            return buf_max, n, True
         n += (30 << 16)
         if ((n >> 16) & 0xff) < 89:
-            return damage_max, n, True
-
+            return buf_max, n, True
         attack_buf_base = 100
         crit_damage_base = 160
         ab = (n >> 24) & 0xff
         cd = (n >>  8) & 0xff
         d = (attack_buf_base + ab) * (crit_damage_base + cd)
-        if d < damage_max:
-            return damage_max, n, True
+        if buf_max >= d:
+            return buf_max, n, True
         return d + 1, n, False
 
     if 1:
-        res, com, _ = filter_soul(prop_value_speed,
+        res, com, n = filter_soul(prop_value_speed,
+                          prop_value_l2_speed,
+                          prop_value_speed,
+                          prop_value_speed,
+                          build_mask_fortune,
+                          speed,
+                          True,
+                          test_suit_buf_max_speed,
+                          data_dict)
+        if len(res) > 0:
+            comb_data = make_result(data_dict, res, com)
+            print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
+            yield comb_data
+
+    if 1:
+        res, com, n = filter_soul(prop_value_speed,
                           prop_value_l2_speed,
                           prop_value_speed,
                           prop_value_speed,
@@ -155,10 +208,12 @@ def filter_fast(data_dict):
         if len(res) > 0:
             for x in res:
                 done.add(x)
-            yield make_result(data_dict, res, com)
+            comb_data = make_result(data_dict, res, com)
+            print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
+            yield comb_data
 
     if 1:
-        res, com, _ = filter_soul(prop_value_speed,
+        res, com, n = filter_soul(prop_value_speed,
                           prop_value_l2_speed,
                           prop_value_speed,
                           prop_value_speed,
@@ -170,21 +225,22 @@ def filter_fast(data_dict):
         if len(res) > 0:
             for x in res:
                 done.add(x)
-            yield make_result(data_dict, res, com)
+            comb_data = make_result(data_dict, res, com)
+            print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
+            yield comb_data
 
-    crit_soul = []
+    soul_crit = []
     for (k, v) in data_format.MITAMA_ENHANCE.items():
         enhance_type = v[u"加成类型"]
         if enhance_type == u"暴击":
-            crit_soul.append(k)
+            soul_crit.append(k)
             continue
-
     if 1:
         type_seductress = u'针女'
         damage = 0
         res = []
         com = {}
-        for s in crit_soul:
+        for s in soul_crit:
             print('4%s + 2%s' % (type_seductress, s))
             def prop_value_crit(mitama):
                 if mitama.keys()[0] in done:
@@ -192,26 +248,55 @@ def filter_fast(data_dict):
                 enhance_type = mitama.values()[0][u'御魂类型']
                 return enhance_type == type_seductress or enhance_type == s
 
-            r, c, buf = filter_soul(prop_value_crit,
-                              prop_value_l2_attack,
-                              prop_value_l2_attack,
-                              prop_value_l6_crit_damage,
-                              build_mask_seductress,
-                              crit_rate,
-                              False,
-                              test_suit_buf_max_damage,
-                              data_dict)
-            if buf > damage:
-                damage = buf
+            r, c, n = filter_soul(prop_value_crit,
+                                    prop_value_l2_attack,
+                                    prop_value_l2_attack,
+                                    prop_value_l6_crit_damage,
+                                    build_mask_seductress,
+                                    crit_rate,
+                                    False,
+                                    test_suit_buf_max_damage,
+                                    data_dict)
+            if n > damage:
+                damage = n
                 res = r
                 com = c
-
-        comb_data = make_result(data_dict, res, com)
-        print(('%s' % comb_data).decode('raw_unicode_escape'))
         if len(res) > 0:
+            comb_data = make_result(data_dict, res, com)
+            print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
             for x in res:
                 done.add(x)
-            yield make_result(data_dict, res, com)
+            yield comb_data
+    soul_effect = []
+    for (k, v) in data_format.MITAMA_ENHANCE.items():
+        enhance_type = v[u"加成类型"]
+        if enhance_type == u'效果命中':
+            soul_effect.append(k)
+            continue
+    if 1:
+        effect_buf = 0
+        res = []
+        com = {}
+        for s in soul_effect:
+            print('4%s + 2%s' % ('Fortune', s))
+            r, c, n = filter_soul(prop_value_effect,
+                                  prop_value_effect,
+                                  prop_value_l4_effect,
+                                  prop_value_effect,
+                                  build_mask_fortune_effect,
+                                  effect,
+                                  False,
+                                  score_suit_buf_max_effect,
+                                  data_dict)
+            if n > effect_buf:
+                effect_buf = n
+                res = r
+                com = c
+        if len(res) > 0:
+            comb_data = make_result(data_dict, res, com)
+            print(('%d %s' % (effect_buf, comb_data['sum'])).decode('raw_unicode_escape'))
+            yield comb_data
+
 
 def make_result(data_dict, res, com):
     d1, d2, d3, d4, d5, d6 = data_dict.values()
@@ -228,7 +313,7 @@ def make_result(data_dict, res, com):
 def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
                 build_mask, sortkey,
                 find_one,
-                test_suit_buf_max,
+                score_suit_buf_max,
                 data_dict):
     d1, d2, d3, d4, d5, d6 = data_dict.values()
 
@@ -262,7 +347,7 @@ def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
     l5 = map2list(soul, d5)
     l6 = map2list(soul, d6)
 
-    suit_buf_max = 0
+    suit_buf_max = 1
     result_num = 0
     result = []
     comb_sum = {}
@@ -284,31 +369,25 @@ def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
                         for i5 in l5:
                             n6 = n5 + i5[0]
                             t6 = t5 + i5[1]
-                            d = suit_buf_max
                             if soul_4p_mask == 0 or (t6 & soul_4p_mask):
-                                suit_buf_max, n6, ok = test_suit_buf_max(soul_2p_mask,
-                                                                         suit_buf_max,
-                                                                         n6, t6)
+                                suit_buf_max, n6, ok = score_suit_buf_max(soul_2p_mask,
+                                                                          suit_buf_max,
+                                                                          n6, t6)
                                 if ok:
                                     continue
                             else:
                                 continue
-                            if d != suit_buf_max:
-                                d = suit_buf_max - 1
-                            else:
-                                d = 0
                             result_num += 1
                             result = [i1[2], i2[2], i3[2], i4[2], i5[2], i6[2]]
                             comb_sum = list2map(soul,
                                                 n6, t6 & soul_4p_mask, '',
                                                 4, '')
-                            #print(('%s %s' % (d, comb_sum)).decode('raw_unicode_escape'))
                             if find_one:
-                                print(('%s %s' % (d, comb_sum)).decode('raw_unicode_escape'))
+                                #print(('%s %s' % (d, comb_sum)).decode('raw_unicode_escape'))
                                 #print('result: %s' % result)
                                 return result, comb_sum, suit_buf_max
     #print('result: %s' % result)
-    print(('%s %s' % (d, comb_sum)).decode('raw_unicode_escape'))
+    #print(('%s %s' % (d, comb_sum)).decode('raw_unicode_escape'))
     return result, comb_sum, suit_buf_max
 
 def filter_loc(data_dict):
@@ -424,7 +503,9 @@ def map2list(codes, dx):
             if codes[j] == v[suit]:
                 code = j
                 break
-        val = int(2)
+        val = int(0)
+        val += int(v[effect])
+        val <<= 8
         val += int(v[attack_buf])
         val <<= 8
         val += int(v[crit_rate])
