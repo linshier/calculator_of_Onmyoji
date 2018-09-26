@@ -40,6 +40,11 @@ def filter_1st_speed(data_dict):
         if (mitama_info[speed] and mitama_info[speed] >= speed_1p_limit):
             return True
         return False
+    def prop_value_damage(mitama):
+        if mitama.keys()[0] in done:
+            return False
+        mitama_info = mitama.values()[0]
+        return False
     def prop_value_l2_speed(mitama):
         if mitama.keys()[0] in done:
             return False
@@ -97,12 +102,13 @@ def filter_1st_speed(data_dict):
         for (k, v) in data_format.MITAMA_ENHANCE.items():
             enhance_type = v[u"加成类型"]
             if k == data_format.MITAMA_TYPES[4]:
-                print(k)
+                #print(k)
                 soul_2p_fortune_mask |= (2 << (3 * len(soul)))
                 soul_4p_fortune_mask |= (4 << (3 * len(soul)))
                 soul.append(k)
                 continue
             if enhance_type == u"暴击":
+                #print(k)
                 soul_2p_fortune_mask |= (2 << (3 * len(soul)))
                 soul.append(k)
                 continue
@@ -117,11 +123,11 @@ def filter_1st_speed(data_dict):
             return buf_max, n, True
         return (n & 0xff) + 1, n, False
     def test_suit_buf_max_damage(soul_2p_mask, damage_max, n, t):
-        #test speed
-        if (n & 0xff) < 11:
-            return damage_max, n, True
         #test crit rate with suit enhance
         if t & soul_2p_mask == 0:
+            return damage_max, n, True
+        #test speed
+        if (n & 0xff) < 11:
             return damage_max, n, True
         n += (30 << 16)
         if ((n >> 16) & 0xff) < 89:
@@ -137,7 +143,7 @@ def filter_1st_speed(data_dict):
         return d + 1, n, False
 
     if 1:
-        res = filter_soul(prop_value_speed,
+        res, _, _ = filter_soul(prop_value_speed,
                           prop_value_l2_speed,
                           prop_value_speed,
                           prop_value_speed,
@@ -150,7 +156,7 @@ def filter_1st_speed(data_dict):
             done.add(x)
 
     if 1:
-        res = filter_soul(prop_value_speed,
+        res, _, _ = filter_soul(prop_value_speed,
                           prop_value_l2_speed,
                           prop_value_speed,
                           prop_value_speed,
@@ -162,16 +168,51 @@ def filter_1st_speed(data_dict):
         for x in res:
             done.add(x)
 
+    crit_soul = []
+    for (k, v) in data_format.MITAMA_ENHANCE.items():
+        enhance_type = v[u"加成类型"]
+        if enhance_type == u"暴击":
+            crit_soul.append(k)
+            continue
+
     if 1:
-        res = filter_soul(prop_value_none,
-                          prop_value_l2_attack,
-                          prop_value_l2_attack,
-                          prop_value_l6_crit_damage,
-                          build_mask_seductress,
-                          crit_rate,
-                          False,
-                          test_suit_buf_max_damage,
-                          data_dict)
+        d1, d2, d3, d4, d5, d6 = data_dict.values()
+        type_seductress = u'针女'
+        damage = 0
+        com = {}
+        for s in crit_soul:
+            print('4%s + 2%s' % (type_seductress, s))
+            def prop_value_crit(mitama):
+                if mitama.keys()[0] in done:
+                    return False
+                enhance_type = mitama.values()[0][u'御魂类型']
+                return enhance_type == type_seductress or enhance_type == s
+
+            r, c, buf = filter_soul(prop_value_crit,
+                              prop_value_l2_attack,
+                              prop_value_l2_attack,
+                              prop_value_l6_crit_damage,
+                              build_mask_seductress,
+                              crit_rate,
+                              False,
+                              test_suit_buf_max_damage,
+                              data_dict)
+            if buf > damage:
+                damage = buf
+                res = r
+                com = c
+
+        comb_data = {'sum': com,
+                     'info': [find_item(d1, res[0]),
+                              find_item(d2, res[1]),
+                              find_item(d3, res[2]),
+                              find_item(d4, res[3]),
+                              find_item(d5, res[4]),
+                              find_item(d6, res[5])]
+                    }
+        print(('map2list: %s' % comb_data).decode('raw_unicode_escape'))
+        for x in res:
+            done.add(x)
 
 def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
                 build_mask, sortkey,
@@ -186,7 +227,7 @@ def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
     d1 = filter(prop_value, d1)
     d3 = filter(prop_value, d3)
     d5 = filter(prop_value, d5)
-    print('%d x %d x %d x %d x %d x %d' % (len(d1), len(d2), len(d3), len(d4), len(d5), len(d5)))
+    #print('%d x %d x %d x %d x %d x %d' % (len(d1), len(d2), len(d3), len(d4), len(d5), len(d5)))
     #for i in d1:
     #    print('%s' % i.values()[0][suit])
     #    #print(('%s' % i.values()[0][suit]).decode('raw_unicode_escape'))
@@ -213,6 +254,7 @@ def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
     suit_buf_max = 0
     result_num = 0
     result = []
+    comb_sum = {}
     for i2 in l2:
         for i4 in l4:
             t2 = i2[1] + i4[1]
@@ -224,7 +266,7 @@ def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
                     t4 = t3 + i1[1]
                     n4 = n3 + i1[0]
                     if soul_4p_mask and (t4 & soul_2p_mask) == 0 and (t4 & soul_4p_mask) == 0:
-		        continue
+                        continue
                     for i3 in l3:
                         t5 = t4 + i3[1]
                         n5 = n4 + i3[0]
@@ -243,18 +285,20 @@ def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
                             if d != suit_buf_max:
                                 d = suit_buf_max - 1
                             else:
-                               d = 0
+                                d = 0
                             result_num += 1
                             result = [i1[2], i2[2], i3[2], i4[2], i5[2], i6[2]]
                             comb_sum = list2map(soul,
                                                 n6, t6 & soul_4p_mask, '',
                                                 4, '')
-                            print(('%s %s' % (d, comb_sum)).decode('raw_unicode_escape'))
+                            #print(('%s %s' % (d, comb_sum)).decode('raw_unicode_escape'))
                             if find_one:
-                                print('result: %s' % result)
-                                return result
-    print('result: %s' % result)
-    return result
+                                print(('%s %s' % (d, comb_sum)).decode('raw_unicode_escape'))
+                                #print('result: %s' % result)
+                                return result, comb_sum, suit_buf_max
+    #print('result: %s' % result)
+    print(('%s %s' % (d, comb_sum)).decode('raw_unicode_escape'))
+    return result, comb_sum, suit_buf_max
 
 def filter_loc(data_dict):
     if len(data_dict) != 6:
@@ -350,12 +394,19 @@ def build_type_list():
             mitama_codes_4p_crit_rate_mask |= (2 << (3 * len(mitama_codes)))
             mitama_codes.append(k)
 
+def find_item(arr, k):
+    for i in arr:
+        if i.keys()[0] == k:
+            return i
+    return None
+
 def map2list(codes, dx):
     l = []
     mitama_codes_num = len(codes)
+    #print(('map2list: %s' % dx).decode('raw_unicode_escape'))
     for i in dx:
         code = -1
-	k = i.keys()[0]
+        k = i.keys()[0]
         v = i.values()[0]
 	#print(('map2list: %s' % v).decode('raw_unicode_escape'))
         for j in xrange(mitama_codes_num):
