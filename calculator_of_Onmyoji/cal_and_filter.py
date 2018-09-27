@@ -179,7 +179,7 @@ def filter_fast(data_dict):
     def test_limit_1p_speed(n):
         return (n & 0xff) < speed_1p_limit
 
-    def test_suit_buf_max_speed(soul_2p_mask, buf_max, n, t):
+    def score_suit_buf_max_speed(soul_2p_mask, buf_max, n, t):
         if buf_max >= (n & 0xff):
             return buf_max, n, True
         return (n & 0xff), n, False
@@ -188,20 +188,21 @@ def filter_fast(data_dict):
         if t & soul_2p_mask:
             n += (15 << 32)
         #test speed
-        if (n & 0xff) < 11:
+        if (n & 0xff) < 11 or (n & 0xff) > 80:
             return buf_max, n, True
         if buf_max >= ((n >> 32) & 0xff):
             return buf_max, n, True
         return ((n >> 32) & 0xff), n, False
     damage_min_speed = 11
-    def test_suit_buf_max_damage(soul_2p_mask, buf_max, n, t):
-        #test crit rate with suit enhance
-        if t & soul_2p_mask == 0:
-            return buf_max, n, True
+    def score_suit_buf_max_damage(soul_2p_mask, buf_max, n, t):
         #test speed
         if (n & 0xff) < damage_min_speed:
             return buf_max, n, True
+        #test crit rate with suit enhance
+        if t & soul_2p_mask == 0:
+            return buf_max, n, True
         n += (30 << 16)
+        #test crit rate
         if ((n >> 16) & 0xff) < 89:
             return buf_max, n, True
         attack_buf_base = 100
@@ -221,7 +222,7 @@ def filter_fast(data_dict):
                           build_mask_fortune,
                           speed,
                           True,
-                          test_suit_buf_max_speed,
+                          score_suit_buf_max_speed,
                           data_dict)
         if len(res) > 0:
             comb_data = make_result(data_dict, res, com)
@@ -235,7 +236,7 @@ def filter_fast(data_dict):
                           build_mask_none,
                           speed,
                           True,
-                          test_suit_buf_max_speed,
+                          score_suit_buf_max_speed,
                           data_dict)
         if len(res) > 0:
             for x in res:
@@ -251,7 +252,7 @@ def filter_fast(data_dict):
                           build_mask_fire,
                           speed,
                           True,
-                          test_suit_buf_max_speed,
+                          score_suit_buf_max_speed,
                           data_dict)
         if len(res) > 0:
             for x in res:
@@ -285,7 +286,7 @@ def filter_fast(data_dict):
                                     build_mask_shadow,
                                     crit_rate,
                                     False,
-                                    test_suit_buf_max_damage,
+                                    score_suit_buf_max_damage,
                                     data_dict)
             if n > damage:
                 damage = n
@@ -296,27 +297,27 @@ def filter_fast(data_dict):
             print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
     if 1:
-        damage_min_speed = 57
+        damage_min_speed = 11
         type_seductress = u'针女'
         damage = 0
         res = []
         com = {}
         for s in soul_crit:
             print('4%s + 2%s' % (type_seductress, s))
-            def prop_value_crit(mitama):
+            def prop_value_type(mitama):
                 if mitama.keys()[0] in done:
                     return False
                 enhance_type = mitama.values()[0][u'御魂类型']
                 return enhance_type == type_seductress or enhance_type == s
 
-            r, c, n = filter_soul(prop_value_crit,
+            r, c, n = filter_soul(prop_value_type,
                                   prop_value_l2_speed,
                                   prop_value_l2_attack,
                                   prop_value_l6_crit_damage,
                                   build_mask_seductress,
                                   speed,
                                   False,
-                                  test_suit_buf_max_damage,
+                                  score_suit_buf_max_damage,
                                   data_dict)
             if n > damage:
                 damage = n
@@ -326,7 +327,7 @@ def filter_fast(data_dict):
             comb_data = make_result(data_dict, res, com)
             print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
-    if 1:
+    if 0:
         damage_min_speed = 11
         type_seductress = u'针女'
         damage = 0
@@ -347,7 +348,7 @@ def filter_fast(data_dict):
                                     build_mask_seductress,
                                     crit_rate,
                                     False,
-                                    test_suit_buf_max_damage,
+                                    score_suit_buf_max_damage,
                                     data_dict)
             if n > damage:
                 damage = n
@@ -358,6 +359,22 @@ def filter_fast(data_dict):
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
             print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
+            yield comb_data
+    if 1:
+        res, com, n = filter_soul(prop_value_none,
+                          prop_value_speed,
+                          prop_value_none,
+                          prop_value_none,
+                          build_mask_sprite,
+                          speed,
+                          True,
+                          score_suit_buf_max_speed,
+                          data_dict)
+        if len(res) > 0:
+            for x in res:
+                done.add(x)
+            comb_data = make_result(data_dict, res, com)
+            print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
     soul_effect = []
     for (k, v) in data_format.MITAMA_ENHANCE.items():
