@@ -6,4 +6,5 @@ fork
 
 ```
 usage: todo
+git push -u origin master 
 ```
