@@ -168,15 +168,19 @@ def main():
         base_critdamage = base_critdamage_hp
 
     origin_data = load_data.get_mitama_data(file_name, ignore_serial)
-    print('Loading data finish')
+    #print('Loading data finish')
 
     locate_sep_data = load_data.sep_mitama_by_loc(origin_data)
 
-    print('Start calculating')
+    #print('Start calculating')
     filter_result = cal.filter_fast(locate_sep_data)
 
-    write_data.write_mitama_result(args.output_file, filter_result,
-                                   base_att, base_hp, base_critdamage)
+    if 0:
+        write_data.write_mitama_result(args.output_file, filter_result,
+                                      base_att, base_hp, base_critdamage)
+    else:
+        for c in filter_result:
+            pass
 
 
 if __name__ == '__main__':
