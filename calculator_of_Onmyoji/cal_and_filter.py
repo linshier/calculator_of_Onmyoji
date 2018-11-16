@@ -8,11 +8,13 @@ import multiprocessing
 from calculator_of_Onmyoji import data_format
 
 cal_fortune_max_speed               = 0
-cal_free_max_speed                  = 0
+cal_free_max_speed                  = 1
 cal_seductress_overstar_max_damage  = [1]
-cal_shadow_overstar_max_damage      = []
-cal_scarlet_crit_max_damage         = []
-cal_scarlet_free_max_damage         = []
+cal_shadow_overstar_max_damage      = [1]
+cal_shadow_crit_max_damage          = [1]
+cal_seductress_crit_max_damage      = [1]
+cal_scarlet_crit_max_damage         = [1]
+cal_scarlet_free_max_damage         = [1]
 
 attack      = data_format.MITAMA_PROPS[0]
 attack_buf  = data_format.MITAMA_PROPS[1]
@@ -127,6 +129,69 @@ def filter_loc_prop(data_list, prop_type, prop_min_value):
         else:
             return False
     return filter(prop_value_le_min, data_list)
+
+def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
+                build_mask, sortkey,
+                find_one,
+                score_suit_buf_max,
+                data_dict):
+    d1, d2, d3, d4, d5, d6 = data_dict.values()
+
+    d2 = filter(prop_value_l2, filter(prop_value, d2))
+    d4 = filter(prop_value_l4, filter(prop_value, d4))
+    d6 = filter(prop_value_l6, filter(prop_value, d6))
+    d1 = filter(prop_value, d1)
+    d3 = filter(prop_value, d3)
+    d5 = filter(prop_value, d5)
+    #print('%d x %d x %d x %d x %d x %d' % (len(d1), len(d2), len(d3), len(d4), len(d5), len(d5)))
+    #for i in d1:
+    #    print('%s' % i.values()[0][suit])
+    #    #print(('%s' % i.values()[0][suit]).decode('raw_unicode_escape'))
+    #return []
+
+    if sortkey is not None:
+        d1.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
+        d2.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
+        d3.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
+        d4.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
+        d5.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
+        d6.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
+
+    soul, soul_2p_mask, soul_4p_mask = build_mask()
+    #print('%s %s %s' % (soul, soul_2p_mask, soul_4p_mask))
+
+    l1 = map2list(soul, d1)
+    l2 = map2list(soul, d2)
+    l3 = map2list(soul, d3)
+    l4 = map2list(soul, d4)
+    l5 = map2list(soul, d5)
+    l6 = map2list(soul, d6)
+
+    suit_buf_max = 1
+    result_num = 0
+    result = []
+    comb_sum = {}
+
+    args = []
+    for i2 in l2:
+        args.append([find_one, l1, i2, l3, l4, l5, l6, soul, soul_2p_mask, soul_4p_mask, score_suit_buf_max])
+    rarr = []
+    if 0:
+        for a in args:
+            rarr.append(mprun(a))
+    else:
+        pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+        rarr = pool.map(mprun, args)
+        pool.close()
+        pool.join()
+    for ra in rarr:
+        r, c, b = ra[0], ra[1], ra[2]
+        #print(ra)
+        if b > suit_buf_max:
+            result, comb_sum, suit_buf_max = r, c, b
+    #print('result: %s' % result)
+    #print(('%s %s' % (d, comb_sum)).decode('raw_unicode_escape'))
+    return result, comb_sum, suit_buf_max
 
 def filter_fast(data_dict):
     global effect_min_speed
@@ -516,42 +581,6 @@ def filter_fast(data_dict):
             print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
     type_crab = u'网切'
-    # shadow type max damage
-    for i in []:
-        damage_min_speed = 0
-        damage_min_crit_rate = 90 - 30
-        attack_buf_base = 100
-        damage = 0
-        res = []
-        com = {}
-        #for s in soul_crit:
-        for s in [type_crab]:
-            print('4%s + 2%s' % (type_shadow, s))
-            def prop_value_type(mitama):
-                if mitama.keys()[0] in done:
-                    return False
-                enhance_type = mitama.values()[0][u'御魂类型']
-                return enhance_type == type_shadow or enhance_type == s
-
-            r, c, n = filter_soul(prop_value_type,
-                                  prop_value_none,
-                                  prop_value_none,
-                                  prop_value_l6_crit_damage,
-                                  build_mask_shadow,
-                                  crit_rate,
-                                  False,
-                                  score_suit_buf_max_damage,
-                                  data_dict)
-            if n > damage:
-                damage = n
-                res = r
-                com = c
-        if len(res) > 0:
-            for x in res:
-                done.add(x)
-            comb_data = make_result(data_dict, res, com)
-            print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
-            yield comb_data
     # seductress + crit_damage type max damage
     for i in cal_seductress_overstar_max_damage:
         damage_min_speed = 12
@@ -592,13 +621,11 @@ def filter_fast(data_dict):
             yield comb_data
         if damage < 62000:
             return
-    #return
-    #return
     # shadow + overstar
     for i in cal_shadow_overstar_max_damage:
         #print('\nshadow: overstar')
-        damage_min_speed = 11
-        damage_min_crit_rate = 89 - 30
+        damage_min_speed = 17
+        damage_min_crit_rate = 90 - 30
         attack_buf_base = 100
         damage = 0
         res = []
@@ -632,6 +659,78 @@ def filter_fast(data_dict):
             #print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
             print('shadow(overstar+l6damage):%d,+%d' % (damage, comb_data['sum'][speed]))
             yield comb_data
+    # shadow crit max damage
+    for i in cal_shadow_crit_max_damage:
+        damage_min_speed = 0
+        damage_min_crit_rate = 89 - 30
+        attack_buf_base = 100
+        damage = 0
+        res = []
+        com = {}
+        for s in soul_crit:
+            #print('4%s + 2%s' % (type_shadow, s))
+            def prop_value_type(mitama):
+                if mitama.keys()[0] in done:
+                    return False
+                enhance_type = mitama.values()[0][u'御魂类型']
+                return enhance_type == type_shadow or enhance_type == s
+
+            r, c, n = filter_soul(prop_value_type,
+                                  prop_value_none,
+                                  prop_value_none,
+                                  prop_value_l6_crit_damage,
+                                  build_mask_shadow,
+                                  crit_rate,
+                                  False,
+                                  score_suit_buf_max_damage,
+                                  data_dict)
+            if n > damage:
+                damage = n
+                res = r
+                com = c
+        if len(res) > 0:
+            for x in res:
+                done.add(x)
+            comb_data = make_result(data_dict, res, com)
+            #print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
+            print('shadow(crit):%d,+%d' % (damage, comb_data['sum'][speed]))
+            yield comb_data
+    # seductress + crit_damage type max damage
+    for i in cal_seductress_crit_max_damage:
+        damage_min_speed = 0
+        damage_min_crit_rate = 89 - 30
+        attack_buf_base = 100
+        damage = 0
+        res = []
+        com = {}
+        for s in soul_crit:
+            #print('4%s + 2%s' % (type_seductress, s))
+            def prop_value_type(mitama):
+                if mitama.keys()[0] in done:
+                    return False
+                enhance_type = mitama.values()[0][u'御魂类型']
+                return enhance_type == type_seductress or enhance_type == s
+
+            r, c, n = filter_soul(prop_value_type,
+                                  prop_value_none,
+                                  prop_value_none,
+                                  prop_value_l6_crit_damage,
+                                  build_mask_seductress_crit,
+                                  crit_rate,
+                                  False,
+                                  score_suit_buf_max_damage,
+                                  data_dict)
+            if n > damage:
+                damage = n
+                res = r
+                com = c
+        if len(res) > 0:
+            for x in res:
+                done.add(x)
+            comb_data = make_result(data_dict, res, com)
+            #print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
+            print('seductress(l6damage):%d,+%d' % (damage, comb_data['sum'][speed]))
+            yield comb_data
     # scarlet + crit_damage type max damage
     for i in cal_scarlet_crit_max_damage:
         damage_min_speed = 0
@@ -662,8 +761,8 @@ def filter_fast(data_dict):
                 res = r
                 com = c
         if len(res) > 0:
-            #for x in res:
-            #    done.add(x)
+            for x in res:
+                done.add(x)
             comb_data = make_result(data_dict, res, com)
             print('scarlet(crit):%d,+%d' % (damage, comb_data['sum'][speed]))
             yield comb_data
@@ -697,46 +796,6 @@ def filter_fast(data_dict):
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
             print('scarlet(free):%d,+%d' % (damage, comb_data['sum'][speed]))
-            yield comb_data
-    return
-    #return
-    # seductress + crit_damage type max damage
-    for i in [1]:
-        #print('\nseductress: l6 crite_damage')
-        damage_min_speed = 0
-        damage_min_crit_rate = 90 - 30
-        attack_buf_base = 100
-        damage = 0
-        res = []
-        com = {}
-        for s in soul_crit:
-        #for s in [type_shadow]:
-            #print('4%s + 2%s' % (type_seductress, s))
-            def prop_value_type(mitama):
-                if mitama.keys()[0] in done:
-                    return False
-                enhance_type = mitama.values()[0][u'御魂类型']
-                return enhance_type == type_seductress or enhance_type == s
-
-            r, c, n = filter_soul(prop_value_type,
-                                  prop_value_none,
-                                  prop_value_none,
-                                  prop_value_l6_crit_damage,
-                                  build_mask_seductress_crit,
-                                  crit_rate,
-                                  False,
-                                  score_suit_buf_max_damage,
-                                  data_dict)
-            if n > damage:
-                damage = n
-                res = r
-                com = c
-        if len(res) > 0:
-            for x in res:
-                done.add(x)
-            comb_data = make_result(data_dict, res, com)
-            #print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
-            print('seductress(l6damage):%d,+%d' % (damage, comb_data['sum'][speed]))
             yield comb_data
     # seductress + crit_rate type max damage
     for i in []:
@@ -1048,69 +1107,6 @@ def list2map(codes, nx, ny, nz, mask, soul):
             speed:       (nx>> 0)&0xff,
             suit:        mitama_type}
 
-def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
-                build_mask, sortkey,
-                find_one,
-                score_suit_buf_max,
-                data_dict):
-    d1, d2, d3, d4, d5, d6 = data_dict.values()
-
-    d2 = filter(prop_value_l2, filter(prop_value, d2))
-    d4 = filter(prop_value_l4, filter(prop_value, d4))
-    d6 = filter(prop_value_l6, filter(prop_value, d6))
-    d1 = filter(prop_value, d1)
-    d3 = filter(prop_value, d3)
-    d5 = filter(prop_value, d5)
-    #print('%d x %d x %d x %d x %d x %d' % (len(d1), len(d2), len(d3), len(d4), len(d5), len(d5)))
-    #for i in d1:
-    #    print('%s' % i.values()[0][suit])
-    #    #print(('%s' % i.values()[0][suit]).decode('raw_unicode_escape'))
-    #return []
-
-    if sortkey is not None:
-        d1.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
-        d2.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
-        d3.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
-        d4.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
-        d5.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
-        d6.sort(lambda x, y: cmp(x.values()[0][sortkey], y.values()[0][sortkey]), reverse=True)
-
-    soul, soul_2p_mask, soul_4p_mask = build_mask()
-    #print('%s %s %s' % (soul, soul_2p_mask, soul_4p_mask))
-
-    l1 = map2list(soul, d1)
-    l2 = map2list(soul, d2)
-    l3 = map2list(soul, d3)
-    l4 = map2list(soul, d4)
-    l5 = map2list(soul, d5)
-    l6 = map2list(soul, d6)
-
-    suit_buf_max = 1
-    result_num = 0
-    result = []
-    comb_sum = {}
-
-    args = []
-    for i2 in l2:
-        args.append([find_one, l1, i2, l3, l4, l5, l6, soul, soul_2p_mask, soul_4p_mask, score_suit_buf_max])
-    rarr = []
-    if 0:
-        for a in args:
-            rarr.append(mprun(a))
-    else:
-        pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
-        rarr = pool.map(mprun, args)
-        pool.close()
-        pool.join()
-    for ra in rarr:
-        r, c, b = ra[0], ra[1], ra[2]
-        #print(ra)
-        if b > suit_buf_max:
-            result, comb_sum, suit_buf_max = r, c, b
-    #print('result: %s' % result)
-    #print(('%s %s' % (d, comb_sum)).decode('raw_unicode_escape'))
-    return result, comb_sum, suit_buf_max
-
 def filter_loc(data_dict):
     if len(data_dict) != 6:
         raise KeyError("combination dict source must have 6 keys")
@@ -1210,120 +1206,4 @@ def find_item(arr, k):
         if i.keys()[0] == k:
             return i
     return None
-
-
-def make_combination(mitama_data, mitama_type_limit={}, all_suit=True):
-    d1, d2, d3, d4, d5, d6 = mitama_data.values()
-    build_type_list()
-    print(('build %x %d %s' % (mitama_codes_4p_suit_mask, len(mitama_codes), mitama_codes)).decode('raw_unicode_escape'))
-    l1 = map2list(mitama_codes, d1)
-    d2.sort(lambda x, y: cmp(x.values()[0][speed], y.values()[0][speed]), reverse=True)
-    #for i2 in d2:
-    #    print(('%s' % i2).decode('raw_unicode_escape'))
-    l2 = map2list(mitama_codes, d2)
-    l3 = map2list(mitama_codes, d3)
-    l4 = map2list(mitama_codes, d4)
-    l5 = map2list(mitama_codes, d5)
-    l6 = map2list(mitama_codes, d6)
-
-    result_num = 0
-    suit_num = 0
-    attack_buf_base = 100
-    crit_damage_base = 160
-    #fast_damage_max = (attack_buf_base + 55) * (crit_damage_base + 104)
-    #damage_max = (attack_buf_base + 55) * (crit_damage_base + 111)
-    damage_max = 60000
-    fast_damage_max = 60000
-    fast_shadow_damage_max = 59000
-    fast_seductress_damage_max = 59000
-
-    #fast_crit_damage_max = 104
-    #crit_damage_max = 111
-    #attack_buf_max = 55
-
-    fortune_speed_max = 120
-    speed_max = 145
-    for i2 in l2:
-        for i4 in l4:
-            if ((i4[0] >> 24) & 0xff) < 55:
-                continue
-            if i4[0] & 0xffffff00 == 0:
-                continue
-            t2 = i2[1] + i4[1]
-            n2 = i2[0] + i4[0]
-            for i6 in l6:
-                if i6[0] & 0xffffff00 == 0:
-                    continue
-                if ((i6[0] >> 16) & 0xff) < 55 and ((i6[0] >> 8) & 0xff) < 89:
-                    continue
-                t3 = t2 + i6[1]
-                n3 = n2 + i6[0]
-                for i1 in l1:
-                    t4 = t3 + i1[1]
-                    if i1[0] & 0xffffff00 == 0:
-                        continue
-                    if (t4 & mitama_codes_2p_suit_mask) == 0 and (t4 & mitama_codes_4p_suit_mask) == 0:
-                        continue
-                    n4 = n3 + i1[0]
-                    for i3 in l3:
-                        if i3[0] & 0xffffff00 == 0:
-                            continue
-                        t5 = t4 + i3[1]
-                        n5 = n4 + i3[0]
-                        for i5 in l5:
-                            if i5[0] & 0xffffff00 == 0:
-                                continue
-                            t6 = t5 + i5[1]
-                            if (t6 & mitama_codes_4p_suit_mask) == 0:
-                                continue
-                            suit_num += 1
-                            n6 = n5 + i5[0]
-                            #test crit rate with suit enhance
-                            if t6 & mitama_codes_2p_crit_rate_mask:
-                                n6 += (15 << 16)
-                            if t6 & mitama_codes_4p_crit_rate_mask:
-                                n6 += (15 << 16)
-                            if ((n6 >> 16) & 0xff) < 89:
-                                continue
-                            #test attack
-                            if t6 & mitama_codes_2p_attack_buf_mask:
-                                n6 += (15 << 24)
-                            if t6 & mitama_codes_4p_attack_buf_mask:
-                                n6 += (15 << 24)
-                            #test speed
-                            #test crit damage
-                            ab = (n6 >> 24) & 0xff
-                            cd = (n6 >> 8) & 0xff
-                            d = (attack_buf_base + ab) * (crit_damage_base + cd)
-                            if (n6 & 0xff) < 11:
-                                if d < damage_max:
-                                    continue
-                                damage_max = d + 1
-                            else:
-                                if t6 & mitama_codes_4p_seductress_mask:
-                                    if d < fast_seductress_damage_max:
-                                        continue
-                                    fast_seductress_damage_max = d + 1
-                                elif t6 & mitama_codes_4p_shadow_mask:
-                                    if d < fast_shadow_damage_max:
-                                        continue
-                                    fast_shadow_damage_max = d + 1
-                                else:
-                                    if d < fast_damage_max:
-                                        continue
-                                    fast_damage_max = d + 1
-
-                            result_num += 1
-                            comb_sum = list2map(mitama_codes, n6, t6 & (mitama_codes_4p_suit_mask | mitama_codes_4p_fortune_mask), '', 4, '')
-                            print(('%s %s' % (d, comb_sum)).decode('raw_unicode_escape'))
-                            mitama_comb = [{'1': list2map(mitama_codes, i1[0], i1[1], i1[2], 1, i1[2])},
-                                           {'2': list2map(mitama_codes, i2[0], i2[1], i2[2], 1, i2[2])},
-                                           {'3': list2map(mitama_codes, i3[0], i3[1], i3[2], 1, i3[2])},
-                                           {'4': list2map(mitama_codes, i4[0], i4[1], i4[2], 1, i4[2])},
-                                           {'5': list2map(mitama_codes, i5[0], i5[1], i5[2], 1, i5[2])},
-                                           {'6': list2map(mitama_codes, i6[0], i6[1], i6[2], 1, i6[2])}]
-                            comb_data = {'sum': comb_sum,
-                                         'info': mitama_comb}
-                            yield comb_data
-    #print('res:%d suit:%d' % (result_num, suit_num))
 
