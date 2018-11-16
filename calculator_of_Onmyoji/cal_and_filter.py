@@ -26,6 +26,97 @@ speed_1p_limit = 3
 
 selected = set()
 
+effect_min_speed = 0
+effect_max_speed = 200
+damage_min_speed = 11
+damage_min_crit_rate = 90
+attack_buf_base = 100
+def score_suit_buf_max_speed(soul_2p_mask, buf_max, n, t):
+    if buf_max >= (n & 0xff):
+        return buf_max, n, True
+    return (n & 0xff), n, False
+def score_suit_buf_max_effect(soul_2p_mask, buf_max, n, t):
+    #test speed
+    if (n & 0xff) < effect_min_speed or (n & 0xff) > effect_max_speed:
+        return buf_max, n, True
+    #test effect with suit enhance
+    if t & soul_2p_mask:
+        n += (15 << 32)
+    ##test speed
+    #if (n & 0xff) < 11 or (n & 0xff) > 80:
+    #    return buf_max, n, True
+    if buf_max >= ((n >> 32) & 0xff):
+        return buf_max, n, True
+    return ((n >> 32) & 0xff), n, False
+
+def score_suit_buf_max_damage(soul_2p_mask, buf_max, n, t):
+    #test speed
+    if (n & 0xff) < damage_min_speed:
+        return buf_max, 1, True
+    ##test crit rate with suit enhance
+    if soul_2p_mask and (t & soul_2p_mask) == 0:
+        return buf_max, 2, True
+    #test crit rate
+    if ((n >> 16) & 0xff) < damage_min_crit_rate:
+        return buf_max, 3, True
+    crit_damage_base = 160
+    ab = (n >> 24) & 0xff
+    cd = (n >>  8) & 0xff
+    d = (attack_buf_base + ab) * (crit_damage_base + cd)
+    if buf_max >= d:
+        return buf_max, 4, True
+    return d + 1, n, False
+
+def mprun(a):
+    find_one = a[0]
+    l1, i2, l3, l4, l5, l6 = a[1], a[2], a[3], a[4], a[5], a[6]
+    soul, soul_2p_mask, soul_4p_mask = a[7], a[8], a[9]
+    score_suit_buf_max = a[10]
+    suit_buf_max_ = 1
+    result_ = []
+    comb_sum_ = {}
+    ns = 0
+    for i4 in l4:
+        t2 = i2[1] + i4[1]
+        n2 = i2[0] + i4[0]
+        for i6 in l6:
+            t3 = t2 + i6[1]
+            n3 = n2 + i6[0]
+            for i1 in l1:
+                t4 = t3 + i1[1]
+                n4 = n3 + i1[0]
+                #if soul_2p_mask and soul_4p_mask \
+                # and (t4 & soul_2p_mask) == 0 and (t4 & soul_4p_mask) == 0:
+                #    continue
+                for i3 in l3:
+                    t5 = t4 + i3[1]
+                    n5 = n4 + i3[0]
+                    for i5 in l5:
+                        n6 = n5 + i5[0]
+                        t6 = t5 + i5[1]
+                        ns += 1
+                        if soul_4p_mask == 0 or (t6 & soul_4p_mask):
+                            spd = n6 & 0xff
+                            suit_buf_max_, n6, skip = score_suit_buf_max(soul_2p_mask, suit_buf_max_, n6, t6)
+                            #buf, n6, skip = score_suit_buf_max(soul_2p_mask, 66000, n6, t6)
+                            #if buf > 66000:
+                            #    print(buf)
+                            if skip:
+                                continue
+                        else:
+                            continue
+                        #result_num += 1
+                        result_ = [i1[2], i2[2], i3[2], i4[2], i5[2], i6[2]]
+                        comb_sum_ = list2map(soul,
+                                             n6, t6 & soul_4p_mask, '',
+                                             4, '')
+                        if find_one:
+                            return [result_, comb_sum_, suit_buf_max_]
+    r = [result_, comb_sum_, suit_buf_max_]
+    #print(r, ns)
+    return r
+
+
 def filter_loc_prop(data_list, prop_type, prop_min_value):
     def prop_value_le_min(mitama):
         mitama_info = mitama.values()[0]
@@ -462,7 +553,7 @@ def filter_fast(data_dict):
             yield comb_data
     # seductress + crit_damage type max damage
     for i in cal_seductress_overstar_max_damage:
-        damage_min_speed = 12
+        damage_min_speed = 11
         damage_min_crit_rate = 89 - 30
         attack_buf_base = 100
         damage = 0
@@ -914,94 +1005,6 @@ def make_result(data_dict, res, com):
                           find_item(d6, res[5])]
                 }
     return comb_data
-
-effect_min_speed = 0
-effect_max_speed = 200
-damage_min_speed = 11
-damage_min_crit_rate = 90
-attack_buf_base = 100
-def score_suit_buf_max_speed(soul_2p_mask, buf_max, n, t):
-    if buf_max >= (n & 0xff):
-        return buf_max, n, True
-    return (n & 0xff), n, False
-def score_suit_buf_max_effect(soul_2p_mask, buf_max, n, t):
-    #test speed
-    if (n & 0xff) < effect_min_speed or (n & 0xff) > effect_max_speed:
-        return buf_max, n, True
-    #test effect with suit enhance
-    if t & soul_2p_mask:
-        n += (15 << 32)
-    ##test speed
-    #if (n & 0xff) < 11 or (n & 0xff) > 80:
-    #    return buf_max, n, True
-    if buf_max >= ((n >> 32) & 0xff):
-        return buf_max, n, True
-    return ((n >> 32) & 0xff), n, False
-def score_suit_buf_max_damage(soul_2p_mask, buf_max, n, t):
-    #test speed
-    if (n & 0xff) < damage_min_speed:
-        return buf_max, 1, True
-    ##test crit rate with suit enhance
-    if soul_2p_mask and (t & soul_2p_mask) == 0:
-        return buf_max, 2, True
-    #test crit rate
-    if ((n >> 16) & 0xff) < damage_min_crit_rate:
-        return buf_max, 3, True
-    crit_damage_base = 160
-    ab = (n >> 24) & 0xff
-    cd = (n >>  8) & 0xff
-    d = (attack_buf_base + ab) * (crit_damage_base + cd)
-    if buf_max >= d:
-        return buf_max, 4, True
-    return d + 1, n, False
-
-def mprun(a):
-    find_one = a[0]
-    l1, i2, l3, l4, l5, l6 = a[1], a[2], a[3], a[4], a[5], a[6]
-    soul, soul_2p_mask, soul_4p_mask = a[7], a[8], a[9]
-    score_suit_buf_max = a[10]
-    suit_buf_max_ = 1
-    result_ = []
-    comb_sum_ = {}
-    ns = 0
-    for i4 in l4:
-        t2 = i2[1] + i4[1]
-        n2 = i2[0] + i4[0]
-        for i6 in l6:
-            t3 = t2 + i6[1]
-            n3 = n2 + i6[0]
-            for i1 in l1:
-                t4 = t3 + i1[1]
-                n4 = n3 + i1[0]
-                #if soul_2p_mask and soul_4p_mask \
-                # and (t4 & soul_2p_mask) == 0 and (t4 & soul_4p_mask) == 0:
-                #    continue
-                for i3 in l3:
-                    t5 = t4 + i3[1]
-                    n5 = n4 + i3[0]
-                    for i5 in l5:
-                        n6 = n5 + i5[0]
-                        t6 = t5 + i5[1]
-                        ns += 1
-                        if soul_4p_mask == 0 or (t6 & soul_4p_mask):
-                            spd = n6 & 0xff
-                            suit_buf_max_, n6, skip = score_suit_buf_max(soul_2p_mask,
-                                                                         suit_buf_max_,
-                                                                         n6, t6)
-                            if skip:
-                                continue
-                        else:
-                            continue
-                        #result_num += 1
-                        result_ = [i1[2], i2[2], i3[2], i4[2], i5[2], i6[2]]
-                        comb_sum_ = list2map(soul,
-                                             n6, t6 & soul_4p_mask, '',
-                                             4, '')
-                        if find_one:
-                            return [result_, comb_sum_, suit_buf_max_]
-    r = [result_, comb_sum_, suit_buf_max_]
-    #print(r, ns)
-    return r
 
 def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
                 build_mask, sortkey,
