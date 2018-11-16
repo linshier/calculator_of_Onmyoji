@@ -14,6 +14,7 @@ cal_shadow_overstar_max_damage      = []
 cal_scarlet_crit_max_damage         = []
 cal_scarlet_free_max_damage         = []
 
+attack      = data_format.MITAMA_PROPS[0]
 attack_buf  = data_format.MITAMA_PROPS[1]
 crit_rate   = data_format.MITAMA_PROPS[4]
 crit_damage = data_format.MITAMA_PROPS[5]
@@ -553,7 +554,7 @@ def filter_fast(data_dict):
             yield comb_data
     # seductress + crit_damage type max damage
     for i in cal_seductress_overstar_max_damage:
-        damage_min_speed = 11
+        damage_min_speed = 12
         damage_min_crit_rate = 89 - 30
         attack_buf_base = 100
         damage = 0
@@ -1006,6 +1007,47 @@ def make_result(data_dict, res, com):
                 }
     return comb_data
 
+def map2list(codes, dx):
+    l = []
+    mitama_codes_num = len(codes)
+    #print(('map2list: %s' % dx).decode('raw_unicode_escape'))
+    for i in dx:
+        code = -1
+        k = i.keys()[0]
+        v = i.values()[0]
+	#print(('map2list: %s' % v).decode('raw_unicode_escape'))
+        for j in xrange(mitama_codes_num):
+            if codes[j] == v[suit]:
+                code = j
+                break
+        val = int(0)
+        val += int(v[effect])
+        val <<= 8
+        val += (int(v[attack_buf]) + int(v[attack]*100/3350))
+        val <<= 8
+        val += int(v[crit_rate])
+        val <<= 8
+        val += int(v[crit_damage])
+        val <<= 8
+        val += int(v[speed])
+        l.append([val,
+                  (1 << (3 * code)) if (code >= 0) else 0,
+                  k])
+    return l
+
+def list2map(codes, nx, ny, nz, mask, soul):
+    mitama_type = soul
+    if ny:
+        for i in xrange(len(codes)):
+            if ny & (mask << (3 * i)):
+                mitama_type = codes[i]
+    return {data_format.MITAMA_COL_NAME_ZH[0]: nz,
+            attack_buf:  (nx>>24)&0xff,
+            crit_rate:   (nx>>16)&0xff,
+            crit_damage: (nx>> 8)&0xff,
+            speed:       (nx>> 0)&0xff,
+            suit:        mitama_type}
+
 def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
                 build_mask, sortkey,
                 find_one,
@@ -1168,46 +1210,6 @@ def find_item(arr, k):
         if i.keys()[0] == k:
             return i
     return None
-
-def map2list(codes, dx):
-    l = []
-    mitama_codes_num = len(codes)
-    #print(('map2list: %s' % dx).decode('raw_unicode_escape'))
-    for i in dx:
-        code = -1
-        k = i.keys()[0]
-        v = i.values()[0]
-	#print(('map2list: %s' % v).decode('raw_unicode_escape'))
-        for j in xrange(mitama_codes_num):
-            if codes[j] == v[suit]:
-                code = j
-                break
-        val = int(0)
-        val += int(v[effect])
-        val <<= 8
-        val += int(v[attack_buf])
-        val <<= 8
-        val += int(v[crit_rate])
-        val <<= 8
-        val += int(v[crit_damage])
-        val <<= 8
-        val += int(v[speed])
-        l.append([val,
-                  (1 << (3 * code)) if (code >= 0) else 0,
-                  k])
-    return l
-def list2map(codes, nx, ny, nz, mask, soul):
-    mitama_type = soul
-    if ny:
-        for i in xrange(len(codes)):
-            if ny & (mask << (3 * i)):
-                mitama_type = codes[i]
-    return {data_format.MITAMA_COL_NAME_ZH[0]: nz,
-            attack_buf:  (nx>>24)&0xff,
-            crit_rate:   (nx>>16)&0xff,
-            crit_damage: (nx>> 8)&0xff,
-            speed:       (nx>> 0)&0xff,
-            suit:        mitama_type}
 
 
 def make_combination(mitama_data, mitama_type_limit={}, all_suit=True):

@@ -175,7 +175,7 @@ def main():
     #print('Start calculating')
     filter_result = cal.filter_fast(locate_sep_data)
 
-    if 1:
+    if 0:
         write_data.write_mitama_result(args.output_file, filter_result,
                                       base_att, base_hp, base_critdamage)
     else:
