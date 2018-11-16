@@ -7,6 +7,13 @@ import multiprocessing
 
 from calculator_of_Onmyoji import data_format
 
+cal_fortune_max_speed               = 0
+cal_free_max_speed                  = 0
+cal_seductress_overstar_max_damage  = [1]
+cal_shadow_overstar_max_damage      = []
+cal_scarlet_crit_max_damage         = []
+cal_scarlet_free_max_damage         = []
+
 attack_buf  = data_format.MITAMA_PROPS[1]
 crit_rate   = data_format.MITAMA_PROPS[4]
 crit_damage = data_format.MITAMA_PROPS[5]
@@ -286,7 +293,7 @@ def filter_fast(data_dict):
         return (n & 0xff) < speed_1p_limit
 
     # fortune type max speed
-    if 1:
+    if cal_fortune_max_speed:
         res, com, n = filter_soul(prop_value_speed,
                           prop_value_l2_speed,
                           prop_value_speed,
@@ -302,7 +309,7 @@ def filter_fast(data_dict):
             print('fortune(maxspeed):%d' % comb_data['sum'][speed])
             yield comb_data
     # free type max speed
-    if 1:
+    if cal_free_max_speed:
         res, com, n = filter_soul(prop_value_speed,
                           prop_value_l2_speed,
                           prop_value_speed,
@@ -454,7 +461,7 @@ def filter_fast(data_dict):
             print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
     # seductress + crit_damage type max damage
-    for i in [1]:
+    for i in cal_seductress_overstar_max_damage:
         damage_min_speed = 12
         damage_min_crit_rate = 89 - 30
         attack_buf_base = 100
@@ -496,7 +503,7 @@ def filter_fast(data_dict):
     #return
     #return
     # shadow + overstar
-    for i in [1]:
+    for i in cal_shadow_overstar_max_damage:
         #print('\nshadow: overstar')
         damage_min_speed = 11
         damage_min_crit_rate = 89 - 30
@@ -534,7 +541,7 @@ def filter_fast(data_dict):
             print('shadow(overstar+l6damage):%d,+%d' % (damage, comb_data['sum'][speed]))
             yield comb_data
     # scarlet + crit_damage type max damage
-    for i in [1]:
+    for i in cal_scarlet_crit_max_damage:
         damage_min_speed = 0
         damage_min_crit_rate = 89 - 15
         attack_buf_base = 100 + 15
@@ -568,7 +575,7 @@ def filter_fast(data_dict):
             comb_data = make_result(data_dict, res, com)
             print('scarlet(crit):%d,+%d' % (damage, comb_data['sum'][speed]))
             yield comb_data
-    for i in [1]:
+    for i in cal_scarlet_free_max_damage:
         damage_min_speed = 0
         damage_min_crit_rate = 89 - 0
         attack_buf_base = 100 + 15
