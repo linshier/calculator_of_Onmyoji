@@ -7,14 +7,14 @@ import multiprocessing
 
 from calculator_of_Onmyoji import data_format
 
-cal_fortune_max_speed               = 0
-cal_free_max_speed                  = 1
-cal_seductress_overstar_max_damage  = [1]
-cal_shadow_overstar_max_damage      = [1]
-cal_shadow_crit_max_damage          = [1]
-cal_seductress_crit_max_damage      = [1]
-cal_scarlet_crit_max_damage         = [1]
-cal_scarlet_free_max_damage         = [1]
+#cal_fortune_max_speed               = 0
+#cal_freetype_max_speed                  = 1
+#cal_seductress_overstar_max_damage  = []
+#cal_shadow_overstar_max_damage      = []
+#cal_shadow_crit_max_damage          = []
+#cal_seductress_crit_max_damage      = []
+#cal_scarlet_crit_max_damage         = []
+#cal_scarlet_free_max_damage         = []
 
 attack      = data_format.MITAMA_PROPS[0]
 attack_buf  = data_format.MITAMA_PROPS[1]
@@ -34,6 +34,9 @@ effect_max_speed = 200
 damage_min_speed = 11
 damage_min_crit_rate = 90
 attack_buf_base = 100
+crit_damage_base = 160
+attack_hero = 3350
+#attack_hero = 3216
 def score_suit_buf_max_speed(soul_2p_mask, buf_max, n, t):
     if buf_max >= (n & 0xff):
         return buf_max, n, True
@@ -62,7 +65,7 @@ def score_suit_buf_max_damage(soul_2p_mask, buf_max, n, t):
     #test crit rate
     if ((n >> 16) & 0xff) < damage_min_crit_rate:
         return buf_max, 3, True
-    crit_damage_base = 160
+    #crit_damage_base = 160
     ab = (n >> 24) & 0xff
     cd = (n >>  8) & 0xff
     d = (attack_buf_base + ab) * (crit_damage_base + cd)
@@ -194,12 +197,6 @@ def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
     return result, comb_sum, suit_buf_max
 
 def filter_fast(data_dict):
-    global effect_min_speed
-    global effect_max_speed
-    global damage_min_speed
-    global damage_min_crit_rate
-    global attack_buf_base
-
     type_seductress = u'针女'
     type_shadow = u'破势'
     type_phenix = data_format.MITAMA_TYPES[33]
@@ -448,9 +445,9 @@ def filter_fast(data_dict):
         return soul, soul_2p_fortune_mask, soul_4p_fortune_mask
     def test_limit_1p_speed(n):
         return (n & 0xff) < speed_1p_limit
-
     # fortune type max speed
-    if cal_fortune_max_speed:
+    #if cal_fortune_max_speed:
+    def cal_fortune_max_speed():
         res, com, n = filter_soul(prop_value_speed,
                           prop_value_l2_speed,
                           prop_value_speed,
@@ -464,9 +461,16 @@ def filter_fast(data_dict):
             comb_data = make_result(data_dict, res, com)
             #print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
             print('fortune(maxspeed):%d' % comb_data['sum'][speed])
-            yield comb_data
+            return comb_data
+        return None
     # free type max speed
-    if cal_free_max_speed:
+    def cal_freetype_max_speed():
+        global effect_min_speed
+        global effect_max_speed
+        global damage_min_speed
+        global damage_min_crit_rate
+        global attack_buf_base
+        global crit_damage_base
         res, com, n = filter_soul(prop_value_speed,
                           prop_value_l2_speed,
                           prop_value_speed,
@@ -482,17 +486,20 @@ def filter_fast(data_dict):
             comb_data = make_result(data_dict, res, com)
             #print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
             print('freetype(maxspeed):%d' % n)
-            yield comb_data
+            return comb_data
         # fast terminate
         if n < 148:
             print('speed test fail')
-            return
+            return None
+
+
     # try crit_damage + crit_rate
     # seductress type speed max damage
     for i in []:
         damage_min_speed = 50
         damage_min_crit_rate = 90 - 30
         attack_buf_base = 100
+        crit_damage_base = 160
         damage = 0
         res = []
         com = {}
@@ -522,7 +529,7 @@ def filter_fast(data_dict):
             for x in res:
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
-            print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
+            #print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
     # fire type max effect
     if 0:
@@ -561,7 +568,7 @@ def filter_fast(data_dict):
             for x in res:
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
-            print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
+            #print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
     # sprite type max speed
     if 0:
@@ -578,14 +585,21 @@ def filter_fast(data_dict):
             for x in res:
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
-            print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
+            #print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
     type_crab = u'网切'
     # seductress + crit_damage type max damage
-    for i in cal_seductress_overstar_max_damage:
+    def cal_seductress_overstar_max_damage():
+        global effect_min_speed
+        global effect_max_speed
+        global damage_min_speed
+        global damage_min_crit_rate
+        global attack_buf_base
+        global crit_damage_base
         damage_min_speed = 12
         damage_min_crit_rate = 89 - 30
         attack_buf_base = 100
+        crit_damage_base = 160
         damage = 0
         res = []
         com = {}
@@ -618,15 +632,22 @@ def filter_fast(data_dict):
             comb_data = make_result(data_dict, res, com)
             #print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
             print('seductress(overstar+l6damage):%d,+%d' % (damage, comb_data['sum'][speed]))
-            yield comb_data
+            return comb_data
         if damage < 62000:
-            return
+            return None
     # shadow + overstar
-    for i in cal_shadow_overstar_max_damage:
+    def cal_shadow_overstar_max_damage():
+        global effect_min_speed
+        global effect_max_speed
+        global damage_min_speed
+        global damage_min_crit_rate
+        global attack_buf_base
+        global crit_damage_base
         #print('\nshadow: overstar')
-        damage_min_speed = 17
-        damage_min_crit_rate = 90 - 30
+        damage_min_speed = 128 - 112
+        damage_min_crit_rate = 100 - 10 - 30
         attack_buf_base = 100
+        crit_damage_base = 150
         damage = 0
         res = []
         com = {}
@@ -658,12 +679,14 @@ def filter_fast(data_dict):
             comb_data = make_result(data_dict, res, com)
             #print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
             print('shadow(overstar+l6damage):%d,+%d' % (damage, comb_data['sum'][speed]))
-            yield comb_data
+            return comb_data
+        return None
     # shadow crit max damage
-    for i in cal_shadow_crit_max_damage:
+    def cal_shadow_crit_max_damage():
         damage_min_speed = 0
         damage_min_crit_rate = 89 - 30
         attack_buf_base = 100
+        crit_damage_base = 160
         damage = 0
         res = []
         com = {}
@@ -694,12 +717,14 @@ def filter_fast(data_dict):
             comb_data = make_result(data_dict, res, com)
             #print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
             print('shadow(crit):%d,+%d' % (damage, comb_data['sum'][speed]))
-            yield comb_data
+            return comb_data
+        return None
     # seductress + crit_damage type max damage
-    for i in cal_seductress_crit_max_damage:
+    def cal_seductress_crit_max_damage():
         damage_min_speed = 0
         damage_min_crit_rate = 89 - 30
         attack_buf_base = 100
+        crit_damage_base = 160
         damage = 0
         res = []
         com = {}
@@ -730,12 +755,14 @@ def filter_fast(data_dict):
             comb_data = make_result(data_dict, res, com)
             #print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
             print('seductress(l6damage):%d,+%d' % (damage, comb_data['sum'][speed]))
-            yield comb_data
+            return comb_data
+        return None
     # scarlet + crit_damage type max damage
-    for i in cal_scarlet_crit_max_damage:
+    def cal_scarlet_crit_max_damage():
         damage_min_speed = 0
         damage_min_crit_rate = 89 - 15
         attack_buf_base = 100 + 15
+        crit_damage_base = 160
         damage = 0
         res = []
         com = {}
@@ -765,11 +792,13 @@ def filter_fast(data_dict):
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
             print('scarlet(crit):%d,+%d' % (damage, comb_data['sum'][speed]))
-            yield comb_data
-    for i in cal_scarlet_free_max_damage:
+            return comb_data
+        return None
+    def cal_scarlet_free_max_damage():
         damage_min_speed = 0
         damage_min_crit_rate = 89 - 0
         attack_buf_base = 100 + 15
+        crit_damage_base = 160
         damage = 0
         res = []
         com = {}
@@ -796,13 +825,15 @@ def filter_fast(data_dict):
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
             print('scarlet(free):%d,+%d' % (damage, comb_data['sum'][speed]))
-            yield comb_data
+            return comb_data
+        return None
     # seductress + crit_rate type max damage
     for i in []:
         print('\nseductress: l6 crit rate')
         damage_min_speed = 0
         damage_min_crit_rate = 90 - 30
         attack_buf_base = 100
+        crit_damage_base = 160
         damage = 0
         res = []
         com = {}
@@ -838,6 +869,7 @@ def filter_fast(data_dict):
         damage_min_speed = 0
         damage_min_crit_rate = 90 - 30
         attack_buf_base = 100
+        crit_damage_base = 160
         damage = 0
         res = []
         com = {}
@@ -873,6 +905,7 @@ def filter_fast(data_dict):
         damage_min_speed = 0
         damage_min_crit_rate = 90 - 30
         attack_buf_base = 100
+        crit_damage_base = 160
         type_crab = u'网切'
         damage = 0
         res = []
@@ -909,6 +942,7 @@ def filter_fast(data_dict):
         damage_min_speed = 0
         damage_min_crit_rate = 89 - 15
         attack_buf_base = 100
+        crit_damage_base = 160
         #damage = 0
         res = []
         com = {}
@@ -960,6 +994,7 @@ def filter_fast(data_dict):
         damage_min_speed = 11
         damage_min_crit_rate = 90 - 30
         attack_buf_base = 100
+        crit_damage_base = 160
         type_seductress = u'针女'
         damage = 0
         res = []
@@ -993,6 +1028,7 @@ def filter_fast(data_dict):
         damage_min_speed = 0
         damage_min_crit_rate = 30 - 15
         attack_buf_base = 100
+        crit_damage_base = 160
         type_seductress = u'针女'
         def prop_value_type(mitama):
             if mitama.keys()[0] in done:
@@ -1023,6 +1059,7 @@ def filter_fast(data_dict):
         damage_min_speed = 50
         damage_min_crit_rate = 89 - 15
         attack_buf_base = 100 + 15
+        crit_damage_base = 160
         type_seductress = u'针女'
         damage = 0
         res = []
@@ -1053,6 +1090,18 @@ def filter_fast(data_dict):
             print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
 
+    order = [
+            #cal_fortune_max_speed,
+            cal_freetype_max_speed,
+            cal_seductress_overstar_max_damage,
+            cal_shadow_overstar_max_damage,
+        ]
+    for f in order:
+        comb = f()
+        if comb is not None:
+            yield comb
+    return
+
 
 def make_result(data_dict, res, com):
     d1, d2, d3, d4, d5, d6 = data_dict.values()
@@ -1082,7 +1131,7 @@ def map2list(codes, dx):
         val = int(0)
         val += int(v[effect])
         val <<= 8
-        val += (int(v[attack_buf]) + int(v[attack]*100/3350))
+        val += (int(v[attack_buf]) + int(v[attack]*100/attack_hero))
         val <<= 8
         val += int(v[crit_rate])
         val <<= 8
