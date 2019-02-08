@@ -7,15 +7,6 @@ import multiprocessing
 
 from calculator_of_Onmyoji import data_format
 
-#cal_fortune_max_speed               = 0
-#cal_freetype_max_speed                  = 1
-#cal_seductress_overstar_max_damage  = []
-#cal_shadow_overstar_max_damage      = []
-#cal_shadow_crit_max_damage          = []
-#cal_seductress_crit_max_damage      = []
-#cal_scarlet_crit_max_damage         = []
-#cal_scarlet_free_max_damage         = []
-
 attack      = data_format.MITAMA_PROPS[0]
 attack_buf  = data_format.MITAMA_PROPS[1]
 crit_rate   = data_format.MITAMA_PROPS[4]
@@ -753,10 +744,10 @@ def filter_fast(data_dict):
         global attack_buf_base
         global crit_damage_base
         damage_min_speed = 0
-        damage_max_speed = 128 - 117
-        damage_min_crit_rate = 89 - 30
+        damage_max_speed = 128 - 121
+        damage_min_crit_rate = 100 - 10 - 30
         attack_buf_base = 100
-        crit_damage_base = 160
+        crit_damage_base = 150
         damage = 0
         res = []
         com = {}
@@ -840,7 +831,7 @@ def filter_fast(data_dict):
         if damage < 62000:
             return None
     # shadow + overstar
-    def cal_shadow_overstar_max_damage():
+    def cal_shadow_xstar_max_damage():
         global effect_min_speed
         global effect_max_speed
         global damage_min_speed
@@ -849,9 +840,10 @@ def filter_fast(data_dict):
         global attack_buf_base
         global crit_damage_base
         #print('\nshadow: overstar')
-        damage_min_speed = 128 - 112
+        #damage_min_speed = 128 - 112
+        damage_min_speed = 0
         damage_max_speed = 500
-        damage_min_crit_rate = 100 - 10 - 30
+        damage_min_crit_rate = 100 - 9 - 30
         attack_buf_base = 100
         crit_damage_base = 150
         damage = 0
@@ -884,7 +876,7 @@ def filter_fast(data_dict):
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
             #print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
-            print('shadow(overstar+l6damage):%d,+%d' % (damage, comb_data['sum'][speed]))
+            print('shadow(xstar+l6damage):%d,+%d' % (damage, comb_data['sum'][speed]))
             return comb_data
         return None
     # shadow crit max damage
@@ -1299,14 +1291,17 @@ def filter_fast(data_dict):
     order = [
             #cal_fortune_max_speed,
             cal_freetype_max_speed,
+            #cal_shadow_xstar_max_damage,
+            cal_seductress_overstar_max_damage,
             cal_seductress_overstar_max_damage,
             #cal_seductress_understar_max_damage,
-            #cal_seductress_understar_max_damage,
-            #cal_shadow_overstar_max_damage,
+            #cal_shadow_xstar_max_damage,
         ]
     for f in order:
         comb = f()
         if comb is not None:
             yield comb
+        if 1:
+            done.clear()
     return
 
