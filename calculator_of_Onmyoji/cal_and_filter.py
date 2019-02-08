@@ -1293,7 +1293,7 @@ def filter_fast(data_dict):
             cal_freetype_max_speed,
             #cal_shadow_xstar_max_damage,
             cal_seductress_overstar_max_damage,
-            cal_seductress_overstar_max_damage,
+            #cal_seductress_overstar_max_damage,
             #cal_seductress_understar_max_damage,
             #cal_shadow_xstar_max_damage,
         ]
@@ -1301,7 +1301,7 @@ def filter_fast(data_dict):
         comb = f()
         if comb is not None:
             yield comb
-        if 1:
+        if 0:
             done.clear()
     return
 
