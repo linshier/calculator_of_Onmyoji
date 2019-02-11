@@ -13,6 +13,7 @@ crit_rate   = data_format.MITAMA_PROPS[4]
 crit_damage = data_format.MITAMA_PROPS[5]
 speed       = data_format.MITAMA_PROPS[10]
 effect      = data_format.MITAMA_PROPS[8]
+soul_sn     = data_format.MITAMA_COL_NAME_ZH[0]
 suit        = data_format.MITAMA_COL_NAME_ZH[1]
 
 speed_1p_limit = 3
@@ -61,6 +62,7 @@ def score_suit_buf_max_damage(soul_2p_mask, buf_max, n, t):
     ab = (n >> 24) & 0xff
     cd = (n >>  8) & 0xff
     d = (attack_buf_base + ab) * (crit_damage_base + cd)
+    #if (ab == 146) and (cd == 130): print 'score:', d, attack_buf_base, crit_damage_base
     if buf_max >= d:
         return buf_max, 4, True
     return d + 1, n, False
@@ -208,7 +210,7 @@ def map2list(codes, dx):
         code = -1
         k = i.keys()[0]
         v = i.values()[0]
-	#print(('map2list: %s' % v).decode('raw_unicode_escape'))
+        #print(('map2list: %s %s' % (k, v)).decode('raw_unicode_escape'))
         for j in xrange(mitama_codes_num):
             if codes[j] == v[suit]:
                 code = j
@@ -216,6 +218,7 @@ def map2list(codes, dx):
         val = int(0)
         val += int(v[effect])
         val <<= 8
+        #if k == '5b47041108942d6ee02ea362': print 'map2list', v[attack], (int(v[attack_buf]) + int(v[attack]*100/attack_hero))
         val += (int(v[attack_buf]) + int(v[attack]*100/attack_hero))
         val <<= 8
         val += int(v[crit_rate])
@@ -792,7 +795,7 @@ def filter_fast(data_dict):
         global crit_damage_base
         damage_min_speed = 12
         damage_max_speed = 500
-        damage_min_crit_rate = 89 - 30
+        damage_min_crit_rate = 100 - 11 - 30
         attack_buf_base = 100
         crit_damage_base = 160
         damage = 0
@@ -817,6 +820,7 @@ def filter_fast(data_dict):
                                   False,
                                   score_suit_buf_max_damage,
                                   data_dict)
+            #print n
             if n > damage:
                 damage = n
                 res = r
@@ -843,9 +847,9 @@ def filter_fast(data_dict):
         #damage_min_speed = 128 - 112
         damage_min_speed = 0
         damage_max_speed = 500
-        damage_min_crit_rate = 100 - 9 - 30
+        damage_min_crit_rate = 100 - 10 - 30
         attack_buf_base = 100
-        crit_damage_base = 150
+        crit_damage_base = 160
         damage = 0
         res = []
         com = {}
