@@ -343,10 +343,22 @@ def find_item(arr, k):
 def filter_fast(data_dict):
     type_seductress = u'针女'
     type_shadow = u'破势'
+    type_sprite = data_format.MITAMA_TYPES[2]
     type_phenix = data_format.MITAMA_TYPES[33]
     type_scarlet = data_format.MITAMA_TYPES[24]
     type_fortune = data_format.MITAMA_TYPES[18]
     type_fire = data_format.MITAMA_TYPES[25]
+    type_jizo = data_format.MITAMA_TYPES[12]
+    __ = {
+        type_seductress: 'seductress',
+        type_shadow: 'shadow',
+        type_sprite: 'sprite',
+        type_phenix: 'phenix',
+        type_scarlet: 'scarlet',
+        type_fortune: 'fortune',
+        type_fire: 'fire',
+        type_jizo: 'jizo',
+    }
 
     soul_crit = []
     for (k, v) in data_format.MITAMA_ENHANCE.items():
@@ -592,7 +604,7 @@ def filter_fast(data_dict):
         if len(res) > 0:
             comb_data = make_result(data_dict, res, com)
             #print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
-            print('fortune(maxspeed):%d' % comb_data['sum'][speed])
+            print('fortune(maxspeed):%d,+%d' % (n, 117 + comb_data['sum'][speed]))
             return comb_data
         return None
     # free type max speed
@@ -618,7 +630,7 @@ def filter_fast(data_dict):
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
             #print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
-            print('freetype(maxspeed):%d' % n)
+            print('freetype(maxspeed):%d,+%d' % (n, 119 + n))
             return comb_data
         # fast terminate
         if n < 148:
@@ -664,7 +676,7 @@ def filter_fast(data_dict):
             comb_data = make_result(data_dict, res, com)
             #print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
-    def cal_x_effect(soul_type):
+    def cal_x_effect(soul_type, base_speed, prop_value_l2):
         def _build_mask():
             soul = []
             soul_2p_fortune_mask = int(0)
@@ -682,7 +694,7 @@ def filter_fast(data_dict):
                     continue
             return soul, soul_2p_fortune_mask, soul_4p_fortune_mask
         res, com, n = filter_soul(prop_value_none,
-                          prop_value_l2_speed,
+                          prop_value_l2,
                           prop_value_effect,
                           prop_value_none,
                           _build_mask,
@@ -694,7 +706,7 @@ def filter_fast(data_dict):
             for x in res:
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
-            print('%s(maxeffect):%d,+%d' % (soul_type, n, comb_data['sum'][speed]))
+            print('%s(maxeffect):%d,+%d' % (__[soul_type], n, base_speed + comb_data['sum'][speed]))
             return comb_data
         return None
     def cal_fortune_effect_over135_116():
@@ -702,31 +714,16 @@ def filter_fast(data_dict):
         global effect_max_speed
         effect_min_speed = 136 - 116
         effect_max_speed = 500
-        return cal_x_effect(type_fortune)
+        return cal_x_effect(type_fortune, 116, prop_value_l2_speed)
     def cal_fire_effect_over135_116():
         global effect_min_speed
         global effect_max_speed
         effect_min_speed = 136 - 116
         effect_max_speed = 500
-        return cal_x_effect(type_fire)
+        #return cal_x_effect(type_fire, 116, prop_value_none)
+        return cal_x_effect(type_fire, 116, prop_value_l2_speed)
     # sprite type max speed
     if 0:
-        res, com, n = filter_soul(prop_value_none,
-                          prop_value_speed,
-                          prop_value_none,
-                          prop_value_none,
-                          build_mask_sprite,
-                          speed,
-                          True,
-                          score_suit_buf_max_speed,
-                          data_dict)
-        if len(res) > 0:
-            for x in res:
-                done.add(x)
-            comb_data = make_result(data_dict, res, com)
-            #print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
-            yield comb_data
-    def cal_sprite_x_max_damage():
         res, com, n = filter_soul(prop_value_none,
                           prop_value_speed,
                           prop_value_none,
@@ -792,7 +789,7 @@ def filter_fast(data_dict):
             print('seductress(understar+l6damage):%d,+%d' % (damage, comb_data['sum'][speed]))
             return comb_data
         return None
-    def cal_seductress_xstar_max_damage():
+    def cal_x_max_damage(soul_type, base_speed, prop_value_l6):
         global effect_min_speed
         global effect_max_speed
         global damage_max_speed
@@ -805,40 +802,36 @@ def filter_fast(data_dict):
         desc = ''
         def _build_mask():
             soul = []
-            soul_2p_fortune_mask = int(0)
-            soul_4p_fortune_mask = int(0)
+            soul_2p_mask = int(0)
+            soul_4p_mask = int(0)
             for (k, v) in data_format.MITAMA_ENHANCE.items():
                 enhance_type = v[u"加成类型"]
-                if k == data_format.MITAMA_TYPES[4]:
-                    #print(k)
-                    soul_2p_fortune_mask |= (2 << (3 * len(soul)))
-                    soul_4p_fortune_mask |= (4 << (3 * len(soul)))
+                if k == soul_type:
+                    soul_2p_mask |= (2 << (3 * len(soul)))
+                    soul_4p_mask |= (4 << (3 * len(soul)))
                     soul.append(k)
                     continue
                 if enhance_type == u"暴击":
-                    #print(k)
-                    soul_2p_fortune_mask |= (2 << (3 * len(soul)))
+                    soul_2p_mask |= (2 << (3 * len(soul)))
                     soul.append(k)
                     continue
-            return soul, soul_2p_fortune_mask, soul_4p_fortune_mask
+            return soul, soul_2p_mask, soul_4p_mask
         for s in soul_crit:
-        #for s in [type_shadow]:
             def __filter_type(mitama):
                 if mitama.keys()[0] in done:
                     return False
                 enhance_type = mitama.values()[0][u'御魂类型']
-                return enhance_type == type_seductress or enhance_type == s
+                return enhance_type == soul_type or enhance_type == s
 
             r, c, n = filter_soul(__filter_type,
                                   prop_value_none,
                                   prop_value_none,
-                                  prop_value_l6_crit_damage,
+                                  prop_value_l6,
                                   _build_mask,
                                   crit_rate,
                                   False,
                                   score_suit_buf_max_damage,
                                   data_dict)
-            #print n
             if n > damage:
                 damage = n
                 res = r
@@ -847,12 +840,10 @@ def filter_fast(data_dict):
             for x in res:
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
-            #print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
-            print('seductress(overstar+l6damage):%d,+%d' % (damage, comb_data['sum'][speed]))
+            print('%s(overstar+l6damage):%d,+%d' % (__[soul_type], damage, base_speed + comb_data['sum'][speed]))
             return comb_data
-        if damage < 62000:
-            return None
-    def cal_seductress_over129_3350_12_160_110():
+        return None
+    def cal_seductress_over129_3350_12_160_117():
         global attack_hero
         global damage_min_crit_rate
         global crit_damage_base
@@ -861,8 +852,8 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 11 - 30
         crit_damage_base = 160
         damage_min_speed = 129 - 117
-        return cal_seductress_xstar_max_damage()
-    def cal_seductress_over140_3350_12_160_110():
+        return cal_x_max_damage(type_seductress, 117, prop_value_l6_crit_damage)
+    def cal_seductress_over140_3350_12_160_117():
         global attack_hero
         global damage_min_crit_rate
         global crit_damage_base
@@ -871,7 +862,27 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 11 - 30
         crit_damage_base = 160
         damage_min_speed = 141 - 117
-        return cal_seductress_xstar_max_damage()
+        return cal_x_max_damage(type_seductress, 117, prop_value_l6_crit_damage)
+    def cal_sprite_over140_2332_5_150_108():
+        global attack_hero
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 2332
+        damage_min_crit_rate = 100 - 5 - 15
+        crit_damage_base = 150
+        damage_min_speed = 141 - 108
+        return cal_x_max_damage(type_sprite, 108, prop_value_none)
+    def cal_jizo_over140_4074_10_150_118():
+        global attack_hero
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 4074
+        damage_min_crit_rate = 100 - 10 - 15
+        crit_damage_base = 150
+        damage_min_speed = 141 - 118
+        return cal_x_max_damage(type_jizo, 118, prop_value_none)
     # shadow + overstar
     def cal_shadow_xstar_max_damage():
         global effect_min_speed
@@ -1047,7 +1058,7 @@ def filter_fast(data_dict):
             print('scarlet(crit):%d,+%d' % (damage, comb_data['sum'][speed]))
             return comb_data
         return None
-    def cal_x_free_max_damage(soul_x_type):
+    def cal_x_free_max_damage(soul_x_type, base_speed):
         global attack_buf_base
         attack_buf_base = 100
         if soul_x_type == type_scarlet:
@@ -1079,7 +1090,7 @@ def filter_fast(data_dict):
             for x in res:
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
-            print('(free):%d,+%d' % (damage, comb_data['sum'][speed]))
+            print('%s(free):%d,+%d' % (__[soul_x_type], damage, base_speed + comb_data['sum'][speed]))
             return comb_data
         return None
     def cal_scarlet_free_max_damage():
@@ -1091,8 +1102,8 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 11 - 0
         crit_damage_base = 160
         damage_min_speed = 0
-        return cal_x_free_max_damage(type_scarlet)
-    def cal_seductress_free_over140_3350_12_160_110():
+        return cal_x_free_max_damage(type_scarlet, 0)
+    def cal_seductress_free_over140_3350_12_160_117():
         global attack_hero
         global damage_min_crit_rate
         global crit_damage_base
@@ -1101,7 +1112,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 11 - 15
         crit_damage_base = 160
         damage_min_speed = 141 - 117
-        return cal_x_free_max_damage(type_seductress)
+        return cal_x_free_max_damage(type_seductress, 117)
     def cal_shadow_free_3350_12_160_110():
         global attack_hero
         global damage_min_crit_rate
@@ -1111,7 +1122,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 12 - 15
         crit_damage_base = 160
         damage_min_speed = 129 - 110
-        return cal_x_free_max_damage(type_shadow)
+        return cal_x_free_max_damage(type_shadow, 110)
     def cal_shadow_free_3216_10_150_112():
         global attack_hero
         global damage_min_crit_rate
@@ -1121,7 +1132,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 10 - 15
         crit_damage_base = 150
         damage_min_speed = 129 - 112
-        return cal_x_free_max_damage(type_shadow)
+        return cal_x_free_max_damage(type_shadow, 112)
 
     # seductress + crit_rate type max damage
     for i in []:
@@ -1386,22 +1397,21 @@ def filter_fast(data_dict):
             print(('%d %s' % (damage, comb_data['sum'])).decode('raw_unicode_escape'))
             yield comb_data
 
-    dou = [
+    fast = [
             cal_freetype_max_speed,
+            cal_seductress_over129_3350_12_160_117,
+    ]
+    dou1 = [
+            cal_freetype_max_speed,
+            #
             cal_fortune_max_speed,
             cal_fire_effect_over135_116,
-            #cal_fortune_effect_over135_116,
-            cal_seductress_over129_3350_12_160_110,
-            #cal_seductress_over140_3350_12_160_110,
-
-            #cal_seductress_free_over140_3350_12_160_110,
-            #cal_shadow_free_3216_10_150_112,
-            #cal_shadow_overstar_3216_10_150_112,
-            #cal_shadow_overstar_3350_12_160_110,
-            #cal_shadow_free_3350_12_160_110,
-            #cal_seductress_understar_max_damage,
+            cal_sprite_over140_2332_5_150_108,
+            cal_seductress_over129_3350_12_160_117,
+            cal_seductress_over140_3350_12_160_117, #cal_seductress_free_over140_3350_12_160_117,
+            cal_jizo_over140_4074_10_150_118,
         ]
-    order = dou
+    order = dou1
     for f in order:
         comb = f()
         if comb is not None:
