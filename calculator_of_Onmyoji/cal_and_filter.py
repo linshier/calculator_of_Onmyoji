@@ -342,22 +342,26 @@ def find_item(arr, k):
 
 def filter_fast(data_dict):
     type_seductress = u'针女'
-    type_shadow = u'破势'
     type_sprite = data_format.MITAMA_TYPES[2]
-    type_phenix = data_format.MITAMA_TYPES[33]
     type_scarlet = data_format.MITAMA_TYPES[24]
     type_fortune = data_format.MITAMA_TYPES[18]
     type_fire = data_format.MITAMA_TYPES[25]
     type_jizo = data_format.MITAMA_TYPES[12]
+    type_claws = data_format.MITAMA_TYPES[31]
+    type_phenix = data_format.MITAMA_TYPES[33]
+    type_shadow = data_format.MITAMA_TYPES[34]
+    type_tomb = data_format.MITAMA_TYPES[35]
     __ = {
         type_seductress: 'seductress',
-        type_shadow: 'shadow',
         type_sprite: 'sprite',
-        type_phenix: 'phenix',
         type_scarlet: 'scarlet',
         type_fortune: 'fortune',
         type_fire: 'fire',
         type_jizo: 'jizo',
+        type_claws: 'claws',
+        type_phenix: 'phenix',
+        type_shadow: 'shadow',
+        type_tomb: 'tomb',
     }
 
     soul_crit = []
@@ -789,7 +793,7 @@ def filter_fast(data_dict):
             print('seductress(understar+l6damage):%d,+%d' % (damage, comb_data['sum'][speed]))
             return comb_data
         return None
-    def cal_x_max_damage(soul_type, base_speed, prop_value_l6):
+    def cal_x_max_damage(soul_type, soul_peer, base_speed, prop_value_l6):
         global effect_min_speed
         global effect_max_speed
         global damage_max_speed
@@ -816,7 +820,7 @@ def filter_fast(data_dict):
                     soul.append(k)
                     continue
             return soul, soul_2p_mask, soul_4p_mask
-        for s in soul_crit:
+        for s in soul_peer:
             def __filter_type(mitama):
                 if mitama.keys()[0] in done:
                     return False
@@ -841,7 +845,7 @@ def filter_fast(data_dict):
             for x in res:
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
-            print('%s(+l6damage):%d,+%d' % (__[soul_type], damage, base_speed + comb_data['sum'][speed]))
+            print('%s(+l6damage):%d,+%d' % (__[soul_type], int(damage / 1000), base_speed + comb_data['sum'][speed]))
             return comb_data
         return None
     def cal_seductress_over129_3350_11_160_117():
@@ -853,7 +857,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 11 - 30
         crit_damage_base = 160
         damage_min_speed = 129 - 117
-        return cal_x_max_damage(type_seductress, 117, prop_value_l6_crit_damage)
+        return cal_x_max_damage(type_seductress, soul_crit, 117, prop_value_l6_crit_damage)
     def cal_seductress_over140_3350_11_160_117():
         global attack_hero
         global damage_min_crit_rate
@@ -863,7 +867,18 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 11 - 30
         crit_damage_base = 160
         damage_min_speed = 141 - 117
-        return cal_x_max_damage(type_seductress, 117, prop_value_l6_crit_damage)
+        return cal_x_max_damage(type_seductress, soul_crit, 117, prop_value_l6_crit_damage)
+    def cal_seductress_over0_3323_10_150_104():
+        global attack_hero
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 3323
+        damage_min_crit_rate = 100 - 10 - 30
+        crit_damage_base = 150
+        damage_min_speed = 104 - 104
+        #return cal_x_max_damage(type_seductress, soul_crit, 104, prop_value_l6_crit_damage)
+        return cal_x_max_damage(type_seductress, soul_crit, 104, prop_value_none)
     def cal_sprite_over140_2332_5_150_108():
         global attack_hero
         global damage_min_crit_rate
@@ -873,7 +888,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 5 - 15
         crit_damage_base = 150
         damage_min_speed = 141 - 108
-        return cal_x_max_damage(type_sprite, 108, prop_value_none)
+        return cal_x_max_damage(type_sprite, soul_crit, 108, prop_value_none)
     def cal_jizo_over140_4074_10_150_118():
         global attack_hero
         global damage_min_crit_rate
@@ -883,17 +898,18 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 10 - 15
         crit_damage_base = 150
         damage_min_speed = 141 - 118
-        return cal_x_max_damage(type_jizo, 118, prop_value_none)
+        return cal_x_max_damage(type_jizo, soul_crit, 118, prop_value_none)
     def cal_shadow_over0_3350_12_160_110():
         global attack_hero
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
         attack_hero = 3350
-        damage_min_crit_rate = 100 - 12 - 30
+        damage_min_crit_rate = 101 - 12 - 30
         crit_damage_base = 160
         damage_min_speed = 110 - 110
-        return cal_x_max_damage(type_shadow, 110, prop_value_l6_crit_damage)
+        #return cal_x_max_damage(type_shadow, soul_crit, 110, prop_value_l6_crit_damage)
+        return cal_x_max_damage(type_shadow, [type_claws], 110, prop_value_l6_crit_damage)
     def cal_shadow_overstar_3350_12_160_110():
         global attack_hero
         global damage_min_crit_rate
@@ -903,7 +919,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 12 - 30
         crit_damage_base = 160
         damage_min_speed = 128 - 110
-        return cal_x_max_damage(type_shadow, 110, prop_value_l6_crit_damage)
+        return cal_x_max_damage(type_shadow, soul_crit, 110, prop_value_l6_crit_damage)
     def cal_shadow_overstar_3216_10_150_112():
         global attack_hero
         global damage_min_crit_rate
@@ -913,7 +929,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 10 - 30
         crit_damage_base = 150
         damage_min_speed = 129 - 112
-        return cal_x_max_damage(type_shadow, 112, prop_value_l6_crit_damage)
+        return cal_x_max_damage(type_shadow, soul_crit, 112, prop_value_l6_crit_damage)
 
     # shadow crit max damage
     def cal_shadow_crit_max_damage():
@@ -1389,8 +1405,9 @@ def filter_fast(data_dict):
             cal_seductress_over140_3350_11_160_117, #cal_seductress_free_over140_3350_12_160_117,
             #
             cal_shadow_over0_3350_12_160_110,
+            cal_seductress_over0_3323_10_150_104,
         ]
-    order = fast
+    order = test
     for f in order:
         comb = f()
         if comb is not None:
