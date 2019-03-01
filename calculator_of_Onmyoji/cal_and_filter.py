@@ -806,39 +806,36 @@ def filter_fast(data_dict):
         res = []
         com = {}
         desc = ''
-        def _build_mask():
-            soul = []
-            soul_2p_mask = int(0)
-            soul_4p_mask = int(0)
-            for (k, v) in data_format.MITAMA_ENHANCE.items():
-                enhance_type = v[u"加成类型"]
-                if k == soul_type:
-                    soul_2p_mask |= (2 << (3 * len(soul)))
-                    soul_4p_mask |= (4 << (3 * len(soul)))
-                    soul.append(k)
-                    continue
-                if enhance_type == u"暴击":
-                    soul_2p_mask |= (2 << (3 * len(soul)))
-                    soul.append(k)
-                    continue
-            return soul, soul_2p_mask, soul_4p_mask
         for s in soul_peer:
             def __filter_type(mitama):
                 if mitama.keys()[0] in done:
                     return False
                 enhance_type = mitama.values()[0][u'御魂类型']
                 return enhance_type == soul_type or enhance_type == s
+            def __build_mask():
+                soul = []
+                soul_2p_mask = int(0)
+                soul_4p_mask = int(0)
+                for (k, v) in data_format.MITAMA_ENHANCE.items():
+                    enhance_type = v[u"加成类型"]
+                    if k == soul_type:
+                        soul_4p_mask |= (4 << (3 * len(soul)))
+                    if k == s:
+                        soul_2p_mask |= (2 << (3 * len(soul)))
+                    if k == soul_type or k == s:
+                        soul.append(k)
+                return soul, soul_2p_mask, soul_4p_mask
 
             r, c, n = filter_soul(__filter_type,
                                   prop_value_none,
                                   prop_value_none,
                                   prop_value_l6,
-                                  _build_mask,
+                                  __build_mask,
                                   crit_rate,
                                   False,
                                   score_suit_buf_max_damage,
                                   data_dict)
-            #if len(r) > 0: print s, n, ('%s' % (make_result(data_dict, r, c)['sum'])).decode('raw_unicode_escape')
+            if len(r) > 0: print s, n, ('%s' % (make_result(data_dict, r, c)['sum'])).decode('raw_unicode_escape')
             if n > damage:
                 damage = n
                 res = r
@@ -1484,7 +1481,7 @@ def filter_fast(data_dict):
     supp = [
             cal_shadow_over163_2894_8_150_118,
         ]
-    order = supp
+    order = fast
     for f in order:
         comb = f()
         if comb is not None:
