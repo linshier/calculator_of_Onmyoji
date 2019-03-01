@@ -3,6 +3,7 @@
 import itertools
 import sys
 import multiprocessing
+import uuid
 #from multiprocessing import Pool
 
 from calculator_of_Onmyoji import data_format
@@ -25,6 +26,7 @@ effect_min_speed = 0
 effect_max_speed = 200
 damage_min_speed = 11
 damage_max_speed = 500
+damage_limit = 0
 damage_min_crit_rate = 90
 attack_buf_base = 100
 crit_damage_base = 160
@@ -62,6 +64,9 @@ def score_suit_buf_max_damage(soul_2p_mask, buf_max, n, t):
     #if (ab == 146) and (cd == 130): print 'score:', d, attack_buf_base, crit_damage_base
     if buf_max >= d:
         return buf_max, 4, True
+    if 0 < damage_limit and damage_limit < d:
+        return buf_max, 5, True
+    #print damage_limit, d
     return d + 1, n, False
 
 def mprun(a):
@@ -341,6 +346,12 @@ def find_item(arr, k):
     return None
 
 def filter_fast(data_dict):
+    for i in xrange(6):
+        v = data_dict[i+1][0].values()[0]
+        f = {('%s' % uuid.uuid1()).decode('utf-8'): {k: 0 for k in v.keys()}}
+        data_dict[i+1].append(f)
+
+    type_none = 0
     type_seductress = u'针女'
     type_sprite = data_format.MITAMA_TYPES[2]
     type_scarlet = data_format.MITAMA_TYPES[24]
@@ -797,12 +808,14 @@ def filter_fast(data_dict):
             print('seductress(understar+l6damage):%d,+%d' % (damage, comb_data['sum'][speed]))
             return comb_data
         return None
-    def cal_x_max_damage(soul_type, soul_peer, base_speed, prop_value_l6):
+    def cal_x_max_damage(soul_type, soul_peer, base_speed, prop_value_l6, buf_limit):
         global effect_min_speed
         global effect_max_speed
         global damage_max_speed
+        global damage_limit
         damage_max_speed = 500
         damage = 0
+        damage_limit = buf_limit
         res = []
         com = {}
         desc = ''
@@ -824,6 +837,10 @@ def filter_fast(data_dict):
                         soul_2p_mask |= (2 << (3 * len(soul)))
                     if k == soul_type or k == s:
                         soul.append(k)
+                if s == type_none:
+                    soul_2p_mask |= (2 << (3 * len(soul)))
+                    soul.append(type_none)
+                #print soul
                 return soul, soul_2p_mask, soul_4p_mask
 
             r, c, n = filter_soul(__filter_type,
@@ -835,7 +852,7 @@ def filter_fast(data_dict):
                                   False,
                                   score_suit_buf_max_damage,
                                   data_dict)
-            if len(r) > 0: print s, n, ('%s' % (make_result(data_dict, r, c)['sum'])).decode('raw_unicode_escape')
+            #if len(r) > 0: print '+type', s, n, ('%s' % (make_result(data_dict, r, c)['sum'])).decode('raw_unicode_escape')
             if n > damage:
                 damage = n
                 res = r
@@ -858,7 +875,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 11 - 30
         crit_damage_base = 160
         damage_min_speed = 129 - 117
-        return cal_x_max_damage(type_seductress, soul_crit, 117, prop_value_l6_crit_damage)
+        return cal_x_max_damage(type_seductress, soul_crit, 117, prop_value_l6_crit_damage, 0)
     def cal_seductress_crit_over140_3350_11_160_117():
         global attack_hero
         global attack_buf_base
@@ -870,7 +887,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 11 - 30
         crit_damage_base = 160
         damage_min_speed = 140 - 117
-        return cal_x_max_damage(type_seductress, soul_crit, 117, prop_value_l6_crit_damage)
+        return cal_x_max_damage(type_seductress, soul_crit, 117, prop_value_l6_crit_damage, 0)
     def cal_seductress_attack_over140_3350_11_160_117():
         global attack_hero
         global attack_buf_base
@@ -882,7 +899,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 11 - 15
         crit_damage_base = 160 + 15
         damage_min_speed = 140 - 117
-        return cal_x_max_damage(type_seductress, soul_attack, 117, prop_value_l6_crit_damage)
+        return cal_x_max_damage(type_seductress, soul_attack, 117, prop_value_l6_crit_damage, 0)
     def cal_seductress_over0_3323_10_150_104():
         global attack_hero
         global attack_buf_base
@@ -894,8 +911,8 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 10 - 30
         crit_damage_base = 150
         damage_min_speed = 104 - 104
-        #return cal_x_max_damage(type_seductress, soul_crit, 104, prop_value_l6_crit_damage)
-        return cal_x_max_damage(type_seductress, soul_crit, 104, prop_value_none)
+        #return cal_x_max_damage(type_seductress, soul_crit, 104, prop_value_l6_crit_damage, 0)
+        return cal_x_max_damage(type_seductress, soul_crit, 104, prop_value_none, 0)
     def cal_sprite_over140_2332_5_150_108():
         global attack_hero
         global attack_buf_base
@@ -907,7 +924,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 5 - 15
         crit_damage_base = 150
         damage_min_speed = 141 - 108
-        return cal_x_max_damage(type_sprite, soul_crit, 108, prop_value_none)
+        return cal_x_max_damage(type_sprite, soul_crit, 108, prop_value_none, 0)
     def cal_jizo_over140_4074_10_150_118():
         global attack_hero
         global attack_buf_base
@@ -919,7 +936,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 10 - 15
         crit_damage_base = 150
         damage_min_speed = 141 - 118
-        return cal_x_max_damage(type_jizo, soul_crit, 118, prop_value_none)
+        return cal_x_max_damage(type_jizo, soul_crit, 118, prop_value_none, 0)
     def cal_shadow_over0_3350_12_160_110():
         global attack_hero
         global attack_buf_base
@@ -931,8 +948,8 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 101 - 12 - 30
         crit_damage_base = 160
         damage_min_speed = 110 - 110
-        #return cal_x_max_damage(type_shadow, soul_crit, 110, prop_value_l6_crit_damage)
-        return cal_x_max_damage(type_shadow, [type_claws], 110, prop_value_l6_crit_damage)
+        #return cal_x_max_damage(type_shadow, soul_crit, 110, prop_value_l6_crit_damage, 0)
+        return cal_x_max_damage(type_shadow, [type_claws], 110, prop_value_l6_crit_damage, 0)
     def cal_shadow_overstar_3350_12_160_110():
         global attack_hero
         global attack_buf_base
@@ -944,7 +961,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 12 - 30
         crit_damage_base = 160
         damage_min_speed = 128 - 110
-        return cal_x_max_damage(type_shadow, soul_crit, 110, prop_value_l6_crit_damage)
+        return cal_x_max_damage(type_shadow, soul_crit, 110, prop_value_l6_crit_damage, 0)
     def cal_shadow_crit_over128_3216_10_150_112():
         global attack_hero
         global attack_buf_base
@@ -956,7 +973,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 10 - 30
         crit_damage_base = 150
         damage_min_speed = 129 - 112
-        return cal_x_max_damage(type_shadow, soul_crit, 112, prop_value_l6_crit_damage)
+        return cal_x_max_damage(type_shadow, soul_crit, 112, prop_value_l6_crit_damage, 0)
     def cal_shadow_attack_over128_3216_10_150_112():
         global attack_hero
         global attack_buf_base
@@ -968,7 +985,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 10 - 15
         crit_damage_base = 150
         damage_min_speed = 129 - 112
-        return cal_x_max_damage(type_shadow, soul_attack, 112, prop_value_none)
+        return cal_x_max_damage(type_shadow, soul_attack, 112, prop_value_none, 0)
     def cal_shadow_over163_1741_8_150_118():
         global attack_hero
         global attack_buf_base
@@ -980,7 +997,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 8 - 30
         crit_damage_base = 150
         damage_min_speed = 164 - 118
-        return cal_x_max_damage(type_shadow, soul_crit, 118, prop_value_none)
+        return cal_x_max_damage(type_shadow, soul_crit, 118, prop_value_none, 0)
     def cal_shadow_over163_2894_8_150_118():
         global attack_hero
         global attack_buf_base
@@ -991,8 +1008,8 @@ def filter_fast(data_dict):
         attack_buf_base = 100
         damage_min_crit_rate = 100 - 0 - 15
         crit_damage_base = 150
-        damage_min_speed = 200 - 118
-        return cal_x_max_damage(type_shadow, soul_attack, 118, prop_value_none)
+        damage_min_speed = 163 - 118
+        return cal_x_max_damage(type_shadow, [type_none], 118, prop_value_none, 28100)
 
     # shadow crit max damage
     def cal_shadow_crit_max_damage():
@@ -1481,7 +1498,7 @@ def filter_fast(data_dict):
     supp = [
             cal_shadow_over163_2894_8_150_118,
         ]
-    order = fast
+    order = supp
     for f in order:
         comb = f()
         if comb is not None:
