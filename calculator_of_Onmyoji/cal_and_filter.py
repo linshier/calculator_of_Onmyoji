@@ -948,8 +948,8 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 101 - 12 - 30
         crit_damage_base = 160
         damage_min_speed = 110 - 110
-        #return cal_x_max_damage(type_shadow, soul_crit, 110, prop_value_l6_crit_damage, 0)
-        return cal_x_max_damage(type_shadow, [type_claws], 110, prop_value_l6_crit_damage, 0)
+        return cal_x_max_damage(type_shadow, soul_crit, 110, prop_value_l6_crit_damage, 0)
+        #return cal_x_max_damage(type_shadow, [type_claws], 110, prop_value_l6_crit_damage, 0)
     def cal_shadow_overstar_3350_12_160_110():
         global attack_hero
         global attack_buf_base
@@ -1009,7 +1009,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 0 - 15
         crit_damage_base = 150
         damage_min_speed = 163 - 118
-        return cal_x_max_damage(type_shadow, [type_none], 118, prop_value_none, 28100)
+        return cal_x_max_damage(type_shadow, [type_none], 118, prop_value_none, 27900)
 
     # shadow crit max damage
     def cal_shadow_crit_max_damage():
@@ -1465,7 +1465,7 @@ def filter_fast(data_dict):
 
     fast = [
             cal_freetype_max_speed,
-            cal_seductress_over129_3350_11_160_117,
+            cal_seductress_crit_over140_3350_11_160_117, #cal_seductress_free_over140_3350_12_160_117,
     ]
     dou1 = [
             cal_freetype_max_speed,
@@ -1490,15 +1490,15 @@ def filter_fast(data_dict):
         ]
     mine = [
             ##cal_shadow_free_over128_3216_10_150_112,
-            cal_shadow_over163_1741_8_150_118,
-            cal_shadow_crit_over128_3216_10_150_112, #cal_shadow_attack_over128_3216_10_150_112,
+            #cal_shadow_over163_1741_8_150_118,
             cal_seductress_crit_over140_3350_11_160_117, #cal_seductress_attack_over140_3350_11_160_117,
+            cal_shadow_crit_over128_3216_10_150_112, #cal_shadow_attack_over128_3216_10_150_112,
             cal_shadow_over0_3350_12_160_110,
         ]
     supp = [
             cal_shadow_over163_2894_8_150_118,
         ]
-    order = supp
+    order = fast
     for f in order:
         comb = f()
         if comb is not None:
