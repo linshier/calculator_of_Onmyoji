@@ -18,6 +18,7 @@ soul_sn     = data_format.MITAMA_COL_NAME_ZH[0]
 suit        = data_format.MITAMA_COL_NAME_ZH[1]
 
 speed_1p_limit = 3
+speed_1p_limit = 1
 #speed_1p_limit = 9
 
 selected = set()
@@ -1652,9 +1653,10 @@ def filter_fast(data_dict):
     fast = [
             #cal_freetype_max_speed,
             cal_fortune_max_speed,
-            cal_seductress_over129_3350_11_160_117,
-            cal_clear,
-            cal_shadow_skull_over0_3326_35_150_112,
+            #cal_seductress_over129_3350_11_160_117,
+            #cal_clear,
+            #cal_shadow_skull_over0_3326_35_150_112,
+
             #cal_seductress_crit_over140_3350_11_160_117, #cal_seductress_free_over140_3350_12_160_117,
     ]
     dou1 = [

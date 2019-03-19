@@ -72,7 +72,7 @@ def write_mitama_result(filename, comb_data_list,
         print('\nRecieve SIGINT, stop.')
 
     workbook.save(filename)
-    print("We got %s results" % result_num)
+    #print("We got %s results" % result_num)
 
 
 def write_header_row(worksheet, sheet_type):

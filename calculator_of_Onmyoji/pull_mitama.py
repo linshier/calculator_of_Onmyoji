@@ -32,7 +32,7 @@ def download_data(acc_id):
     post_url = 'https://yys.cbg.163.com/cgi/api/get_equip_detail'
 
     try:
-        print(post_url, post_data, post_header)
+        #print(post_url, post_data, post_header)
         req = requests.post(post_url, data=post_data, headers=post_header,
                             verify=False)
         return json.loads(req.text)
@@ -43,10 +43,10 @@ def download_data(acc_id):
 
 def generate_mitama_list(acc_id, filename,
                          header_row=data_format.MITAMA_COL_NAME_ZH):
-    print("Downloading data...")
+    #print("Downloading data...")
     res = download_data(acc_id)
 
-    print("Dumping mitama data...")
+    #print("Dumping mitama data...")
     if res is None:
         return
 
@@ -55,6 +55,16 @@ def generate_mitama_list(acc_id, filename,
         mitama_sheet = workbook.add_sheet(u'御魂')
         acct_info = res['equip']
         acct_detail = json.loads(acct_info['equip_desc'])
+
+        if 0:
+            hero_fragment = acct_detail['hero_fragment']
+            for v in hero_fragment.values():
+                if v['hero_id'] == 325 or v['hero_id'] == 316:
+                    print 'fragment', v['hero_id'], v['num']
+        if 1:
+            head_skin = acct_detail['head_skin']
+            if head_skin.has_key('901240'):
+                print '901240'
 
         mitama_list = acct_detail['inventory']
 
@@ -94,7 +104,7 @@ def generate_mitama_list(acc_id, filename,
             mitama_num += 1
 
         workbook.save(filename)
-        print("write finish, we got %s results" % mitama_num)
+        #print("write finish, we got %s results" % mitama_num)
     except Exception as e:
         print(e.message)
         raise e
@@ -104,7 +114,7 @@ def main():
     args = parser.parse_args()
     test_acc_id = args.acc_id
     output_file = args.output_file
-    print('Start pulling mitama data, please wait')
+    #print('Start pulling mitama data, please wait')
     generate_mitama_list(test_acc_id, output_file)
 
 
