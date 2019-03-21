@@ -25,7 +25,7 @@ parser.add_argument("-O", "--output-file",
                     help=u'输出文件位置，格式为pathto/filename.xls')
 
 
-def download_data(acc_id):
+def download_data(acc_id, filename):
     server_id = int(acc_id.split('-')[1])
     post_data = {'serverid': server_id, 'ordersn': acc_id}
     post_header = {'User Agent': UASTRING}
@@ -35,6 +35,10 @@ def download_data(acc_id):
         #print(post_url, post_data, post_header)
         req = requests.post(post_url, data=post_data, headers=post_header,
                             verify=False)
+        if 1:
+            file_object = open(filename[:-3] + 'json', 'w')
+            file_object.write(req.text)
+            file_object.close()
         return json.loads(req.text)
     except Exception:
         print('Unable to download the data. %s' % traceback.format_exc())
@@ -44,7 +48,7 @@ def download_data(acc_id):
 def generate_mitama_list(acc_id, filename,
                          header_row=data_format.MITAMA_COL_NAME_ZH):
     #print("Downloading data...")
-    res = download_data(acc_id)
+    res = download_data(acc_id, filename)
 
     #print("Dumping mitama data...")
     if res is None:
@@ -61,7 +65,7 @@ def generate_mitama_list(acc_id, filename,
             for v in hero_fragment.values():
                 if v['hero_id'] == 325 or v['hero_id'] == 316:
                     print 'fragment', v['hero_id'], v['num']
-        if 1:
+        if 0:
             head_skin = acct_detail['head_skin']
             if head_skin.has_key('901240'):
                 print '901240'
