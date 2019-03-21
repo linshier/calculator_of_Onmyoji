@@ -960,7 +960,7 @@ def filter_fast(data_dict):
         crit_damage_base = 160
         damage_min_speed = 128 - 110
         return cal_x_max_damage(type_shadow, soul_crit, 110, prop_value_l6_crit_damage, 0)
-    def cal_shadow_crit_over119_3216_10_150_112():
+    def cal_shadow_crit_over120_3216_10_150_112():
         global attack_hero
         global attack_buf_base
         global damage_min_crit_rate
@@ -970,7 +970,7 @@ def filter_fast(data_dict):
         attack_buf_base = 100
         damage_min_crit_rate = 100 - 10 - 30
         crit_damage_base = 150
-        damage_min_speed = 122 - 112
+        damage_min_speed = 120 - 112
         return cal_x_max_damage(type_shadow, soul_crit, 112, prop_value_none, 0)
     def cal_shadow_crit_over0_2385_5_150_118():
         global attack_hero
@@ -978,12 +978,16 @@ def filter_fast(data_dict):
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
+        global damage_max_speed
         attack_hero = 2385
         attack_buf_base = 100
         damage_min_crit_rate = 100 - 5 - 30
         crit_damage_base = 150
         damage_min_speed = 118 - 118
-        return cal_x_max_damage(type_shadow, soul_crit, 112, prop_value_none, 0)
+        damage_max_speed = 119 - 118
+        r = cal_x_max_damage(type_shadow, soul_crit, 112, prop_value_none, 0)
+        damage_max_speed = 500
+        return r
     def cal_shadow_skull_over117_3216_10_150_112():
         global attack_hero
         global attack_buf_base
@@ -1174,7 +1178,7 @@ def filter_fast(data_dict):
             cal_seductress_crit_over140_3350_11_160_117, #cal_seductress_free_over140_3350_12_160_117,
             cal_jizo_over140_4074_10_150_118,
             #
-            cal_shadow_crit_over119_3216_10_150_112,
+            cal_shadow_crit_over120_3216_10_150_112,
             cal_shadow_over0_3350_12_160_110,
             #cal_shadow_xstar_max_damage,
         ]
@@ -1189,7 +1193,7 @@ def filter_fast(data_dict):
             ##cal_shadow_free_over128_3216_10_150_112,
             #cal_shadow_over163_1741_8_150_118,
             cal_seductress_crit_over140_3350_11_160_117, #cal_seductress_attack_over140_3350_11_160_117,
-            cal_shadow_crit_over119_3216_10_150_112, #cal_shadow_attack_over128_3216_10_150_112,
+            cal_shadow_crit_over120_3216_10_150_112, #cal_shadow_attack_over128_3216_10_150_112,
             cal_shadow_over0_3350_12_160_110,
             cal_shadow_over0_3002_8_150_107,
         ]
@@ -1256,7 +1260,7 @@ def filter_fast(data_dict):
         #cal_clear,
         #ci+qing+chou+jiu A
         #cal_shadow_crit_over0_2385_5_150_118,
-        cal_shadow_crit_over119_3216_10_150_112,
+        cal_shadow_crit_over120_3216_10_150_112,
         cal_shadow_over163_1741_8_150_118,
         cal_clear,
         #ci+qing+chou+jiu B
