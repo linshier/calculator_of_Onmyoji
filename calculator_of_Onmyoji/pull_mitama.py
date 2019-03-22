@@ -7,6 +7,7 @@ import traceback
 
 import requests
 import xlwt
+import os
 
 from calculator_of_Onmyoji import data_format
 
@@ -33,13 +34,20 @@ def download_data(acc_id, filename):
 
     try:
         #print(post_url, post_data, post_header)
-        req = requests.post(post_url, data=post_data, headers=post_header,
-                            verify=False)
-        if 1:
-            file_object = open(filename[:-3] + 'json', 'w')
-            file_object.write(req.text)
-            file_object.close()
-        return json.loads(req.text)
+        json_filename = filename[:-3] + 'json'
+        text = ''
+        if os.path.exists(json_filename):
+            f = open(json_filename, 'r')
+            text = f.read()
+            f.close()
+        else:
+            req = requests.post(post_url, data=post_data, headers=post_header,
+                    verify=False)
+            text = req.text
+            f = open(json_filename, 'w')
+            f.write(text)
+            f.close()
+        return json.loads(text)
     except Exception:
         print('Unable to download the data. %s' % traceback.format_exc())
         return None
@@ -54,21 +62,37 @@ def generate_mitama_list(acc_id, filename,
     if res is None:
         return
 
+    enAttrNames = ['attackAdditionRate',
+                   'attackAdditionVal',
+                   'critPowerAdditionVal',
+                   'critRateAdditionVal',
+                   'debuffEnhance',
+                   'debuffResist',
+                   'defenseAdditionRate',
+                   'defenseAdditionVal',
+                   'maxHpAdditionRate',
+                   'maxHpAdditionVal',
+                   'speedAdditionVal']
+    cnAttrNames = [u'攻击加成', u'攻击', u'暴击伤害', u'暴击',
+                   u'效果命中', u'效果抵抗', u'防御加成',
+                   u'防御', u'生命加成', u'生命', u'速度']
+    basePropValue = {u'攻击加成': 3, u'攻击': 27, u'暴击伤害': 4, u'暴击': 3,
+                     u'效果抵抗': 4,  u'效果命中': 4, u'防御加成': 3,
+                     u'防御': 5, u'生命加成': 3, u'生命': 114, u'速度': 3}
+    e2cNameMap = dict(list(zip(enAttrNames, cnAttrNames)))
+    def calAddiAttrs(rattrs):
+        res = {}
+        for prop, v in rattrs:
+            prop = e2cNameMap[prop]
+            if prop not in res:
+                res[prop] = 0
+            res[prop] += v
+        return [[p, res[p]*basePropValue[p]] for p in res]
     try:
         workbook = xlwt.Workbook(encoding='utf-8')
         mitama_sheet = workbook.add_sheet(u'御魂')
         acct_info = res['equip']
         acct_detail = json.loads(acct_info['equip_desc'])
-
-        if 0:
-            hero_fragment = acct_detail['hero_fragment']
-            for v in hero_fragment.values():
-                if v['hero_id'] == 325 or v['hero_id'] == 316:
-                    print 'fragment', v['hero_id'], v['num']
-        if 0:
-            head_skin = acct_detail['head_skin']
-            if head_skin.has_key('901240'):
-                print '901240'
 
         mitama_list = acct_detail['inventory']
 
@@ -91,12 +115,21 @@ def generate_mitama_list(acc_id, filename,
             if single_prop:
                 mitama_attrs[single_prop[0]] = int(
                     single_prop[1].replace('%', ''))
-            for prop, value in mitama_info['attrs']:
-                value = int(value.replace('%', ''))
-                if prop not in mitama_attrs:
-                    mitama_attrs[prop] = value
-                else:
-                    mitama_attrs[prop] += value
+            if 'rattr' in mitama_info:
+                base_prop = mitama_info['attrs'][0]
+                mitama_attrs[base_prop[0]] = float(base_prop[1].replace('%', ''))
+                for prop, value in calAddiAttrs(mitama_info['rattr']):
+                    if prop not in mitama_attrs:
+                        mitama_attrs[prop] = value
+                    else:
+                        mitama_attrs[prop] += value
+            else:
+                for prop, value in mitama_info['attrs']:
+                    value = int(value.replace('%', ''))
+                    if prop not in mitama_attrs:
+                        mitama_attrs[prop] = value
+                    else:
+                        mitama_attrs[prop] += value
 
             mitama_sheet.write(mitama_num, 0, label=mitama_id)
             mitama_sheet.write(mitama_num, 1, label=mitama_name)
@@ -124,3 +157,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    #input('Press any key to exit.')
