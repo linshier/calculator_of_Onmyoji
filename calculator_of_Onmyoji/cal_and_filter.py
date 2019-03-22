@@ -1231,16 +1231,6 @@ def filter_fast(data_dict):
             #cal_clear,
             #cal_shadow_crit_over0_3326_35_150_112,
         ]
-    fast = [
-            #cal_fortune_max_speed,
-            #cal_shadow_indirect_over131_4074_10_150_118,
-
-            cal_seductress_crit_over129_3350_11_160_117,
-            #cal_clear,
-            #cal_shadow_skull_over117_3326_35_150_112,
-
-            #cal_seductress_crit_over140_3350_11_160_117, #cal_seductress_free_over140_3350_12_160_117,
-    ]
     dou2 = [
         cal_freetype_max_speed,
         cal_fortune_max_speed,
@@ -1274,10 +1264,19 @@ def filter_fast(data_dict):
         #cal_freetype_max_speed,
         #cal_fire_max_speed,
     ]
-    order = fast
+    fast = [
+            cal_fortune_max_speed,
+            #cal_shadow_indirect_over131_4074_10_150_118,
+            cal_seductress_crit_over129_3350_11_160_117,
+            #cal_clear,
+            #cal_shadow_skull_over117_3326_35_150_112,
+
+            #cal_seductress_crit_over140_3350_11_160_117, #cal_seductress_free_over140_3350_12_160_117,
+    ]
     order = brief
     order = mine11
     order = dou2
+    order = fast
     for f in order:
         comb = f()
         if comb is not None:
