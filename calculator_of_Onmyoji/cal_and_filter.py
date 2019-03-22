@@ -33,39 +33,54 @@ damage_min_crit_rate = 90
 attack_buf_base = 100
 crit_damage_base = 160
 attack_hero = 3350
+# |-resit(8)-|-effect(8)-|-attackbuf(8)-|-critrate(8)-|-critdamage(8)-|-speed(8)-|
+# |-effect(11)-|-attackbuf(14)-|-critrate(13)-|-critdamage(11)-|-speed(12)-|
+bits_speed = 8
+bits_critdamage = 8
+bits_critrate = 8
+bits_attackbuf = 8
+bits_effect = 8
+#
+offset_speed = 0
+offset_critdamage = offset_speed + bits_speed
+offset_critrate = offset_critdamage + bits_critdamage
+offset_attackbuf = offset_critrate + bits_critrate
+offset_effect = offset_attackbuf + bits_attackbuf
+#print offset_speed, offset_critrate, offset_critdamage ,offset_attackbuf,offset_effect
+
+def __decode(v, offset, bits):
+    return (v >> offset) & ((1 << bits) - 1)
+
 def score_suit_buf_max_speed(soul_2p_mask, buf_max, n, t):
-    if buf_max >= (n & 0xff):
+    if buf_max >= __decode(n, offset_speed, bits_speed):
         return buf_max, n, True
-    return (n & 0xff), n, False
+    return __decode(n, offset_speed, bits_speed), n, False
 def score_suit_buf_max_effect(soul_2p_mask, buf_max, n, t):
     #test speed
-    if (n & 0xff) < effect_min_speed or (n & 0xff) > effect_max_speed:
+    if __decode(n, offset_speed, bits_speed) < effect_min_speed or __decode(n, offset_speed, bits_speed) > effect_max_speed:
         return buf_max, n, True
     #test effect with suit enhance
     if t & soul_2p_mask:
-        n += (15 << 32)
-    if buf_max >= ((n >> 32) & 0xff):
+        n += (15 << offset_effect)
+    if buf_max >= __decode(n, offset_effect, bits_effect):
         return buf_max, n, True
-    return ((n >> 32) & 0xff), n, False
+    return __decode(n, offset_effect, bits_effect), n, False
 
 def score_suit_buf_max_damage(soul_2p_mask, buf_max, n, t):
     #test speed
-    if (n & 0xff) < damage_min_speed or (n & 0xff) > damage_max_speed:
+    if __decode(n, offset_speed, bits_speed) < damage_min_speed or __decode(n, offset_speed, bits_effect) > damage_max_speed:
         return buf_max, 1, True
     ##test crit rate with suit enhance
     if soul_2p_mask and (t & soul_2p_mask) == 0:
         return buf_max, 2, True
     #test crit rate
-    if ((n >> 16) & 0xff) < damage_min_crit_rate:
+    if __decode(n, offset_critrate, bits_critrate) < damage_min_crit_rate:
         return buf_max, 3, True
-    #crit_damage_base = 160
-    ab = (n >> 24) & 0xff
-    cd = (n >>  8) & 0xff
+    ab = __decode(n, offset_attackbuf, bits_attackbuf)
+    cd = __decode(n, offset_critdamage, bits_critdamage)
     d = (attack_buf_base + ab) * (crit_damage_base + cd)
-    #if damage_indirect:
-    #    #d = (attack_buf_base + ab) * 1000 + d / 100
-    #    d = (attack_buf_base + ab) * (crit_damage_base + cd + damage_indirect)
-    #if (ab == 146) and (cd == 130): print 'score:', d, attack_buf_base, crit_damage_base
+    #print attack_buf_base + ab, crit_damage_base + cd, d
+    #if (ab == 129) and (cd == 360): print 'score:', d, attack_buf_base, crit_damage_base
     if buf_max >= d:
         return buf_max, 4, True
     if 0 < damage_limit and damage_limit < d:
@@ -81,6 +96,7 @@ def mprun(a):
     suit_buf_max_ = 1
     result_ = []
     comb_sum_ = {}
+    n_ = 0
     ns = 0
     for i4 in l4:
         t2 = i2[1] + i4[1]
@@ -102,9 +118,7 @@ def mprun(a):
                         t6 = t5 + i5[1]
                         ns += 1
                         if soul_4p_mask == 0 or (t6 & soul_4p_mask):
-                            spd = n6 & 0xff
                             suit_buf_max_, n6, skip = score_suit_buf_max(soul_2p_mask, suit_buf_max_, n6, t6)
-                            #buf, n6, skip = score_suit_buf_max(soul_2p_mask, 66000, n6, t6)
                             if skip:
                                 continue
                             #print suit_buf_max_
@@ -115,9 +129,10 @@ def mprun(a):
                         comb_sum_ = list2map(soul,
                                              n6, t6 & soul_4p_mask, '',
                                              4, '')
+                        n_ = n6
                         if find_one:
                             return [result_, comb_sum_, suit_buf_max_]
-    r = [result_, comb_sum_, suit_buf_max_]
+    r = [result_, comb_sum_, suit_buf_max_, n_]
     #print(r, ns)
     return r
 
@@ -187,10 +202,11 @@ def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
         pool.close()
         pool.join()
     for ra in rarr:
-        r, c, b = ra[0], ra[1], ra[2]
+        r, c, b, v = ra[0], ra[1], ra[2], ra[3]
         #print(ra)
         if b > suit_buf_max:
             result, comb_sum, suit_buf_max = r, c, b
+            #print b, __decode(v, offset_attackbuf, bits_attackbuf), __decode(v, offset_critdamage, bits_critdamage)
     #print('result: %s' % result)
     #print(('%s %s' % (d, comb_sum)).decode('raw_unicode_escape'))
     return result, comb_sum, suit_buf_max
@@ -221,15 +237,16 @@ def map2list(codes, dx):
                 code = j
                 break
         val = int(0)
-        val += int(v[effect])
-        val <<= 8
         #if k == '5b47041108942d6ee02ea362': print 'map2list', v[attack], (int(v[attack_buf]) + int(v[attack]*100/attack_hero))
+        val <<= bits_effect
+        val += int(v[effect])
+        val <<= bits_attackbuf
         val += (int(v[attack_buf]) + int(round(v[attack]*100/attack_hero)))
-        val <<= 8
+        val <<= bits_critrate
         val += int(v[crit_rate])
-        val <<= 8
+        val <<= bits_critdamage
         val += int(v[crit_damage])
-        val <<= 8
+        val <<= bits_speed
         val += int(v[speed])
         l.append([val,
                   (1 << (3 * code)) if (code >= 0) else 0,
@@ -243,10 +260,10 @@ def list2map(codes, nx, ny, nz, mask, soul):
             if ny & (mask << (3 * i)):
                 mitama_type = codes[i]
     return {data_format.MITAMA_COL_NAME_ZH[0]: nz,
-            attack_buf:  (nx>>24)&0xff,
-            crit_rate:   (nx>>16)&0xff,
-            crit_damage: (nx>> 8)&0xff,
-            speed:       (nx>> 0)&0xff,
+            attack_buf:  __decode(nx, offset_attackbuf, bits_attackbuf),
+            crit_rate:   __decode(nx, offset_critrate, bits_critrate),
+            crit_damage: __decode(nx, offset_critdamage, bits_critdamage),
+            speed:       __decode(nx, offset_speed, bits_speed),
             suit:        mitama_type}
 
 def filter_loc(data_dict):
@@ -493,8 +510,6 @@ def filter_fast(data_dict):
                 soul.append(k)
                 continue
         return soul, soul_2p_mask, soul_4p_mask
-    def test_limit_1p_speed(n):
-        return (n & 0xff) < speed_1p_limit
     # fortune type max speed
     #if cal_fortune_max_speed:
     def cal_x_max_speed(soul_x_type):
@@ -661,9 +676,8 @@ def filter_fast(data_dict):
             for x in res:
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
-            #if damage_indirect:
-            #    print('%s(+%s):%d/%d,+%d' % (__[soul_type], __[p], int(damage % 1000), int(damage * damage_indirect / 100000), base_speed + comb_data['sum'][speed]))
             print('%s(+%s):%d,+%d' % (__[soul_type], __[p], int(attack_hero * damage / 1000000), base_speed + comb_data['sum'][speed]))
+            #print('%s(+%s):%d,+%d' % (__[soul_type], __[p], int(damage), base_speed + comb_data['sum'][speed]))
             return comb_data
         return None
     def cal_seductress_crit_over129_3350_11_160_117():
