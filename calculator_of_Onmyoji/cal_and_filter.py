@@ -890,7 +890,7 @@ def filter_fast(data_dict):
         crit_damage_base = 150
         damage_min_speed = 117 - 112
         return cal_x_max_damage(type_shadow, soul_crit, 112, prop_value_none, 0)
-    def cal_watcher_crit_over117_3326_35_150_112():
+    def cal_watcher_crit_over117_3326_15_150_112():
         global attack_hero
         global attack_buf_base
         global damage_min_crit_rate
@@ -1243,29 +1243,33 @@ def filter_fast(data_dict):
         cal_seductress_over0_3323_10_150_104,
     ]
     mine11 = [
-        #lin+lin
-        #cal_shadow_skull_over117_3326_15_150_112,
+        #31s star+220lin+205lin
+        cal_clear,
+        cal_shadow_skull_over117_3326_15_150_112,
+        cal_watcher_crit_over117_3326_15_150_112,
         #light+star+lin
         #chi+yu
         #cal_shadow_skull_over0_3350_32_160_110,
         #cal_shadow_skull_over130_3216_30_150_112,
-        #cal_clear,
         #ci+qing+chou+jiu A
         #cal_shadow_crit_over0_2385_5_150_118,
-        cal_shadow_crit_over120_3216_10_150_112,
-        cal_shadow_over163_1741_8_150_118,
+        #cal_clear,
+        #cal_shadow_crit_over120_3216_10_150_112,
+        #cal_shadow_over163_1741_8_150_118,
+        #31s ci+qing+chou+jiu
         cal_clear,
-        #ci+qing+chou+jiu B
-        ##cal_shadow_skull_over117_3216_10_150_112,
-        cal_watcher_crit_over0_3350_12_160_110,
-        cal_shadow_crit_over0_2385_5_150_118,
+        cal_shadow_skull_over117_3216_10_150_112,
+        #cal_clear,
+        #cal_watcher_crit_over0_3350_12_160_110,
+        #cal_shadow_crit_over0_2385_5_150_118,
 
         #cal_shadow_skull_over117_3350_47_160_110,
-        #cal_freetype_max_speed,
         #cal_fire_max_speed,
     ]
     fast = [
             cal_fortune_max_speed,
+            cal_clear,
+            cal_freetype_max_speed,
             #cal_shadow_indirect_over131_4074_10_150_118,
             cal_seductress_crit_over129_3350_11_160_117,
             #cal_clear,
@@ -1273,10 +1277,17 @@ def filter_fast(data_dict):
 
             #cal_seductress_crit_over140_3350_11_160_117, #cal_seductress_free_over140_3350_12_160_117,
     ]
+    dou3 = [
+        cal_freetype_max_speed,
+        #cal_freetype_max_speed,
+        cal_fortune_max_speed,
+        #cal_fire_max_speed,
+    ]
     order = brief
-    order = mine11
     order = dou2
     order = fast
+    order = mine11
+    order = dou3
     for f in order:
         comb = f()
         if comb is not None:
