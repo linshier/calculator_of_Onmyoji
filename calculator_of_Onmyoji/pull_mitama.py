@@ -11,25 +11,24 @@ import os
 
 from calculator_of_Onmyoji import data_format
 
-UASTRING = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_5) "
-            "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/11.1.1 "
-            "Safari/605.1.15")
+UASTRING = ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) '
+            'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 '
+            'Safari/537.36')
 
 parser = argparse.ArgumentParser()
 parser.add_argument("acc_id",
                     type=str,
-                    help=u'藏宝阁id，商品详情页面对应的网址中，'
-                         u'格式如201806211901616-3-KJ8J8IQOJTOMD8')
+                    help=u'cbg id')
 parser.add_argument("-O", "--output-file",
                     type=str,
                     default='mitama_data.xls',
-                    help=u'输出文件位置，格式为pathto/filename.xls')
+                    help=u'db/filename.xls')
 
 
 def download_data(acc_id, filename):
     server_id = int(acc_id.split('-')[1])
-    post_data = {'serverid': server_id, 'ordersn': acc_id}
-    post_header = {'User Agent': UASTRING}
+    post_data = 'serverid=%s&ordersn=%s' % (server_id, acc_id)
+    post_header = {'User-Agent': UASTRING, 'Content-Type': 'application/x-www-form-urlencoded'}
     post_url = 'https://yys.cbg.163.com/cgi/api/get_equip_detail'
 
     try:
