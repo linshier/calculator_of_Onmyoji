@@ -1,0 +1,3 @@
+#!/bin/sh
+./list.sh|tee top0
+(cat top0 |grep '^20'|xargs -n1 ./run.sh)|tee log

@@ -27,7 +27,7 @@ parser.add_argument("-O", "--output-file",
 
 def download_data(acc_id, filename):
     server_id = int(acc_id.split('-')[1])
-    post_data = 'serverid=%s&ordersn=%s' % (server_id, acc_id)
+    post_data = 'serverid=%s&ordersn=%s&view_loc=search' % (server_id, acc_id)
     post_header = {'User-Agent': UASTRING, 'Content-Type': 'application/x-www-form-urlencoded'}
     post_url = 'https://yys.cbg.163.com/cgi/api/get_equip_detail'
 
