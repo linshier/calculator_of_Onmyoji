@@ -83,7 +83,7 @@ def score_suit_buf_max_damage(soul_2p_mask, buf_max, n, t):
     #if (ab == 129) and (cd == 360): print 'score:', d, attack_buf_base, crit_damage_base
     if buf_max >= d:
         return buf_max, 4, True
-    if 0 < damage_limit and damage_limit * 1000 < d:
+    if 0 < damage_limit and damage_limit < int(attack_hero * d / 1000000 / 100):
         return buf_max, 5, True
     #print damage_limit, d
     return d + 1, n, False
@@ -670,7 +670,7 @@ def filter_fast(data_dict):
                                   False,
                                   score_suit_buf_max_damage,
                                   data_dict)
-            #if len(r) > 0: print '+type', s, n, ('%s' % (make_result(data_dict, r, c)['sum'])).decode('raw_unicode_escape')
+            #if len(r) > 0: print '+type', s, int(attack_hero * n / 1000000 / 100), ('%s' % (make_result(data_dict, r, c)['sum'])).decode('raw_unicode_escape')
             if n > damage:
                 damage, res, com, p, cc = n, r, c, s, v
         if len(res) > 0:
@@ -732,8 +732,19 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 10 - 30
         crit_damage_base = 150
         damage_min_speed = 104 - 104
-        #return cal_x_max_damage(type_seductress, soul_crit, 104, prop_value_l6_crit_damage, 0)
         return cal_x_max_damage(type_seductress, soul_crit, 104, prop_value_none, 0)
+    def cal_seductress_attack_over0_3377_9_150_109():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 3377
+        attack_buf_base = 100 + 15
+        damage_min_crit_rate = 100 - 9 - 15
+        crit_damage_base = 150
+        damage_min_speed = 109 - 109
+        return cal_x_max_damage(type_seductress, soul_attack, 109, prop_value_none, 0)
     def cal_sprite_over140_2332_5_150_108():
         global attack_hero
         global attack_buf_base
@@ -810,7 +821,7 @@ def filter_fast(data_dict):
         crit_damage_base = 160
         damage_min_speed = 117 - 110
         return cal_x_max_damage(type_shadow, [type_skull], 110, prop_value_none, 0)
-    def cal_shadow_skull_over117_3350_47_160_110():
+    def cal_shadow_skull_over117_3350_32_160_110():
         global attack_hero
         global attack_buf_base
         global damage_min_crit_rate
@@ -818,9 +829,9 @@ def filter_fast(data_dict):
         global damage_min_speed
         attack_hero = 3350
         attack_buf_base = 100
-        damage_min_crit_rate = 100 - 35 - 12 - 15
+        damage_min_crit_rate = 100 - 20 - 12 - 15
         crit_damage_base = 160
-        damage_min_speed = 117 - 110
+        damage_min_speed = 122 - 110
         return cal_x_max_damage(type_shadow, [type_skull], 110, prop_value_none, 0)
     def cal_shadow_skull_over0_3350_32_160_110():
         global attack_hero
@@ -871,7 +882,7 @@ def filter_fast(data_dict):
         crit_damage_base = 150
         damage_min_speed = 117 - 112
         return cal_x_max_damage(type_shadow, [type_skull], 112, prop_value_none, 0)
-    def cal_shadow_skull_over117_3323_35_150_112():
+    def cal_shadow_skull_over121_3323_35_150_112():
         global attack_hero
         global attack_buf_base
         global damage_min_crit_rate
@@ -881,7 +892,7 @@ def filter_fast(data_dict):
         attack_buf_base = 100
         damage_min_crit_rate = 100 - 20 - 15 - 15
         crit_damage_base = 150
-        damage_min_speed = 117 - 112
+        damage_min_speed = 121 - 112
         return cal_x_max_damage(type_shadow, [type_skull], 112, prop_value_none, 0)
     def cal_shadow_crit_over0_3323_35_150_112():
         global attack_hero
@@ -1027,21 +1038,21 @@ def filter_fast(data_dict):
         crit_damage_base = 150
         damage_min_speed = 120 - 112
         return cal_x_max_damage(type_shadow, soul_crit, 112, prop_value_none, 0)
-    def cal_shadow_crit_over0_2385_5_150_118():
+    def cal_shadow_semisen_over119_2385_25_150_118():
         global attack_hero
         global attack_buf_base
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
-        global damage_max_speed
+        #global damage_max_speed
         attack_hero = 2385
         attack_buf_base = 100
-        damage_min_crit_rate = 100 - 5 - 30
+        damage_min_crit_rate = 100 - 20 - 5 - 30
         crit_damage_base = 150
-        damage_min_speed = 118 - 118
-        damage_max_speed = 119 - 118
-        r = cal_x_max_damage(type_shadow, soul_crit, 112, prop_value_none, 0)
-        damage_max_speed = 500
+        damage_min_speed = 119 - 118
+        #damage_max_speed = 119 - 118
+        r = cal_x_max_damage(type_shadow, [type_semisen], 118, prop_value_none, 0)
+        #damage_max_speed = 500
         return r
     def cal_shadow_crit_over122_3216_10_150_112():
         global attack_hero
@@ -1116,7 +1127,7 @@ def filter_fast(data_dict):
         crit_damage_base = 150
         damage_min_speed = 129 - 112
         return cal_x_max_damage(type_shadow, soul_attack, 112, prop_value_none, 0)
-    def cal_shadow_over163_1741_8_150_118():
+    def cal_shadow_crit_over158_1741_8_150_118():
         global attack_hero
         global attack_buf_base
         global damage_min_crit_rate
@@ -1126,8 +1137,8 @@ def filter_fast(data_dict):
         attack_buf_base = 100
         damage_min_crit_rate = 100 - 8 - 15
         crit_damage_base = 150
-        damage_min_speed = 164 - 118
-        return cal_x_max_damage(type_fire, [type_spider], 118, prop_value_none, 0)
+        damage_min_speed = 158 - 118
+        return cal_x_max_damage(type_shadow, [type_spider], 118, prop_value_none, 0)
     def cal_shadow_over158_2894_8_150_118():
         global attack_hero
         global attack_buf_base
@@ -1136,10 +1147,10 @@ def filter_fast(data_dict):
         global damage_min_speed
         attack_hero = 2894
         attack_buf_base = 100
-        damage_min_crit_rate = 100 - 8 - 30
+        damage_min_crit_rate = 100 - 20 - 8 - 30
         crit_damage_base = 150
         damage_min_speed = 158 - 118
-        return cal_x_max_damage(type_shadow, soul_crit, 118, prop_value_none, 0)
+        return cal_x_max_damage(type_shadow, soul_crit, 118, prop_value_none, 157)
     def cal_fire_over158_2894_8_150_118():
         global attack_hero
         global attack_buf_base
@@ -1265,11 +1276,9 @@ def filter_fast(data_dict):
             cal_seductress_crit_over140_3350_11_160_117, #cal_seductress_free_over140_3350_12_160_117,
             #
             cal_shadow_over0_3350_12_160_110,
-            cal_seductress_over0_3323_10_150_104,
         ]
     mine = [
             ##cal_shadow_free_over128_3216_10_150_112,
-            #cal_shadow_over163_1741_8_150_118,
             cal_seductress_crit_over140_3350_11_160_117, #cal_seductress_attack_over140_3350_11_160_117,
             cal_shadow_crit_over120_3216_10_150_112, #cal_shadow_attack_over128_3216_10_150_112,
             cal_shadow_over0_3350_12_160_110,
@@ -1280,7 +1289,6 @@ def filter_fast(data_dict):
         ]
     min2 = [
             #cal_seductress_crit_over129_3350_11_160_117,
-            #cal_shadow_over163_1741_8_150_118,
             cal_shadow_over0_3350_32_160_110,
             cal_shadow_over122_3216_30_150_112,
         ]
@@ -1300,10 +1308,10 @@ def filter_fast(data_dict):
             #
             cal_clear,
             #cal_shadow_skull_over117_3350_32_160_110,
-            cal_shadow_skull_over117_3323_35_150_112,
+            cal_shadow_skull_over121_3323_35_150_112,
             #cal_clear,
             #cal_watcher_crit_over0_3323_35_150_112,
-            #cal_shadow_skull_over117_3323_35_150_112,
+            #cal_shadow_skull_over121_3323_35_150_112,
             #cal_clear,
             #cal_shadow_crit_over0_3323_35_150_112,
         ]
@@ -1318,41 +1326,26 @@ def filter_fast(data_dict):
         cal_shadow_over0_3350_12_160_110,
         cal_seductress_over0_3323_10_150_104,
     ]
-    dou3 = [
-        cal_freetype_max_speed, #mian
-        cal_fortune_max_speed, #yu
-        #cal_freetype_max_speed,
-        #cal_fire_max_speed,
-        #cal_kyoukotsu_crit_over117_3323_15_150_112,
-        cal_seductress_crit_over129_3350_11_160_117, #qie1
-        cal_seductress_crit_over140_3350_11_160_117, #qie2
-        cal_shadow_indirect_over131_4074_10_150_118, #she
-        #
-        cal_shadow_over0_3350_12_160_110, #jiu
-    ]
-    fast = [
-        #cal_clear,
-        cal_freetype_max_speed,
-        #cal_fortune_max_speed,
-            #cal_shadow_indirect_over131_4074_10_150_118,
-        #cal_seductress_crit_over129_3350_11_160_117,
-            #cal_clear,
-            #cal_shadow_skull_over117_3323_35_150_112,
-
-            #cal_seductress_crit_over140_3350_11_160_117, #cal_seductress_free_over140_3350_12_160_117,
-    ]
     mine11 = [
         #03_33s light+star+lin+lin
-        #cal_clear, #cal_shadow_skull_over117_3323_35_150_112, #lin #cal_shadow_over158_2894_8_150_118, #shi
+        #cal_clear, #cal_shadow_skull_over121_3323_35_150_112, #lin #cal_shadow_over158_2894_8_150_118, #shi
         #cal_watcher_skull_over117_3323_35_150_112, #lin2
 
         #04_31s star+220lin+205lin
-        #cal_clear, #cal_shadow_skull_over117_3323_15_150_112, #lin #cal_clear, #cal_shadow_over158_2894_8_150_118, #shi
-        #cal_watcher_crit_over117_3323_15_150_112, #lin2 cal_watcher_skull_over117_3323_15_150_112,
+        cal_clear,
+        #cal_shadow_skull_over117_3323_15_150_112, #lin #cal_clear, #cal_shadow_over158_2894_8_150_118, #shi
+        #cal_watcher_crit_over117_3323_15_150_112, #lin2
+        cal_watcher_skull_over117_3323_15_150_112,
 
         #06_32s light+lin
         cal_clear,
-        cal_shadow_skull_over117_3323_35_150_112,
+        cal_shadow_skull_over121_3323_35_150_112,
+
+        #09_35s jiu
+        cal_clear,
+        cal_shadow_skull_over0_3350_32_160_110, #jiu
+        cal_clear,
+        cal_shadow_skull_over122_3216_10_150_112,
 
         #10_33s shi+ci+chou+qin+jiu
         #cal_clear, #cal_shadow_skull_over117_3350_32_160_110,
@@ -1366,11 +1359,74 @@ def filter_fast(data_dict):
         #cal_watcher_crit_over0_3350_12_160_110, #jiu
         #cal_fire_over158_2894_8_150_118, #shi
     ]
+    fast = [
+        cal_fortune_max_speed,
+        cal_clear,
+        cal_freetype_max_speed,
+            #cal_shadow_indirect_over131_4074_10_150_118,
+        cal_seductress_crit_over129_3350_11_160_117,
+        cal_clear,
+        cal_shadow_skull_over121_3323_35_150_112,
+        cal_clear,
+        cal_shadow_skull_over0_3350_32_160_110,
+            #cal_seductress_crit_over140_3350_11_160_117, #cal_seductress_free_over140_3350_12_160_117,
+    ]
+    dou4 = [
+        cal_fortune_max_speed,
+    ]
+    test = [
+    ]
+    man = [
+        cal_shadow_skull_over117_3350_32_160_110,   #jiu        SO
+        cal_shadow_skull_over0_3350_32_160_110,     #jiu        SO
+        cal_shadow_crit_over158_1741_8_150_118,     #shi        SO
+    ]
+    mine11A = [
+        cal_clear,
+        cal_shadow_skull_over122_3216_10_150_112,   #ci         SO3
+        cal_shadow_over158_2894_8_150_118,          #shi        SO2
+    ]
+    mine11B = [
+        cal_clear,
+        cal_shadow_skull_over0_3350_32_160_110,     #jiu        SO5
+    ]
+    mine11a6 = [
+        cal_clear,
+        cal_shadow_over158_2894_8_150_118,          #shi        SO2
+        cal_shadow_semisen_over119_2385_25_150_118, #qin        SO3
+        cal_seductress_crit_over129_3350_11_160_117,
+    ]
+    mine11b6 = [
+        cal_clear,
+        cal_shadow_skull_over121_3323_35_150_112,   #lin        SO3
+    ]
+    dou3 = [
+        cal_freetype_max_speed,                      #mian  DO1
+        cal_fortune_max_speed,                       #lian  DO1
+        #cal_freetype_max_speed,
+        #cal_fire_max_speed,
+        #cal_kyoukotsu_crit_over117_3323_15_150_112,
+        cal_shadow_semisen_over119_2385_25_150_118,  #qin       SO5
+        cal_seductress_crit_over129_3350_11_160_117, #qie   DO
+        cal_shadow_over158_2894_8_150_118,           #shi       SO1
+        cal_seductress_crit_over140_3350_11_160_117, #qie   DO
+        cal_shadow_indirect_over131_4074_10_150_118, #she   DO
+        cal_shadow_over0_3350_12_160_110,            #jiu           TU3
+        cal_seductress_attack_over0_3377_9_150_109,  #hei               SE
+        cal_seductress_over0_3323_10_150_104,        #huang DO5
+    ]
     order = brief
     order = dou2
-    order = dou3
+    order = dou4
     order = fast
-    order = mine11
+    order = test
+    order = supp
+    order = man
+    order = mine11A
+    order = mine11B
+    order = mine11b6
+    order = mine11a6
+    order = dou3
     for f in order:
         comb = f()
         if comb is not None:
