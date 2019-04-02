@@ -1417,6 +1417,7 @@ def filter_fast(data_dict):
     she = [
         cal_fortune_max_speed,
         cal_fortune_max_speed,
+        cal_freetype_max_speed,
         cal_fortune_max_speed,
     ]
     order = brief
@@ -1429,9 +1430,9 @@ def filter_fast(data_dict):
     order = mine11B
     order = mine11b6
     order = mine11a6
+    order = dou3
     order = test
     order = she
-    order = dou3
     for f in order:
         comb = f()
         if comb is not None:
