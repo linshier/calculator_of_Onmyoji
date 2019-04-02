@@ -12,8 +12,10 @@ attack      = data_format.MITAMA_PROPS[0]
 attack_buf  = data_format.MITAMA_PROPS[1]
 crit_rate   = data_format.MITAMA_PROPS[4]
 crit_damage = data_format.MITAMA_PROPS[5]
-speed       = data_format.MITAMA_PROPS[10]
+hp_buf      = data_format.MITAMA_PROPS[7]
 effect      = data_format.MITAMA_PROPS[8]
+resist      = data_format.MITAMA_PROPS[9]
+speed       = data_format.MITAMA_PROPS[10]
 soul_sn     = data_format.MITAMA_COL_NAME_ZH[0]
 suit        = data_format.MITAMA_COL_NAME_ZH[1]
 
@@ -32,9 +34,10 @@ damage_min_crit_rate = 90
 attack_buf_base = 100
 crit_damage_base = 160
 attack_hero = 3350
-effect_buf_base = 0
+effect_base = 0
+hp_buf_base = 0
+resist_base = 0
 # |-effect(11)-|-attackbuf(14)-|-critrate(13)-|-critdamage(11)-|-speed(12)-|
-# |-resit(11)--|-hpbuf(14)-----|-critrate(13)-|-critdamage(11)-|-speed(12)-|
 bits_speed = 14
 bits_critdamage = 11
 bits_critrate = 13
@@ -46,6 +49,12 @@ offset_critdamage = offset_speed + bits_speed
 offset_critrate = offset_critdamage + bits_critdamage
 offset_attackbuf = offset_critrate + bits_critrate
 offset_effect = offset_attackbuf + bits_attackbuf
+# |-resist(11)-|-hpbuf(14)-----|-critrate(13)-|-critdamage(11)-|-speed(12)-|
+encode_hp_resist = False
+bits_hpbuf = bits_attackbuf
+bits_resist = bits_effect
+offset_hpbuf = offset_attackbuf
+offset_resist = offset_effect
 
 def __decode(v, offset, bits):
     return (v >> offset) & ((1 << bits) - 1)
@@ -236,10 +245,16 @@ def map2list(codes, dx):
                 break
         val = int(0)
         #if k == '5b47041108942d6ee02ea362': print 'map2list', v[attack], (int(v[attack_buf]) + int(v[attack]*100/attack_hero))
-        val <<= bits_effect
-        val += int(v[effect] * 10)
-        val <<= bits_attackbuf
-        val += (int(v[attack_buf] * 10) + int(v[attack]*100/attack_hero * 10))
+        if encode_hp_resist:
+            val <<= bits_effect
+            val += int(v[resist] * 10)
+            val <<= bits_attackbuf
+            val += (int(v[hp_buf] * 10) + int(v[attack]*100/attack_hero * 10))
+        else:
+            val <<= bits_effect
+            val += int(v[effect] * 10)
+            val <<= bits_attackbuf
+            val += (int(v[attack_buf] * 10) + int(v[attack]*100/attack_hero * 10))
         val <<= bits_critrate
         val += int(v[crit_rate] * 10)
         val <<= bits_critdamage
@@ -261,6 +276,8 @@ def list2map(codes, nx, ny, nz, mask, soul):
             attack_buf:  __decode(nx, offset_attackbuf, bits_attackbuf),
             crit_rate:   __decode(nx, offset_critrate, bits_critrate),
             crit_damage: __decode(nx, offset_critdamage, bits_critdamage),
+            effect:      __decode(nx, offset_effect, bits_effect),
+            resist:      __decode(nx, offset_resist, bits_resist),
             speed:       __decode(nx, offset_speed, bits_speed),
             suit:        mitama_type}
 
@@ -418,6 +435,12 @@ def filter_fast(data_dict):
         if enhance_type == u'攻击加成':
             soul_attack.append(k)
             continue
+    soul_resist = []
+    for (k, v) in data_format.MITAMA_ENHANCE.items():
+        enhance_type = v[u"加成类型"]
+        if enhance_type == resist:
+            soul_resist.append(k)
+            continue
     soul_free = set()
     for (k, v) in data_format.MITAMA_ENHANCE.items():
         if v.get(u'加成数值'):
@@ -452,6 +475,13 @@ def filter_fast(data_dict):
             return False
         mitama_info = mitama.values()[0]
         if (mitama_info[effect] and mitama_info[effect] > 0):
+            return True
+        return False
+    def prop_value_resist(mitama):
+        if mitama.keys()[0] in done:
+            return False
+        mitama_info = mitama.values()[0]
+        if (mitama_info[resist] and mitama_info[resist] > 0):
             return True
         return False
     def prop_value_damage(mitama):
@@ -588,7 +618,6 @@ def filter_fast(data_dict):
                 soul_2p_mask = int(0)
                 soul_4p_mask = int(0)
                 for (k, v) in data_format.MITAMA_ENHANCE.items():
-                    enhance_type = v[u"加成类型"]
                     if k == soul_type:
                         soul_4p_mask |= (4 << (3 * len(soul)))
                     if k == s:
@@ -613,17 +642,73 @@ def filter_fast(data_dict):
             for x in res:
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
-            print('%s(+%s)maxeffect:%.1f,+%.2f' % (__[soul_type], __[p], n / 10.0 + effect_buf_base, base_speed + comb_data['sum'][speed] / 100.0))
+            print('%s(+%s)maxeffect:%.1f,+%.2f' % (__[soul_type], __[p], n / 10.0 + effect_base, base_speed + comb_data['sum'][speed] / 100.0))
             return comb_data
         return None
     def cal_fortune_effect_over200_119():
         global effect_min_speed
         global effect_max_speed
-        global effect_buf_base
+        global effect_base
         effect_min_speed = 200 - 119
         effect_max_speed = 500
-        effect_buf_base = 0 + 15
-        return cal_x_effect(type_fortune, [type_fire], 119, prop_value_l2_speed)
+        effect_base = 0 + 15
+        r = cal_x_effect(type_fortune, [type_fire], 119, prop_value_l2_speed)
+        effect_base = 0
+        return r
+
+    def cal_x_resist(soul_type, soul_peer, base_speed, prop_value_l2):
+        score = 0
+        res = []
+        com = {}
+        cc = 0
+        desc = ''
+        p = type_none
+        for s in soul_peer:
+            def __build_mask():
+                soul = []
+                soul_2p_mask = int(0)
+                soul_4p_mask = int(0)
+                for (k, v) in data_format.MITAMA_ENHANCE.items():
+                    if k == soul_type:
+                        soul_4p_mask |= (4 << (3 * len(soul)))
+                    if k == s:
+                        soul_2p_mask |= (2 << (3 * len(soul)))
+                    if k == soul_type or k == s:
+                        soul.append(k)
+                        break
+                return soul, soul_2p_mask, soul_4p_mask
+
+            r, c, n, _ = filter_soul(prop_value_none,
+                              prop_value_l2,
+                              prop_value_resist,
+                              prop_value_none,
+                              __build_mask,
+                              resist,
+                              True,
+                              score_suit_buf_max_effect, # same with resit
+                              data_dict)
+            if n > score:
+                score, res, com, p = n, r, c, s
+        if len(res) > 0:
+            for x in res:
+                done.add(x)
+            comb_data = make_result(data_dict, res, com)
+            print('%s(+%s)maxresist:%.1f,+%.2f' % (__[soul_type], __[p], n / 10.0 + resist_base, base_speed + comb_data['sum'][speed] / 100.0))
+            return comb_data
+        return None
+    def cal_fire_resist_over200_109():
+        global encode_hp_resist
+        global effect_min_speed
+        global effect_max_speed
+        global resist_base
+        encode_hp_resist = True
+        effect_min_speed = 109 - 109
+        effect_max_speed = 500
+        resit_base = 0 + 15
+        r = cal_x_resist(type_fire, soul_resist, 109, prop_value_l2_speed)
+        resit_base = 0 + 15
+        encode_hp_resist = False
+        return r
 
     # seductress + crit_damage type max damage
     def cal_x_max_damage(soul_type, soul_peer, base_speed, prop_value_l6, buf_limit):
@@ -1407,10 +1492,6 @@ def filter_fast(data_dict):
         cal_shadow_over0_3350_11_160_117,            #qie               SE
         cal_seductress_over0_3323_10_150_104,        #huang DO5
     ]
-    dou4 = [
-        cal_fortune_max_speed,                       #lian  DO1
-        cal_fortune_effect_over200_119,              #zhu   DO2
-    ]
     test = [
         cal_fortune_max_speed,
     ]
@@ -1419,6 +1500,11 @@ def filter_fast(data_dict):
         cal_fortune_max_speed,
         cal_freetype_max_speed,
         cal_fortune_max_speed,
+    ]
+    dou4 = [
+        cal_fortune_max_speed,                       #lian  DO1
+        cal_fire_resist_over200_109,                 #yu    DO2
+        cal_fortune_effect_over200_119,              #zhu   DO2
     ]
     order = brief
     order = dou2
