@@ -19,7 +19,6 @@ suit        = data_format.MITAMA_COL_NAME_ZH[1]
 
 speed_1p_limit = 3
 speed_1p_limit = 1
-#speed_1p_limit = 9
 
 selected = set()
 
@@ -33,8 +32,9 @@ damage_min_crit_rate = 90
 attack_buf_base = 100
 crit_damage_base = 160
 attack_hero = 3350
-# |-resit(8)-|-effect(8)-|-attackbuf(8)-|-critrate(8)-|-critdamage(8)-|-speed(8)-|
+effect_buf_base = 0
 # |-effect(11)-|-attackbuf(14)-|-critrate(13)-|-critdamage(11)-|-speed(12)-|
+# |-resit(11)--|-hpbuf(14)-----|-critrate(13)-|-critdamage(11)-|-speed(12)-|
 bits_speed = 14
 bits_critdamage = 11
 bits_critrate = 13
@@ -46,7 +46,6 @@ offset_critdamage = offset_speed + bits_speed
 offset_critrate = offset_critdamage + bits_critdamage
 offset_attackbuf = offset_critrate + bits_critrate
 offset_effect = offset_attackbuf + bits_attackbuf
-#print offset_speed, offset_critrate, offset_critdamage ,offset_attackbuf,offset_effect
 
 def __decode(v, offset, bits):
     return (v >> offset) & ((1 << bits) - 1)
@@ -60,8 +59,6 @@ def score_suit_buf_max_effect(soul_2p_mask, buf_max, n, t):
     if __decode(n, offset_speed, bits_speed) < effect_min_speed * 100 or __decode(n, offset_speed, bits_speed) > effect_max_speed * 100:
         return buf_max, n, True
     #test effect with suit enhance
-    if t & soul_2p_mask:
-        n += (15 << offset_effect)
     if buf_max >= __decode(n, offset_effect, bits_effect):
         return buf_max, n, True
     return __decode(n, offset_effect, bits_effect), n, False
@@ -541,7 +538,7 @@ def filter_fast(data_dict):
             for x in res:
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
-            print('%s(maxspeed):%.2f,+%.2f' % (__[soul_x_type], n / 100.0, 117 + comb_data['sum'][speed] / 100.0))
+            print('%s()maxspeed:%.2f,+%.2f' % (__[soul_x_type], n / 100.0, 117 + comb_data['sum'][speed] / 100.0))
             return comb_data
         return None
     def cal_fortune_max_speed():
@@ -571,59 +568,62 @@ def filter_fast(data_dict):
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
             #print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
-            print('freetype(maxspeed):%.2f,+%.2f' % (n / 100.0, 119 + n / 100.0))
+            print('freetype()maxspeed:%.2f,+%.2f' % (n / 100.0, 119 + n / 100.0))
             return comb_data
         # fast terminate
         if n < 148 * 100:
             print('speed test fail')
             return None
 
-    def cal_x_effect(soul_type, base_speed, prop_value_l2):
-        def _build_mask():
-            soul = []
-            soul_2p_fortune_mask = int(0)
-            soul_4p_fortune_mask = int(0)
-            for (k, v) in data_format.MITAMA_ENHANCE.items():
-                enhance_type = v[u"加成类型"]
-                if k == soul_type:
-                    soul_2p_fortune_mask |= (2 << (3 * len(soul)))
-                    soul_4p_fortune_mask |= (4 << (3 * len(soul)))
-                    soul.append(k)
-                    break
-                if enhance_type == u'效果命中':
-                    soul_2p_fortune_mask |= (2 << (3 * len(soul)))
-                    soul.append(k)
-                    continue
-            return soul, soul_2p_fortune_mask, soul_4p_fortune_mask
-        res, com, n = filter_soul(prop_value_none,
-                          prop_value_l2,
-                          prop_value_effect,
-                          prop_value_none,
-                          _build_mask,
-                          effect,
-                          True,
-                          score_suit_buf_max_effect,
-                          data_dict)
+    def cal_x_effect(soul_type, soul_peer, base_speed, prop_value_l2):
+        score = 0
+        res = []
+        com = {}
+        cc = 0
+        desc = ''
+        p = type_none
+        for s in soul_peer:
+            def __build_mask():
+                soul = []
+                soul_2p_mask = int(0)
+                soul_4p_mask = int(0)
+                for (k, v) in data_format.MITAMA_ENHANCE.items():
+                    enhance_type = v[u"加成类型"]
+                    if k == soul_type:
+                        soul_4p_mask |= (4 << (3 * len(soul)))
+                    if k == s:
+                        soul_2p_mask |= (2 << (3 * len(soul)))
+                    if k == soul_type or k == s:
+                        soul.append(k)
+                        break
+                return soul, soul_2p_mask, soul_4p_mask
+
+            r, c, n, _ = filter_soul(prop_value_none,
+                              prop_value_l2,
+                              prop_value_effect,
+                              prop_value_none,
+                              __build_mask,
+                              effect,
+                              True,
+                              score_suit_buf_max_effect,
+                              data_dict)
+            if n > score:
+                score, res, com, p = n, r, c, s
         if len(res) > 0:
             for x in res:
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
-            print('%s(maxeffect):%d,+%d' % (__[soul_type], n, base_speed + comb_data['sum'][speed]))
+            print('%s(+%s)maxeffect:%.1f,+%.2f' % (__[soul_type], __[p], n / 10.0 + effect_buf_base, base_speed + comb_data['sum'][speed] / 100.0))
             return comb_data
         return None
-    def cal_fortune_effect_over135_116():
+    def cal_fortune_effect_over200_119():
         global effect_min_speed
         global effect_max_speed
-        effect_min_speed = 136 - 116
+        global effect_buf_base
+        effect_min_speed = 200 - 119
         effect_max_speed = 500
-        return cal_x_effect(type_fortune, 116, prop_value_l2_speed)
-    def cal_fire_effect_over190_116():
-        global effect_min_speed
-        global effect_max_speed
-        effect_min_speed = 190 - 116
-        effect_max_speed = 500
-        #return cal_x_effect(type_fire, 116, prop_value_none)
-        return cal_x_effect(type_fire, 116, prop_value_l2_speed)
+        effect_buf_base = 0 + 15
+        return cal_x_effect(type_fortune, [type_fire], 119, prop_value_l2_speed)
 
     # seductress + crit_damage type max damage
     def cal_x_max_damage(soul_type, soul_peer, base_speed, prop_value_l6, buf_limit):
@@ -1259,7 +1259,6 @@ def filter_fast(data_dict):
     dou1 = [
             cal_freetype_max_speed,
             #
-            cal_fire_effect_over190_116,
             #cal_fortune_max_speed,
             cal_sprite_over140_2332_5_150_108,
             #cal_seductress_crit_over129_3350_11_160_117,
@@ -1398,9 +1397,6 @@ def filter_fast(data_dict):
     dou3 = [
         cal_freetype_max_speed,                      #mian  DO1
         cal_fortune_max_speed,                       #lian  DO1
-        #cal_freetype_max_speed,
-        #cal_fire_max_speed,
-        #cal_kyoukotsu_crit_over117_3323_15_150_112,
         cal_shadow_semisen_over119_2385_25_150_118,  #qin       SO5
         cal_seductress_crit_over129_3350_11_160_117, #qie   DO
         cal_shadow_over158_2894_8_150_118,           #shi       SO1
@@ -1410,6 +1406,10 @@ def filter_fast(data_dict):
         cal_seductress_attack_over0_3377_9_150_109,  #hei               SE
         cal_shadow_over0_3350_11_160_117,            #qie               SE
         cal_seductress_over0_3323_10_150_104,        #huang DO5
+    ]
+    dou4 = [
+        cal_fortune_max_speed,                       #lian  DO1
+        cal_fortune_effect_over200_119,              #zhu   DO2
     ]
     test = [
         cal_fortune_max_speed,
@@ -1422,7 +1422,6 @@ def filter_fast(data_dict):
     ]
     order = brief
     order = dou2
-    order = dou4
     order = fast
     order = supp
     order = man
@@ -1433,6 +1432,7 @@ def filter_fast(data_dict):
     order = dou3
     order = test
     order = she
+    order = dou4
     for f in order:
         comb = f()
         if comb is not None:
