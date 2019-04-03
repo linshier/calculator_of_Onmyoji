@@ -385,8 +385,13 @@ def filter_fast(data_dict):
     type_none = 0
     for i in xrange(6):
         v = data_dict[i+1][0].values()[0]
-        f = {('%s' % uuid.uuid1()).decode('utf-8'): {k: (i + 1 if k == data_format.MITAMA_COL_NAME_ZH[2] else type_none) for k in v.keys()}}
-        data_dict[i+1].append(f)
+        kf = ('%s' % uuid.uuid1()).decode('utf-8')
+        vf = {k: 0 for k in v.keys()}
+        vf[data_format.MITAMA_COL_NAME_ZH[1]] = type_none
+        vf[data_format.MITAMA_COL_NAME_ZH[2]] = i + 1
+        if i == 0:
+            vf[data_format.MITAMA_COL_NAME_ZH[3]] = 486
+        data_dict[i+1].append({kf : vf})
 
     type_sprite = data_format.MITAMA_TYPES[2]
     type_seductress = data_format.MITAMA_TYPES[4]
@@ -1536,10 +1541,10 @@ def filter_fast(data_dict):
     order = test
     order = she
     order = dou4
+    order = dou3
     order = [
         cal_shadow_over0_3136_10_150_113,            #tun
     ]
-    order = dou3
     for f in order:
         comb = f()
         if comb is not None:
