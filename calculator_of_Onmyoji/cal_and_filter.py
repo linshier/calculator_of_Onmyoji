@@ -382,12 +382,12 @@ def find_item(arr, k):
     return None
 
 def filter_fast(data_dict):
+    type_none = 0
     for i in xrange(6):
         v = data_dict[i+1][0].values()[0]
-        f = {('%s' % uuid.uuid1()).decode('utf-8'): {k: 0 for k in v.keys()}}
+        f = {('%s' % uuid.uuid1()).decode('utf-8'): {k: (i + 1 if k == data_format.MITAMA_COL_NAME_ZH[2] else type_none) for k in v.keys()}}
         data_dict[i+1].append(f)
 
-    type_none = 0
     type_sprite = data_format.MITAMA_TYPES[2]
     type_seductress = data_format.MITAMA_TYPES[4]
     type_spider = data_format.MITAMA_TYPES[6]
@@ -524,6 +524,11 @@ def filter_fast(data_dict):
         if (mitama_info[crit_rate] and mitama_info[crit_rate] >= 55):
             return True
         return False
+    def prop_value_l6_none(mitama):
+        if mitama.keys()[0] in done:
+            return False
+        mitama_info = mitama.values()[0]
+        return mitama_info[data_format.MITAMA_COL_NAME_ZH[1]] == 0
     def build_mask_none():
         return [], int(0), int(0)
     def build_mask_x_free(soul_x_type):
@@ -894,6 +899,18 @@ def filter_fast(data_dict):
         crit_damage_base = 160
         damage_min_speed = 117 - 117
         return cal_x_max_damage(type_shadow, soul_attack, 117, prop_value_none, 0)
+    def cal_shadow_over0_3136_10_150_113():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 3136
+        attack_buf_base = 100
+        damage_min_crit_rate = 100 - 10 - 15 - 62
+        crit_damage_base = 150
+        damage_min_speed = 113 - 113
+        return cal_x_max_damage(type_shadow, [type_none], 113, prop_value_l6_none, 0)
     def cal_shadow_crit_over131_3350_12_160_110():
         global attack_hero
         global attack_buf_base
@@ -1491,6 +1508,7 @@ def filter_fast(data_dict):
         cal_seductress_attack_over0_3377_9_150_109,  #hei               SE
         cal_shadow_over0_3350_11_160_117,            #qie               SE
         cal_seductress_over0_3323_10_150_104,        #huang DO5
+        cal_shadow_over0_3136_10_150_113,            #tun
     ]
     test = [
         cal_fortune_max_speed,
@@ -1515,10 +1533,13 @@ def filter_fast(data_dict):
     order = mine11B
     order = mine11b6
     order = mine11a6
-    order = dou3
     order = test
     order = she
     order = dou4
+    order = [
+        cal_shadow_over0_3136_10_150_113,            #tun
+    ]
+    order = dou3
     for f in order:
         comb = f()
         if comb is not None:
