@@ -12,6 +12,7 @@ attack      = data_format.MITAMA_PROPS[0]
 attack_buf  = data_format.MITAMA_PROPS[1]
 crit_rate   = data_format.MITAMA_PROPS[4]
 crit_damage = data_format.MITAMA_PROPS[5]
+hp          = data_format.MITAMA_PROPS[6]
 hp_buf      = data_format.MITAMA_PROPS[7]
 effect      = data_format.MITAMA_PROPS[8]
 resist      = data_format.MITAMA_PROPS[9]
@@ -35,8 +36,6 @@ attack_buf_base = 100
 crit_damage_base = 160
 attack_hero = 3350
 effect_base = 0
-hp_buf_base = 0
-resist_base = 0
 # |-effect(11)-|-attackbuf(14)-|-critrate(13)-|-critdamage(11)-|-speed(12)-|
 bits_speed = 14
 bits_critdamage = 11
@@ -51,6 +50,8 @@ offset_attackbuf = offset_critrate + bits_critrate
 offset_effect = offset_attackbuf + bits_attackbuf
 # |-resist(11)-|-hpbuf(14)-----|-critrate(13)-|-critdamage(11)-|-speed(12)-|
 encode_hp_resist = False
+hp_buf_base = 0
+resist_base = 0
 bits_hpbuf = bits_attackbuf
 bits_resist = bits_effect
 offset_hpbuf = offset_attackbuf
@@ -70,7 +71,8 @@ def score_suit_buf_max_effect(soul_2p_mask, buf_max, n, t):
     #test effect with suit enhance
     if buf_max >= __decode(n, offset_effect, bits_effect):
         return buf_max, n, True
-    return __decode(n, offset_effect, bits_effect), n, False
+    e = __decode(n, offset_effect, bits_effect)
+    return e, n, False
 
 def score_suit_buf_max_damage(soul_2p_mask, buf_max, n, t):
     #test speed
@@ -166,7 +168,7 @@ def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
     d1 = filter(prop_value, d1)
     d3 = filter(prop_value, d3)
     d5 = filter(prop_value, d5)
-    #print('%d x %d x %d x %d x %d x %d' % (len(d1), len(d2), len(d3), len(d4), len(d5), len(d5)))
+    #print('search:%d' % (len(d1) * len(d2) * len(d3) * len(d4) * len(d5) * len(d6)))
     #for i in d1:
     #    print('%s' % i.values()[0][suit])
     #    #print(('%s' % i.values()[0][suit]).decode('raw_unicode_escape'))
@@ -246,10 +248,10 @@ def map2list(codes, dx):
         val = int(0)
         #if k == '5b47041108942d6ee02ea362': print 'map2list', v[attack], (int(v[attack_buf]) + int(v[attack]*100/attack_hero))
         if encode_hp_resist:
-            val <<= bits_effect
+            val <<= bits_resist
             val += int(v[resist] * 10)
-            val <<= bits_attackbuf
-            val += (int(v[hp_buf] * 10) + int(v[attack]*100/attack_hero * 10))
+            val <<= bits_hpbuf
+            val += (int(v[hp_buf] * 10) + int(v[hp]*100/attack_hero * 10))
         else:
             val <<= bits_effect
             val += int(v[effect] * 10)
@@ -393,34 +395,45 @@ def filter_fast(data_dict):
             vf[data_format.MITAMA_COL_NAME_ZH[3]] = 486
         data_dict[i+1].append({kf : vf})
 
+    type_pearl = data_format.MITAMA_TYPES[0]
     type_sprite = data_format.MITAMA_TYPES[2]
     type_seductress = data_format.MITAMA_TYPES[4]
+    type_senecio = data_format.MITAMA_TYPES[5]
     type_spider = data_format.MITAMA_TYPES[6]
     type_skull = data_format.MITAMA_TYPES[8]
     type_jizo = data_format.MITAMA_TYPES[12]
     type_semisen = data_format.MITAMA_TYPES[15]
+    type_mimic = data_format.MITAMA_TYPES[16]
     type_fortune = data_format.MITAMA_TYPES[18]
+    type_taker = data_format.MITAMA_TYPES[20]
     type_scarlet = data_format.MITAMA_TYPES[24]
     type_fire = data_format.MITAMA_TYPES[25]
     type_watcher = data_format.MITAMA_TYPES[28]
+    type_nymph = data_format.MITAMA_TYPES[29]
+    type_spirit = data_format.MITAMA_TYPES[30]
     type_claws = data_format.MITAMA_TYPES[31]
-    type_crab = u'网切'
     type_phenix = data_format.MITAMA_TYPES[33]
     type_shadow = data_format.MITAMA_TYPES[34]
     type_tomb = data_format.MITAMA_TYPES[35]
     type_kyoukotsu = data_format.MITAMA_TYPES[36]
     __ = {
         type_none: 'none',
+        type_pearl: 'pearl',
         type_sprite: 'sprite',
         type_seductress: 'seductress',
+        type_senecio: 'senecio',
         type_spider: 'spider',
         type_skull: 'skull',
         type_jizo: 'jizo',
         type_semisen: 'semisen',
+        type_mimic: 'mimic',
         type_fortune: 'fortune',
+        type_taker: 'taker',
         type_scarlet: 'scarlet',
         type_fire: 'fire',
         type_watcher: 'watcher',
+        type_nymph: 'nymph',
+        type_spirit: 'spirit',
         type_claws: 'claws',
         type_phenix: 'phenix',
         type_shadow: 'shadow',
@@ -665,6 +678,16 @@ def filter_fast(data_dict):
         r = cal_x_effect(type_fortune, [type_fire], 119, prop_value_l2_speed)
         effect_base = 0
         return r
+    def cal_fire_effect_over200_116():
+        global effect_min_speed
+        global effect_max_speed
+        global effect_base
+        effect_min_speed = 200 - 116
+        effect_max_speed = 500
+        effect_base = 0 + 15
+        r = cal_x_effect(type_fire, soul_effect, 116, prop_value_l2_speed)
+        effect_base = 0
+        return r
 
     def cal_x_resist(soul_type, soul_peer, base_speed, prop_value_l2):
         score = 0
@@ -674,6 +697,11 @@ def filter_fast(data_dict):
         desc = ''
         p = type_none
         for s in soul_peer:
+            def __filter_type(mitama):
+                if mitama.keys()[0] in done:
+                    return False
+                enhance_type = mitama.values()[0][data_format.MITAMA_COL_NAME_ZH[1]]
+                return enhance_type == soul_type or enhance_type == s
             def __build_mask():
                 soul = []
                 soul_2p_mask = int(0)
@@ -688,7 +716,7 @@ def filter_fast(data_dict):
                         break
                 return soul, soul_2p_mask, soul_4p_mask
 
-            r, c, n, _ = filter_soul(prop_value_none,
+            r, c, n, _ = filter_soul(__filter_type,
                               prop_value_l2,
                               prop_value_resist,
                               prop_value_none,
@@ -711,13 +739,26 @@ def filter_fast(data_dict):
         global effect_min_speed
         global effect_max_speed
         global resist_base
-        encode_hp_resist = True
-        effect_min_speed = 109 - 109
+        effect_min_speed = 200 - 109
         effect_max_speed = 500
         resit_base = 0 + 15
+        encode_hp_resist = True
         r = cal_x_resist(type_fire, soul_resist, 109, prop_value_l2_speed)
-        resit_base = 0 + 15
         encode_hp_resist = False
+        resit_base = 0
+        return r
+    def cal_nymph_resist_over140_108():
+        global encode_hp_resist
+        global effect_min_speed
+        global effect_max_speed
+        global resist_base
+        effect_min_speed = 140 - 108
+        effect_max_speed = 500
+        resit_base = 0 + 0
+        encode_hp_resist = True
+        r = cal_x_resist(type_nymph, soul_resist, 108, prop_value_none)
+        encode_hp_resist = False
+        resit_base = 0
         return r
 
     # seductress + crit_damage type max damage
@@ -852,18 +893,38 @@ def filter_fast(data_dict):
         crit_damage_base = 150
         damage_min_speed = 109 - 109
         return cal_x_max_damage(type_seductress, soul_attack, 109, prop_value_none, 0)
-    def cal_sprite_over140_2332_5_150_108():
+    def cal_sprite_over140_13785_5_150_108():
+        global encode_hp_resist
         global attack_hero
         global attack_buf_base
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
-        attack_hero = 2332
+        attack_hero = 13785 #hp
         attack_buf_base = 100
         damage_min_crit_rate = 100 - 5 - 15
         crit_damage_base = 150
-        damage_min_speed = 141 - 108
-        return cal_x_max_damage(type_sprite, soul_crit, 108, prop_value_none, 0)
+        damage_min_speed = 140 - 108
+        encode_hp_resist = True
+        r = cal_x_max_damage(type_sprite, soul_crit, 108, prop_value_none, 0)
+        encode_hp_resist = False
+        return r
+    def cal_pearl_over129_14013_5_150_112():
+        global encode_hp_resist
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 14013 #hp
+        attack_buf_base = 100 + 0
+        damage_min_crit_rate = 100 - 5 - 15
+        crit_damage_base = 150
+        damage_min_speed = 129 - 112
+        encode_hp_resist = True
+        r = cal_x_max_damage(type_pearl, soul_crit, 112, prop_value_none, 0)
+        encode_hp_resist = False
+        return r
     def cal_jizo_over140_4074_10_150_118():
         global attack_hero
         global attack_buf_base
@@ -876,7 +937,7 @@ def filter_fast(data_dict):
         crit_damage_base = 150
         damage_min_speed = 141 - 118
         return cal_x_max_damage(type_jizo, soul_crit, 118, prop_value_none, 0)
-    def cal_shadow_indirect_over131_4074_10_150_118():
+    def cal_shadow_indirect_over129_4074_10_150_118():
         global attack_hero
         global attack_buf_base
         global damage_min_crit_rate
@@ -887,9 +948,25 @@ def filter_fast(data_dict):
         attack_buf_base = 100
         damage_min_crit_rate = 100 - 10 - 30
         crit_damage_base = 150 + 211
-        damage_min_speed = 130 - 118
+        damage_min_speed = 129 - 118
         damage_max_speed = 132 - 118
         r = cal_x_max_damage(type_shadow, soul_crit, 118, prop_value_none, 0)
+        damage_max_speed = 500
+        return r
+    def cal_fortune_indirect_over129_4074_10_150_118():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        global damage_max_speed
+        attack_hero = 4074
+        attack_buf_base = 100
+        damage_min_crit_rate = 100 - 10 - 15
+        crit_damage_base = 150 + 211
+        damage_min_speed = 129 - 118
+        damage_max_speed = 132 - 118
+        r = cal_x_max_damage(type_fortune, soul_crit, 118, prop_value_l6_crit_damage, 0)
         damage_max_speed = 500
         return r
     def cal_shadow_over0_3350_12_160_110():
@@ -1415,7 +1492,7 @@ def filter_fast(data_dict):
             cal_freetype_max_speed,
             #
             #cal_fortune_max_speed,
-            cal_sprite_over140_2332_5_150_108,
+            cal_sprite_over140_13785_5_150_108,
             #cal_seductress_crit_over129_3350_11_160_117,
             cal_seductress_crit_over140_3350_11_160_117, #cal_seductress_free_over140_3350_12_160_117,
             cal_jizo_over140_4074_10_150_118,
@@ -1455,7 +1532,7 @@ def filter_fast(data_dict):
             cal_seductress_crit_over129_3350_11_160_117,
             #
             cal_clear,
-            cal_shadow_indirect_over131_4074_10_150_118,
+            cal_shadow_indirect_over129_4074_10_150_118,
             #
             cal_clear,
             #cal_shadow_skull_over117_3350_32_160_110,
@@ -1470,9 +1547,9 @@ def filter_fast(data_dict):
         cal_freetype_max_speed,
         cal_fortune_max_speed,
         cal_fire_max_speed,
-        cal_sprite_over140_2332_5_150_108,
+        cal_sprite_over140_13785_5_150_108,
         cal_seductress_crit_over129_3350_11_160_117,
-        cal_shadow_indirect_over131_4074_10_150_118,
+        cal_shadow_indirect_over129_4074_10_150_118,
         #
         cal_shadow_over0_3350_12_160_110,
         cal_seductress_over111_3323_10_150_104,
@@ -1514,7 +1591,7 @@ def filter_fast(data_dict):
         cal_fortune_max_speed,
         cal_clear,
         cal_freetype_max_speed,
-            #cal_shadow_indirect_over131_4074_10_150_118,
+            #cal_shadow_indirect_over129_4074_10_150_118,
         cal_seductress_crit_over129_3350_11_160_117,
         cal_clear,
         cal_shadow_skull_over121_3323_35_150_112,
@@ -1556,16 +1633,11 @@ def filter_fast(data_dict):
         cal_seductress_crit_over129_3350_11_160_117, #qie   DO
         cal_shadow_over158_2894_8_150_118,           #shi       SO1
         cal_seductress_crit_over140_3350_11_160_117, #qie   DO
-        cal_shadow_indirect_over131_4074_10_150_118, #she   DO
+        cal_shadow_indirect_over129_4074_10_150_118, #she   DO
         cal_shadow_over0_3350_12_160_110,            #jiu           TU3
         cal_seductress_attack_over0_3377_9_150_109,  #hei               SE
         cal_shadow_over0_3350_11_160_117,            #qie               SE
         cal_seductress_over111_3323_10_150_104,      #huang DO5
-    ]
-    dou4 = [
-        cal_fortune_max_speed,                       #lian  DO1
-        #cal_fire_resist_over200_109,                 #yu    DO2
-        cal_fortune_effect_over200_119,              #zhu   DO2
     ]
     test = [
         cal_fortune_max_speed,
@@ -1583,19 +1655,27 @@ def filter_fast(data_dict):
         cal_shadow_over0_3136_28_198_113,             #tun
         #cal_seductress_over0_2412_5_150_105,          #ji
     ]
-    order = brief
-    order = dou2
-    order = supp
-    order = man
-    order = mine11A
-    order = mine11B
-    order = mine11b6
-    order = mine11a6
-    order = test
-    order = she
+    dou4 = [
+        cal_freetype_max_speed,                         #mian  DO1
+        cal_clear,
+        cal_fortune_max_speed,                          #lian  DO1
+        cal_shadow_semisen_over119_2385_25_150_118,     #qin        SO5
+        cal_seductress_crit_over129_3350_11_160_117,    #qie1  DO4
+        cal_shadow_over158_2894_8_150_118,              #shi        SO1
+        cal_fire_effect_over200_116,                    #bin   DO2
+        cal_fortune_effect_over200_119,                 #zhu   DO2
+        cal_fire_resist_over200_109,                    #lu    DO2
+        cal_shadow_indirect_over129_4074_10_150_118,    #she1  DO5
+        cal_shadow_over0_3350_12_160_110,               #yu         TU3
+        cal_seductress_attack_over0_3377_9_150_109,     #hei            SE6
+        cal_pearl_over129_14013_5_150_112,              #ri    DO5
+        cal_fortune_indirect_over129_4074_10_150_118,   #she2  DO5
+        cal_sprite_over140_13785_5_150_108,             #ji1   DO3
+        cal_nymph_resist_over140_108,                   #ji2   DO3
+        cal_seductress_over111_3323_10_150_104,         #huang      TU5
+        cal_shadow_over0_3350_11_160_117,               #qie            SE4
+    ]
     order = dou4
-    order = fast
-    order = yue2
     for f in order:
         comb = f()
         if comb is not None:
