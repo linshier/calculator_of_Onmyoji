@@ -816,7 +816,7 @@ def filter_fast(data_dict):
         crit_damage_base = 160 + 15
         damage_min_speed = 140 - 117
         return cal_x_max_damage(type_seductress, soul_attack, 117, prop_value_l6_crit_damage, 0)
-    def cal_seductress_over0_3323_10_150_104():
+    def cal_seductress_over111_3323_10_150_104():
         global attack_hero
         global attack_buf_base
         global damage_min_crit_rate
@@ -826,8 +826,20 @@ def filter_fast(data_dict):
         attack_buf_base = 100
         damage_min_crit_rate = 100 - 10 - 30
         crit_damage_base = 150
-        damage_min_speed = 104 - 104
+        damage_min_speed = 111 - 104
         return cal_x_max_damage(type_seductress, soul_crit, 104, prop_value_none, 0)
+    def cal_seductress_over0_2412_5_150_105():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 2412
+        attack_buf_base = 100
+        damage_min_crit_rate = 100 - 5 - 30
+        crit_damage_base = 150
+        damage_min_speed = 105 + 57 - 105
+        return cal_x_max_damage(type_seductress, soul_crit, 105, prop_value_none, 0)
     def cal_seductress_attack_over0_3377_9_150_109():
         global attack_hero
         global attack_buf_base
@@ -904,18 +916,42 @@ def filter_fast(data_dict):
         crit_damage_base = 160
         damage_min_speed = 117 - 117
         return cal_x_max_damage(type_shadow, soul_attack, 117, prop_value_none, 0)
-    def cal_shadow_over0_3136_10_150_113():
+    def cal_shadow_over0_3109_10_165_115():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 3109
+        attack_buf_base = 100 + 0
+        damage_min_crit_rate = 100 - 0 - 10 - 30
+        crit_damage_base = 150 + 15
+        damage_min_speed = 115 - 115
+        return cal_x_max_damage(type_shadow, soul_crit, 115, prop_value_none, 0)
+    def cal_shadow_over0_3323_45_230_112():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 3323
+        attack_buf_base = 100 + 15
+        damage_min_crit_rate = 100 - 30 - 15 - 15
+        crit_damage_base = 150 + 80
+        damage_min_speed = 112 - 112
+        return cal_x_max_damage(type_shadow, soul_attack, 112, prop_value_none, 0)
+    def cal_shadow_over0_3136_28_198_113():
         global attack_hero
         global attack_buf_base
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
         attack_hero = 3136
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 10 - 15 - 62
-        crit_damage_base = 150
-        damage_min_speed = 113 - 113
-        return cal_x_max_damage(type_shadow, [type_none], 113, prop_value_l6_none, 0)
+        attack_buf_base = 100 + 0
+        damage_min_crit_rate = 100 - 18 - 10 - 15
+        crit_damage_base = 150 + 48
+        damage_min_speed = 113 + 0 - 113
+        return cal_x_max_damage(type_shadow, [type_skull], 113, prop_value_none, 0)
     def cal_shadow_crit_over131_3350_12_160_110():
         global attack_hero
         global attack_buf_base
@@ -1156,6 +1192,18 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 10 - 30
         crit_damage_base = 150
         damage_min_speed = 120 - 112
+        return cal_x_max_damage(type_shadow, soul_crit, 112, prop_value_none, 0)
+    def cal_shadow_crit_over0_3216_10_150_112():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 3216
+        attack_buf_base = 100
+        damage_min_crit_rate = 100 - 10 - 30
+        crit_damage_base = 150
+        damage_min_speed = 112 - 112
         return cal_x_max_damage(type_shadow, soul_crit, 112, prop_value_none, 0)
     def cal_shadow_semisen_over119_2385_25_150_118():
         global attack_hero
@@ -1427,7 +1475,7 @@ def filter_fast(data_dict):
         cal_shadow_indirect_over131_4074_10_150_118,
         #
         cal_shadow_over0_3350_12_160_110,
-        cal_seductress_over0_3323_10_150_104,
+        cal_seductress_over111_3323_10_150_104,
     ]
     mine11 = [
         #03_33s light+star+lin+lin
@@ -1512,8 +1560,12 @@ def filter_fast(data_dict):
         cal_shadow_over0_3350_12_160_110,            #jiu           TU3
         cal_seductress_attack_over0_3377_9_150_109,  #hei               SE
         cal_shadow_over0_3350_11_160_117,            #qie               SE
-        cal_seductress_over0_3323_10_150_104,        #huang DO5
-        cal_shadow_over0_3136_10_150_113,            #tun
+        cal_seductress_over111_3323_10_150_104,      #huang DO5
+    ]
+    dou4 = [
+        cal_fortune_max_speed,                       #lian  DO1
+        #cal_fire_resist_over200_109,                 #yu    DO2
+        cal_fortune_effect_over200_119,              #zhu   DO2
     ]
     test = [
         cal_fortune_max_speed,
@@ -1524,14 +1576,15 @@ def filter_fast(data_dict):
         cal_freetype_max_speed,
         cal_fortune_max_speed,
     ]
-    dou4 = [
-        cal_fortune_max_speed,                       #lian  DO1
-        cal_fire_resist_over200_109,                 #yu    DO2
-        cal_fortune_effect_over200_119,              #zhu   DO2
+    yue2 = [
+        #cal_shadow_over0_3109_10_165_115,            #gen
+        #cal_clear,
+        #cal_shadow_over0_3323_45_230_112,            #lin
+        cal_shadow_over0_3136_28_198_113,             #tun
+        #cal_seductress_over0_2412_5_150_105,          #ji
     ]
     order = brief
     order = dou2
-    order = fast
     order = supp
     order = man
     order = mine11A
@@ -1541,10 +1594,8 @@ def filter_fast(data_dict):
     order = test
     order = she
     order = dou4
-    order = dou3
-    order = [
-        cal_shadow_over0_3136_10_150_113,            #tun
-    ]
+    order = fast
+    order = yue2
     for f in order:
         comb = f()
         if comb is not None:
