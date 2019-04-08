@@ -22,6 +22,7 @@ suit        = data_format.MITAMA_COL_NAME_ZH[1]
 
 speed_1p_limit = 3
 speed_1p_limit = 1
+fast_min_speed = 10
 
 selected = set()
 
@@ -66,15 +67,16 @@ def score_suit_buf_max_speed(soul_2p_mask, buf_max, n, t):
     return __decode(n, offset_speed, bits_speed), n, False
 def score_suit_buf_max_effect(soul_2p_mask, buf_max, n, t):
     #test speed
-    if __decode(n, offset_speed, bits_speed) < effect_min_speed * 100 or __decode(n, offset_speed, bits_speed) > effect_max_speed * 100:
+    s = __decode(n, offset_speed, bits_speed)
+    if s < effect_min_speed * 100 or s > effect_max_speed * 100:
         return buf_max, n, True
     #test buf with suit enhance
     if soul_2p_mask and (t & soul_2p_mask) == 0:
         return buf_max, n, True
     #test effect with suit enhance
-    if buf_max >= __decode(n, offset_effect, bits_effect):
-        return buf_max, n, True
     e = __decode(n, offset_effect, bits_effect)
+    if buf_max >= e:
+        return buf_max, n, True
     return e, n, False
 
 def score_suit_buf_max_damage(soul_2p_mask, buf_max, n, t):
@@ -171,7 +173,7 @@ def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
     d1 = filter(prop_value, d1)
     d3 = filter(prop_value, d3)
     d5 = filter(prop_value, d5)
-    #print('search:%d' % (len(d1) * len(d2) * len(d3) * len(d4) * len(d5) * len(d6)))
+    print('search:%d' % (len(d1) * len(d2) * len(d3) * len(d4) * len(d5) * len(d6)))
     #for i in d1:
     #    print('%s' % i.values()[0][suit])
     #    #print(('%s' % i.values()[0][suit]).decode('raw_unicode_escape'))
@@ -491,6 +493,13 @@ def filter_fast(data_dict):
         if (mitama_info[speed] and mitama_info[speed] >= speed_1p_limit):
             return True
         return False
+    def prop_value_fast_speed(mitama):
+        if mitama.keys()[0] in done:
+            return False
+        mitama_info = mitama.values()[0]
+        if (mitama_info[speed] and mitama_info[speed] >= fast_min_speed):
+            return True
+        return False
     def prop_value_effect(mitama):
         if mitama.keys()[0] in done:
             return False
@@ -605,11 +614,6 @@ def filter_fast(data_dict):
     def cal_freetype_max_speed():
         global effect_min_speed
         global effect_max_speed
-        global damage_min_speed
-        global damage_max_speed
-        global damage_min_crit_rate
-        global attack_buf_base
-        global crit_damage_base
         res, com, n, _ = filter_soul(prop_value_speed,
                           prop_value_l2_speed,
                           prop_value_speed,
@@ -631,6 +635,45 @@ def filter_fast(data_dict):
             print('speed test fail')
             return None
 
+    def cal_freetype_speed_effect(soul_peer, base_speed):
+        score = 0
+        res = []
+        com = {}
+        cc = 0
+        desc = ''
+        p = type_none
+        for s in soul_peer:
+            print s
+            def __build_mask():
+                soul = []
+                soul_2p_mask = int(0)
+                soul_4p_mask = int(0)
+                for (k, v) in data_format.MITAMA_ENHANCE.items():
+                    if k == s:
+                        soul_2p_mask |= (2 << (3 * len(soul)))
+                        soul_2p_mask |= (4 << (3 * len(soul))) # for freetype only
+                        soul.append(k)
+                return soul, soul_2p_mask, soul_4p_mask
+
+            r, c, n, _ = filter_soul(prop_value_fast_speed,
+                              prop_value_l2_speed,
+                              prop_value_l4_effect,
+                              prop_value_none,
+                              __build_mask,
+                              effect,
+                              False,
+                              score_suit_buf_max_effect,
+                              data_dict)
+            if n > score:
+                score, res, com, p = n, r, c, s
+        if len(res) > 0:
+            for x in res:
+                done.add(x)
+            comb_data = make_result(data_dict, res, com)
+            #print n
+            print('freetype(+%s)maxeffect:%.1f,+%.2f' % (__[p], score / 10.0 + effect_base, base_speed + comb_data['sum'][speed] / 100.0))
+            return comb_data
+        return None
     def cal_x_effect(soul_type, soul_peer, base_speed, prop_value_l2):
         score = 0
         res = []
@@ -693,6 +736,26 @@ def filter_fast(data_dict):
         effect_max_speed = 500
         effect_base = 0 + 15
         r = cal_x_effect(type_fire, soul_effect, 116, prop_value_l2_speed)
+        effect_base = 0
+        return r
+    def cal_senecio_effect_over200_116():
+        global effect_min_speed
+        global effect_max_speed
+        global effect_base
+        effect_min_speed = 200 - 116
+        effect_max_speed = 500
+        effect_base = 0 + 15
+        r = cal_x_effect(type_senecio, soul_effect, 116, prop_value_l2_speed)
+        effect_base = 0
+        return r
+    def cal_freetype_effect_over276_127():
+        global effect_min_speed
+        global effect_max_speed
+        global effect_base
+        effect_min_speed = 276 - 127
+        effect_max_speed = 500
+        effect_base = 0 + 15
+        r = cal_freetype_speed_effect(soul_effect, 127)
         effect_base = 0
         return r
 
@@ -1668,13 +1731,13 @@ def filter_fast(data_dict):
         cal_shadow_semisen_over119_2385_25_150_118,     #qin        SO5
         cal_seductress_crit_over129_3350_11_160_117,    #qie1  DO4
         cal_shadow_over158_2894_8_150_118,              #shi        SO1
-        #cal_fire_effect_over200_116,                    #bin   DO2
-        #cal_fortune_effect_over200_119,                 #zhu   DO2
-        #cal_fire_resist_over200_109,                    #lu    DO2
+        cal_senecio_effect_over200_116,                 #bin   DO2
+        cal_fortune_effect_over200_119,                 #zhu   DO2
+        cal_fire_resist_over200_109,                    #lu    DO2
         cal_shadow_indirect_over129_4074_10_150_118,    #she1  DO5
         cal_shadow_over0_3350_12_160_110,               #yu             TU3
         cal_seductress_attack_over0_3377_9_150_109,     #hei                SE6
-        #cal_pearl_over129_14013_5_150_112,              #ri    DO5
+        cal_pearl_over129_14013_5_150_112,              #ri    DO5
         cal_fortune_indirect_over129_4074_10_150_118,   #she2  DO5
         cal_sprite_over140_13785_5_150_108,             #ji1   DO3
         cal_nymph_resist_over140_108,                   #ji2   DO3
@@ -1683,7 +1746,9 @@ def filter_fast(data_dict):
     ]
     order = dou4
     order = [
-        cal_fortune_effect_over200_119,                 #zhu   DO2
+        #cal_freetype_max_speed,
+        cal_freetype_effect_over276_127,
+        #cal_fortune_effect_over200_119,                 #zhu   DO2
     ]
     for f in order:
         comb = f()
