@@ -68,6 +68,9 @@ def score_suit_buf_max_effect(soul_2p_mask, buf_max, n, t):
     #test speed
     if __decode(n, offset_speed, bits_speed) < effect_min_speed * 100 or __decode(n, offset_speed, bits_speed) > effect_max_speed * 100:
         return buf_max, n, True
+    #test buf with suit enhance
+    if soul_2p_mask and (t & soul_2p_mask) == 0:
+        return buf_max, n, True
     #test effect with suit enhance
     if buf_max >= __decode(n, offset_effect, bits_effect):
         return buf_max, n, True
@@ -636,6 +639,11 @@ def filter_fast(data_dict):
         desc = ''
         p = type_none
         for s in soul_peer:
+            def __filter_type(mitama):
+                if mitama.keys()[0] in done:
+                    return False
+                enhance_type = mitama.values()[0][data_format.MITAMA_COL_NAME_ZH[1]]
+                return enhance_type == soul_type or enhance_type == s
             def __build_mask():
                 soul = []
                 soul_2p_mask = int(0)
@@ -647,10 +655,9 @@ def filter_fast(data_dict):
                         soul_2p_mask |= (2 << (3 * len(soul)))
                     if k == soul_type or k == s:
                         soul.append(k)
-                        break
                 return soul, soul_2p_mask, soul_4p_mask
 
-            r, c, n, _ = filter_soul(prop_value_none,
+            r, c, n, _ = filter_soul(__filter_type,
                               prop_value_l2,
                               prop_value_effect,
                               prop_value_none,
@@ -713,7 +720,6 @@ def filter_fast(data_dict):
                         soul_2p_mask |= (2 << (3 * len(soul)))
                     if k == soul_type or k == s:
                         soul.append(k)
-                        break
                 return soul, soul_2p_mask, soul_4p_mask
 
             r, c, n, _ = filter_soul(__filter_type,
@@ -1662,20 +1668,23 @@ def filter_fast(data_dict):
         cal_shadow_semisen_over119_2385_25_150_118,     #qin        SO5
         cal_seductress_crit_over129_3350_11_160_117,    #qie1  DO4
         cal_shadow_over158_2894_8_150_118,              #shi        SO1
-        cal_fire_effect_over200_116,                    #bin   DO2
-        cal_fortune_effect_over200_119,                 #zhu   DO2
-        cal_fire_resist_over200_109,                    #lu    DO2
+        #cal_fire_effect_over200_116,                    #bin   DO2
+        #cal_fortune_effect_over200_119,                 #zhu   DO2
+        #cal_fire_resist_over200_109,                    #lu    DO2
         cal_shadow_indirect_over129_4074_10_150_118,    #she1  DO5
-        cal_shadow_over0_3350_12_160_110,               #yu         TU3
-        cal_seductress_attack_over0_3377_9_150_109,     #hei            SE6
-        cal_pearl_over129_14013_5_150_112,              #ri    DO5
+        cal_shadow_over0_3350_12_160_110,               #yu             TU3
+        cal_seductress_attack_over0_3377_9_150_109,     #hei                SE6
+        #cal_pearl_over129_14013_5_150_112,              #ri    DO5
         cal_fortune_indirect_over129_4074_10_150_118,   #she2  DO5
         cal_sprite_over140_13785_5_150_108,             #ji1   DO3
         cal_nymph_resist_over140_108,                   #ji2   DO3
-        cal_seductress_over111_3323_10_150_104,         #huang      TU5
-        cal_shadow_over0_3350_11_160_117,               #qie            SE4
+        cal_seductress_over111_3323_10_150_104,         #huang          TU5
+        cal_shadow_over0_3350_11_160_117,               #qie                SE4
     ]
     order = dou4
+    order = [
+        cal_fortune_effect_over200_119,                 #zhu   DO2
+    ]
     for f in order:
         comb = f()
         if comb is not None:
