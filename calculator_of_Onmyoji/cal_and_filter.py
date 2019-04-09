@@ -80,7 +80,8 @@ def score_suit_buf_max_effect(soul_2p_mask, buf_max, n, t):
 
 def score_suit_buf_max_damage(soul_2p_mask, buf_max, n, t):
     #test speed
-    if __decode(n, offset_speed, bits_speed) < damage_min_speed * 100 or __decode(n, offset_speed, bits_effect) > damage_max_speed * 100:
+    s = __decode(n, offset_speed, bits_speed)
+    if s < int(damage_min_speed * 100) or s > int(damage_max_speed * 100):
         return buf_max, 1, True
     ##test crit rate with suit enhance
     if soul_2p_mask and (t & soul_2p_mask) == 0:
@@ -607,8 +608,6 @@ def filter_fast(data_dict):
         return None
     def cal_fortune_max_speed():
         return cal_x_max_speed(type_fortune, 'lian')
-    def cal_fortune_speed():
-        return cal_x_max_speed(type_fortune, 'yao ')
     def cal_fire_max_speed():
         return cal_x_max_speed(type_fire)
     # free type max speed
@@ -629,7 +628,7 @@ def filter_fast(data_dict):
                 done.add(x)
             comb_data = make_result(data_dict, res, com)
             #print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
-            print('freetype()maxspeed:%.2f,+%.2f' % (n / 100.0, 119 + n / 100.0))
+            print('[mian]freetype()maxspeed:%.2f,+%.2f' % (n / 100.0, 119 + n / 100.0))
             return comb_data
         # fast terminate
         if n < 148 * 100:
@@ -739,14 +738,14 @@ def filter_fast(data_dict):
         r = cal_x_effect(type_fire, soul_effect, 116, prop_value_l2_speed)
         effect_base = 0
         return r
-    def cal_fire_effect_over140_114():
+    def cal_fire_effect_over135_114():
         global effect_min_speed
         global effect_max_speed
         global effect_base
-        effect_min_speed = 140 - 114
+        effect_min_speed = 135 - 114
         effect_max_speed = 500
         effect_base = 0 + 15
-        r = cal_x_effect(type_fire, soul_effect, 114, prop_value_l2_speed, 'ban ')
+        r = cal_x_effect(type_fire, soul_effect, 114, prop_value_none, 'ban ')
         effect_base = 0
         return r
     def cal_senecio_effect_over200_116():
@@ -823,7 +822,7 @@ def filter_fast(data_dict):
         effect_max_speed = 500
         resit_base = 0 + 15
         encode_hp_resist = True
-        r = cal_x_resist(type_fire, soul_resist, 109, prop_value_l2_speed, 'splv')
+        r = cal_x_resist(type_fire, soul_resist, 109, prop_value_l2_speed, 'lv  ')
         encode_hp_resist = False
         resit_base = 0
         return r
@@ -1047,6 +1046,67 @@ def filter_fast(data_dict):
         damage_min_speed = 129 - 118
         damage_max_speed = 131 - 118
         r = cal_x_max_damage(type_fortune, [type_seductress], 118, prop_value_l6_crit_damage, 0, 'she2')
+        damage_max_speed = 500
+        return r
+    def cal_phenix_over0_4074_10_150_118():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 4074
+        attack_buf_base = 100 + 15
+        damage_min_crit_rate = 100 - 10 - 15
+        crit_damage_base = 150
+        damage_min_speed = 131 - 118
+        r = cal_x_max_damage(type_phenix, soul_attack, 118, prop_value_none, 0, 'she1')
+        return r
+    def cal_fortune_over120_2573_5_150_120():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        global damage_max_speed
+        attack_hero = 2573
+        attack_buf_base = 100 + 15 + int(199100 / attack_hero)
+        damage_min_crit_rate = 100 - 5 - 15 - int(20)
+        crit_damage_base = 150 + 0 + int(45)
+        damage_min_speed = 129 - 120
+        damage_max_speed = 131 - 120
+        r = cal_x_max_damage(type_fortune, [type_taker], 120, prop_value_none, 0, 'yao2')
+        damage_max_speed = 500
+        return r
+    def cal_fortune_over120_1548_5_150_120():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        global damage_max_speed
+        attack_hero = 1548
+        attack_buf_base = 100 + 15 + int(199100 / attack_hero)
+        damage_min_crit_rate = 100 - 5 - 15 - int(20)
+        crit_damage_base = 150 + 0 + int(45)
+        damage_min_speed = 129 - 120
+        damage_max_speed = 131 - 120
+        r = cal_x_max_damage(type_fortune, [type_watcher], 120, prop_value_none, 0, 'yao1')
+        damage_max_speed = 500
+        return r
+    def cal_fire_over110_639_5_150_110():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        global damage_max_speed
+        attack_hero = 639
+        attack_buf_base = 100 + 15 + int(199100 / attack_hero)
+        damage_min_crit_rate = 100 - 5 - 15 - int(20)
+        crit_damage_base = 150 + 0 + int(45)
+        damage_min_speed = 129 - 110
+        damage_max_speed = 130 - 110
+        r = cal_x_max_damage(type_fire, soul_attack, 110, prop_value_none, 0, 'yao3')
         damage_max_speed = 500
         return r
     def cal_shadow_over0_3350_12_160_110():
@@ -1368,15 +1428,12 @@ def filter_fast(data_dict):
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
-        #global damage_max_speed
         attack_hero = 2385
         attack_buf_base = 100
         damage_min_crit_rate = 100 - 20 - 5 - 30
         crit_damage_base = 150
         damage_min_speed = 119 - 118
-        #damage_max_speed = 119 - 118
         r = cal_x_max_damage(type_shadow, [type_semisen], 118, prop_value_none, 0, 'qin ')
-        #damage_max_speed = 500
         return r
     def cal_shadow_crit_over122_3216_10_150_112():
         global attack_hero
@@ -1745,44 +1802,35 @@ def filter_fast(data_dict):
         cal_clear,
         cal_fortune_max_speed,                          #lian  DO1
         cal_freetype_effect_over276_127,                #yan   DO0
+        cal_freetype_max_speed,                         #mian  DO1
         cal_seductress_crit_over129_3350_11_160_117,    #qie1  DO4
         cal_shadow_semisen_over119_2385_25_150_118,     #qin        SO5
         cal_shadow_over158_2894_8_150_118,              #shi        SO1
-
-        cal_shadow_over0_3002_8_150_107,                #xi                         DI5
-
+        cal_shadow_over0_3002_8_150_107,                #xi                         YU5
         cal_senecio_effect_over200_116,                 #bin   DO2
         cal_fortune_effect_over200_119,                 #zhu   DO2
-        cal_fire_resist_over200_109,                    #splv  DO2
+        cal_fire_resist_over200_109,                    #lv    DO2
         cal_shadow_indirect_over129_4074_10_150_118,    #she1  DO5
-
         cal_shadow_over0_3350_12_160_110,               #yu             TU3
-        cal_seductress_attack_over0_3377_9_150_109,     #hei                SE6
-        cal_pearl_over129_14013_5_150_112,              #fan   DO5
+        cal_seductress_attack_over0_3377_9_150_109,     #hei                ZH6
         cal_fortune_indirect_over129_4074_10_150_118,   #she2  DO5
-
-        cal_fire_effect_over140_114,                    #ban                    DC2
+        cal_fire_effect_over135_114,                    #ban                    DC2
         cal_sprite_over140_13785_5_150_108,             #ji1   DO3
         cal_nymph_resist_over140_108,                   #ji2   DO3
+        cal_phenix_over0_4074_10_150_118,               #she1                           MO5
+        cal_fortune_over120_2573_5_150_120,             #yao2                       YU4
+        cal_fortune_over120_1548_5_150_120,             #yao1                       YU3
+        cal_fire_over110_639_5_150_110,                 #yao3                       YU5
+        cal_pearl_over129_14013_5_150_112,              #fan   DO5
         cal_seductress_over111_3323_10_150_104,         #huan           TU5
-        cal_shadow_over0_3350_11_160_117,               #qie                SE4
-
-        cal_fortune_speed,                              #qin                        DI1
-        cal_fortune_speed,                              #qin                        DI2
-        #cal_fire_max_speed,                             #tu             TU2
+        cal_shadow_over0_3350_11_160_117,               #qie2               ZH4
     ]
-    order = dou4
     yue2 = [
         #cal_shadow_over0_3109_10_165_115,            #gen
         #cal_clear,
         #cal_shadow_over0_3323_45_230_112,            #lin
         cal_shadow_over126_3136_28_198_113,             #tun
         #cal_seductress_over0_2412_5_150_105,          #ji
-    ]
-    order = [
-        #cal_freetype_max_speed,
-        cal_freetype_effect_over276_127,
-        #cal_fortune_effect_over200_119,                 #zhu   DO2
     ]
     order = dou4
     for f in order:
