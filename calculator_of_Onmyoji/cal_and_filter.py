@@ -820,11 +820,11 @@ def filter_fast(data_dict):
         global resist_base
         effect_min_speed = 200 - 109
         effect_max_speed = 500
-        resit_base = 0 + 15
+        resist_base = 0 + 15
         encode_hp_resist = True
         r = cal_x_resist(type_fire, soul_resist, 109, prop_value_l2_speed, 'lv  ')
         encode_hp_resist = False
-        resit_base = 0
+        resist_base = 0
         return r
     def cal_nymph_resist_over140_108():
         global encode_hp_resist
@@ -833,11 +833,11 @@ def filter_fast(data_dict):
         global resist_base
         effect_min_speed = 140 - 108
         effect_max_speed = 500
-        resit_base = 0 + 15
+        resist_base = 0 + 15
         encode_hp_resist = True
         r = cal_x_resist(type_nymph, soul_resist, 108, prop_value_none, 'ji2 ')
         encode_hp_resist = False
-        resit_base = 0
+        resist_base = 0
         return r
 
     # seductress + crit_damage type max damage
