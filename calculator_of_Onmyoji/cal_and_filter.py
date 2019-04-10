@@ -1132,6 +1132,18 @@ def filter_fast(data_dict):
         r = cal_x_max_damage(type_fire, soul_attack, 110, prop_value_none, 0, ' yao3')
         damage_max_speed = 500
         return r
+    def cal_fortune_over170_2680_8_150_109():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 2680
+        attack_buf_base = 100 + 0
+        damage_min_crit_rate = 100 - 8 - 15
+        crit_damage_base = 150 + 0
+        damage_min_speed = 170 - 109
+        return cal_x_max_damage(type_fortune, soul_crit, 109, prop_value_none, 0, '_shu ')
     def cal_shadow_over0_3350_12_160_110():
         global attack_hero
         global attack_buf_base
@@ -1888,6 +1900,9 @@ def filter_fast(data_dict):
         #cal_seductress_over0_2412_5_150_105,          #ji
     ]
     order = dou4
+    order = [
+        cal_fortune_over170_2680_8_150_109,
+    ]
     for f in order:
         comb = f()
         if comb is not None:
