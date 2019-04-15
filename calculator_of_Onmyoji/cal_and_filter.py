@@ -1900,9 +1900,6 @@ def filter_fast(data_dict):
         #cal_seductress_over0_2412_5_150_105,          #ji
     ]
     order = dou4
-    order = [
-        cal_fortune_over170_2680_8_150_109,
-    ]
     for f in order:
         comb = f()
         if comb is not None:
