@@ -600,7 +600,7 @@ def filter_fast(data_dict):
                 continue
         return soul, soul_2p_mask, soul_4p_mask
     # fortune type max speed
-    def cal_x_max_speed(soul_x_type, note):
+    def cal_x_max_speed(soul_x_type, base_speed, note):
         def _build_mask():
             soul = []
             soul_2p_mask = int(0)
@@ -627,13 +627,15 @@ def filter_fast(data_dict):
                 if x not in none:
                     done.add(x)
             comb_data = make_result(data_dict, res, com)
-            print('%02d[%s]%s()maxspeed:%.2f,+%.2f' % (result_num, note, __[soul_x_type], n / 100.0, 117 + comb_data['sum'][speed] / 100.0))
+            print('%02d[%s]%s()maxspeed:%.2f,+%.2f' % (result_num, note, __[soul_x_type], n / 100.0, base_speed + comb_data['sum'][speed] / 100.0))
             return comb_data
         return None
     def cal_fortune_max_speed():
-        return cal_x_max_speed(type_fortune, '_lian')
+        return cal_x_max_speed(type_fortune, 117, '_you1')
     def cal_fire_max_speed():
         return cal_x_max_speed(type_fire)
+    def cal_fortune_speed_107():
+        return cal_x_max_speed(type_fortune, 107, '_you2')
     # free type max speed
     def cal_freetype_max_speed():
         global effect_min_speed
@@ -857,7 +859,7 @@ def filter_fast(data_dict):
         effect_max_speed = 500
         resist_base = 0 + 15
         encode_hp_resist = True
-        r = cal_x_resist(type_nymph, soul_resist, 108, prop_value_none, '_ji2 ')
+        r = cal_x_resist(type_nymph, soul_resist, 108, prop_value_none, '_ye2 ')
         encode_hp_resist = False
         resist_base = 0
         return r
@@ -935,6 +937,18 @@ def filter_fast(data_dict):
         crit_damage_base = 160
         damage_min_speed = 129 - 117
         return cal_x_max_damage(type_seductress, soul_crit, 117, prop_value_l6_crit_damage, 0, '_qie1')
+    def cal_scarlet_crit_over129_3350_11_160_117():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 3350
+        attack_buf_base = 100 + 15
+        damage_min_crit_rate = 100 - 11 - 15
+        crit_damage_base = 160
+        damage_min_speed = 129 - 117
+        return cal_x_max_damage(type_scarlet, soul_crit, 117, prop_value_none, 0, '_qie2')
     def cal_seductress_crit_over140_3350_11_160_117():
         global attack_hero
         global attack_buf_base
@@ -965,12 +979,16 @@ def filter_fast(data_dict):
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
+        global damage_max_speed
         attack_hero = 3323
         attack_buf_base = 100
         damage_min_crit_rate = 100 - 10 - 30
         crit_damage_base = 150
         damage_min_speed = 111 - 104
-        return cal_x_max_damage(type_seductress, soul_crit, 104, prop_value_none, 0, '_huan')
+        damage_max_speed = 117 - 104
+        r = cal_x_max_damage(type_seductress, soul_crit, 104, prop_value_none, 0, '_huan')
+        damage_max_speed = 500
+        return r
     def cal_seductress_over0_2412_5_150_105():
         global attack_hero
         global attack_buf_base
@@ -1008,7 +1026,7 @@ def filter_fast(data_dict):
         crit_damage_base = 150
         damage_min_speed = 140 - 108
         encode_hp_resist = True
-        r = cal_x_max_damage(type_sprite, soul_crit, 108, prop_value_none, 0, '_ji1 ')
+        r = cal_x_max_damage(type_sprite, soul_crit, 108, prop_value_none, 0, '_ye1 ')
         encode_hp_resist = False
         return r
     def cal_pearl_over129_14013_5_150_112():
@@ -1156,6 +1174,18 @@ def filter_fast(data_dict):
         crit_damage_base = 160
         damage_min_speed = 110 - 110
         return cal_x_max_damage(type_shadow, soul_crit, 110, prop_value_none, 0, '_yu  ')
+    def cal_shadow_over129_3028_10_150_113():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 3028
+        attack_buf_base = 100 + 15
+        damage_min_crit_rate = 100 - 11 - 15
+        crit_damage_base = 150
+        damage_min_speed = 129 - 113
+        return cal_x_max_damage(type_shadow, soul_attack, 117, prop_value_none, 0, '_lu1 ')
     def cal_shadow_over0_3350_11_160_117():
         global attack_hero
         global attack_buf_base
@@ -1167,7 +1197,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 11 - 15
         crit_damage_base = 160
         damage_min_speed = 117 - 117
-        return cal_x_max_damage(type_shadow, soul_attack, 117, prop_value_none, 0, '_qie2')
+        return cal_x_max_damage(type_shadow, soul_attack, 117, prop_value_none, 0, ' qie2')
     def cal_shadow_over0_3109_10_165_115():
         global attack_hero
         global attack_buf_base
@@ -1409,6 +1439,18 @@ def filter_fast(data_dict):
         crit_damage_base = 150
         damage_min_speed = 112 - 112
         return cal_x_max_damage(type_watcher, [type_skull], 112, prop_value_none, 0)
+    def cal_watcher_crit_over0_3270_12_150_111():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 3270
+        attack_buf_base = 100 + 15
+        damage_min_crit_rate = 100 - 15 - 15
+        crit_damage_base = 150
+        damage_min_speed = 111 - 111
+        return cal_x_max_damage(type_watcher, soul_crit, 111, prop_value_none, 0, '_dao ')
     def cal_shadow_over0_3002_8_150_107():
         global attack_hero
         global attack_buf_base
@@ -1595,8 +1637,8 @@ def filter_fast(data_dict):
     def cal_x_free_max_damage(soul_x_type, base_speed):
         global attack_buf_base
         attack_buf_base = 100
-        if soul_x_type == type_scarlet:
-            attack_buf_base = attack_buf_base + 15
+        #if soul_x_type == type_scarlet:
+        #    attack_buf_base = attack_buf_base + 15
         damage = 0
         res = []
         com = {}
@@ -1865,6 +1907,7 @@ def filter_fast(data_dict):
         cal_fortune_max_speed,
     ]
     dou4 = [
+        cal_clear,
         cal_freetype_max_speed,                         #mian  DO1
         cal_clear,
         cal_fortune_max_speed,                          #lian  DO1
@@ -1880,17 +1923,21 @@ def filter_fast(data_dict):
         cal_shadow_indirect_over129_4074_10_150_118,    #she1  DO5
         cal_shadow_over0_3350_12_160_110,               #yu             TU3
         cal_seductress_attack_over0_3377_9_150_109,     #hei                ZH6
+        cal_scarlet_crit_over129_3350_11_160_117,       #qie2                                   SU3
+        cal_phenix_over0_4074_10_150_118,               #she1                           MO5
         cal_fortune_indirect_over129_4074_10_150_118,   #she2  DO5
-        cal_fire_effect_over135_114,                    #ban                    DC2
+        #cal_fire_effect_over135_114,                    #ban                    DC2
         cal_sprite_over140_13785_5_150_108,             #ji1   DO3
         cal_nymph_resist_over140_108,                   #ji2   DO3
-        cal_phenix_over0_4074_10_150_118,               #she1                           MO5
+        cal_watcher_crit_over0_3270_12_150_111,         #dao                                ME5
         cal_fortune_over120_2573_5_150_120,             #yao2                       YU4
         cal_fortune_over120_1548_5_150_120,             #yao1                       YU3
         cal_fire_over110_639_5_150_110,                 #yao3                       YU5
         cal_pearl_over129_14013_5_150_112,              #fan   DO5
+        cal_shadow_over129_3028_10_150_113,             #lu1                                    SU2
         cal_seductress_over111_3323_10_150_104,         #huan           TU5
         cal_shadow_over0_3350_11_160_117,               #qie2               ZH4
+        cal_fortune_speed_107,                          #you2                               ME1
     ]
     yue2 = [
         #cal_shadow_over0_3109_10_165_115,            #gen
