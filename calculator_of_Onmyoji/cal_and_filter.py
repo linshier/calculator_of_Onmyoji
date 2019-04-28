@@ -1921,7 +1921,7 @@ def filter_fast(data_dict):
         cal_shadow_over0_3350_12_160_110,               #yu             TU3
         cal_seductress_attack_over0_3377_9_150_109,     #hei                ZH6
         cal_scarlet_crit_over129_3350_11_160_117,       #qie2                                   SU3
-        cal_phenix_over129_4074_10_150_118,               #she1                           MO5
+        cal_phenix_over129_4074_10_150_118,             #she1                           MO5
         cal_fortune_indirect_over129_4074_10_150_118,   #she2  DO5
         #cal_fire_effect_over135_114,                    #ban                    DC2
         cal_sprite_over140_13785_5_150_108,             #ji1   DO3
