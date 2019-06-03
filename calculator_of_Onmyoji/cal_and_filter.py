@@ -415,7 +415,9 @@ def filter_fast(data_dict):
         v = data_dict[i+1][0].values()[0]
         kf = ('%s' % uuid.uuid1()).decode('utf-8')
         none.add(kf)
-        vf = {k: 0 for k in v.keys()}
+        vf = {}
+        for k in v.keys():
+            vf[k] = 0
         vf[data_format.MITAMA_COL_NAME_ZH[1]] = type_none
         vf[data_format.MITAMA_COL_NAME_ZH[2]] = i + 1
         if i == 0:
@@ -625,7 +627,7 @@ def filter_fast(data_dict):
             comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
             if comb_speed[1] > 57:
                 comb_speed[1] = comb_speed[1] - 57
-            print comb_speed
+            print 'fort', comb_speed
             #base_speed = 117
             #print('%02d[%s]%s()maxspeed:%.2f,+%.2f' % (result_num, '____', __[type_fortune], n / 100.0, base_speed + comb_data['sum'][speed] / 100.0))
             return comb_data
@@ -686,7 +688,7 @@ def filter_fast(data_dict):
             comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
             if comb_speed[1] > 57:
                 comb_speed[1] = comb_speed[1] - 57
-            print comb_speed
+            print 'free', comb_speed
             #print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
             print('%02d[_mian]freetype()maxspeed:%.2f,+%.2f' % (result_num, n / 100.0, 119 + n / 100.0))
             return comb_data
