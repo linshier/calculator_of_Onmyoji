@@ -599,7 +599,37 @@ def filter_fast(data_dict):
                 soul.append(k)
                 continue
         return soul, soul_2p_mask, soul_4p_mask
-    # fortune type max speed
+    def cal_fortune_or_none():
+        def __filter_type(mitama):
+            if mitama.keys()[0] in done:
+                return False
+            enhance_type = mitama.values()[0][data_format.MITAMA_COL_NAME_ZH[1]]
+            enhance_speed = mitama.values()[0][speed]
+            if enhance_type == type_none:
+                return True
+            return enhance_type == type_fortune and enhance_speed and enhance_speed > 10
+        res, com, n, _ = filter_soul(__filter_type,
+                          prop_value_none,
+                          prop_value_none,
+                          prop_value_none,
+                          build_mask_none,
+                          speed,
+                          True,
+                          score_suit_buf_max_speed,
+                          data_dict)
+        if len(res) > 0:
+            for x in res:
+                if x not in none:
+                    done.add(x)
+            comb_data = make_result(data_dict, res, com)
+            comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
+            if comb_speed[1] > 57:
+                comb_speed[1] = comb_speed[1] - 57
+            print comb_speed
+            #base_speed = 117
+            #print('%02d[%s]%s()maxspeed:%.2f,+%.2f' % (result_num, '____', __[type_fortune], n / 100.0, base_speed + comb_data['sum'][speed] / 100.0))
+            return comb_data
+        return None
     def cal_x_max_speed(soul_x_type, base_speed, note):
         def _build_mask():
             soul = []
@@ -653,6 +683,10 @@ def filter_fast(data_dict):
                 if x not in none:
                     done.add(x)
             comb_data = make_result(data_dict, res, com)
+            comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
+            if comb_speed[1] > 57:
+                comb_speed[1] = comb_speed[1] - 57
+            print comb_speed
             #print(('%d %s' % (n, comb_data['sum'])).decode('raw_unicode_escape'))
             print('%02d[_mian]freetype()maxspeed:%.2f,+%.2f' % (result_num, n / 100.0, 119 + n / 100.0))
             return comb_data
@@ -1180,7 +1214,7 @@ def filter_fast(data_dict):
         r = cal_x_max_damage(type_fortune, [type_seductress], 118, prop_value_l6_crit_damage, 0, '_she2')
         damage_max_speed = 500
         return r
-    def cal_fortune_indirect_under128_4074_10_150_118():
+    def cal_fortune_indirect_under122_4074_10_150_118():
         global attack_hero
         global attack_buf_base
         global damage_min_crit_rate
@@ -1192,7 +1226,7 @@ def filter_fast(data_dict):
         damage_min_crit_rate = 100 - 10 - 15
         crit_damage_base = 150 + 211
         damage_min_speed = 118 - 118
-        damage_max_speed = 128 - 118
+        damage_max_speed = 122 - 118
         r = cal_x_max_damage(type_fortune, [type_seductress], 118, prop_value_none, 0, '_she2')
         damage_max_speed = 500
         return r
@@ -2158,7 +2192,7 @@ def filter_fast(data_dict):
         cal_seductress_attack_over0_3377_9_150_109,     #hei                ZH6
 
         cal_seductress_over0_3457_40_150_117,           #li    DO5
-        cal_fortune_indirect_under128_4074_10_150_118,  #she2       DG5
+        cal_fortune_indirect_under122_4074_10_150_118,  #she2       DG5
     ]
     fast = [
         cal_fortune_max_speed,
@@ -2166,7 +2200,12 @@ def filter_fast(data_dict):
         cal_freetype_max_speed,
         #cal_seductress_crit_over129_3350_11_160_117,
     ]
-    order = dou6
+    cbg = [
+        cal_fortune_or_none,
+        cal_clear,
+        cal_freetype_max_speed,
+    ]
+    order = cbg
     for f in order:
         comb = f()
         if comb is not None:
