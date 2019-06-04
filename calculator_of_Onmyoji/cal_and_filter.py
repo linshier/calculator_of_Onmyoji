@@ -625,9 +625,15 @@ def filter_fast(data_dict):
                     done.add(x)
             comb_data = make_result(data_dict, res, com)
             comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
-            if comb_speed[1] > 57:
+            if comb_speed[1] >= 57:
                 comb_speed[1] = comb_speed[1] - 57
-            print ('%04d[_____]fort' % result_num), comb_data['sum'][speed] / 100.0, comb_speed
+            print ('%04d[_____]fort' % result_num), comb_data['sum'][speed] / 100.0, \
+                    '(1)%0.2f' % comb_speed[0], \
+                    '(2)%0.2f' % comb_speed[1], \
+                    '(3)%0.2f' % comb_speed[2], \
+                    '(4)%0.2f' % comb_speed[3], \
+                    '(5)%0.2f' % comb_speed[4], \
+                    '(6)%0.2f' % comb_speed[5]
             #base_speed = 117
             #print('%02d[%s]%s()maxspeed:%.2f,+%.2f' % (result_num, '____', __[type_fortune], n / 100.0, base_speed + comb_data['sum'][speed] / 100.0))
             return comb_data
@@ -688,7 +694,13 @@ def filter_fast(data_dict):
             comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
             if comb_speed[1] > 57:
                 comb_speed[1] = comb_speed[1] - 57
-            print ('%04d[_____]free' % result_num), comb_data['sum'][speed] / 100.0, comb_speed
+            print ('%04d[_____]free' % result_num), comb_data['sum'][speed] / 100.0, \
+                    '(1)%0.2f' % comb_speed[0], \
+                    '(2)%0.2f' % comb_speed[1], \
+                    '(3)%0.2f' % comb_speed[2], \
+                    '(4)%0.2f' % comb_speed[3], \
+                    '(5)%0.2f' % comb_speed[4], \
+                    '(6)%0.2f' % comb_speed[5]
             #print('%04d[_mian]freetype()maxspeed:%.2f,+%.2f' % (result_num, n / 100.0, 119 + n / 100.0))
             return comb_data
         # quick terminate
