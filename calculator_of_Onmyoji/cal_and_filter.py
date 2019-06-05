@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import itertools
+import os
 import sys
 import multiprocessing
 import uuid
@@ -19,7 +20,9 @@ resist      = data_format.MITAMA_PROPS[9]
 speed       = data_format.MITAMA_PROPS[10]
 soul_sn     = data_format.MITAMA_COL_NAME_ZH[0]
 suit        = data_format.MITAMA_COL_NAME_ZH[1]
+pos         = data_format.MITAMA_COL_NAME_ZH[2]
 
+speed_1p_overflow = 20
 speed_1p_limit = 1
 fast_min_speed = int(277 - (127 + 57 + 16.5 * 5))
 
@@ -299,7 +302,7 @@ def list2map(codes, nx, ny, nz, mask, soul):
         for i in xrange(len(codes)):
             if ny & (mask << (3 * i)):
                 mitama_type = codes[i]
-    return {data_format.MITAMA_COL_NAME_ZH[0]: nz,
+    return {soul_sn:     nz,
             attack_buf:  __decode(nx, offset_attackbuf, bits_attackbuf),
             crit_rate:   __decode(nx, offset_critrate, bits_critrate),
             crit_damage: __decode(nx, offset_critdamage, bits_critdamage),
@@ -409,20 +412,25 @@ def find_item(arr, k):
     return None
 
 def filter_fast(data_dict):
-    type_none = 0
     none = set()
-    for i in xrange(6):
-        v = data_dict[i+1][0].values()[0]
-        kf = ('%s' % uuid.uuid1()).decode('utf-8')
-        none.add(kf)
-        vf = {}
-        for k in v.keys():
-            vf[k] = 0
-        vf[data_format.MITAMA_COL_NAME_ZH[1]] = type_none
-        vf[data_format.MITAMA_COL_NAME_ZH[2]] = i + 1
-        if i == 0:
-            vf[data_format.MITAMA_COL_NAME_ZH[3]] = 486
-        data_dict[i+1].append({kf : vf})
+    def append_data_dict(type_x, fake_speed):
+        for i in xrange(6):
+            v = data_dict[i+1][0].values()[0]
+            kf = ('%s' % uuid.uuid1()).decode('utf-8')
+            none.add(kf)
+            vf = {}
+            for k in v.keys():
+                vf[k] = 0
+            vf[suit] = type_x
+            vf[pos] = i + 1
+            if i == 0:
+                vf[data_format.MITAMA_COL_NAME_ZH[3]] = 486
+            vf[data_format.MITAMA_COL_NAME_ZH[13]] = fake_speed
+            if i in [1]:
+                vf[data_format.MITAMA_COL_NAME_ZH[13]] = 0 # too hard for p2
+            data_dict[i + 1].append({kf : vf})
+    type_none = 0
+    append_data_dict(type_none, 0)
 
     type_pearl = data_format.MITAMA_TYPES[0]
     type_sprite = data_format.MITAMA_TYPES[2]
@@ -471,6 +479,7 @@ def filter_fast(data_dict):
         type_tomb: 'tomb',
         type_kyoukotsu: 'kyoukotsu',
     }
+    append_data_dict(type_fortune, speed_1p_overflow)
 
     soul_crit = []
     for (k, v) in data_format.MITAMA_ENHANCE.items():
@@ -515,10 +524,11 @@ def filter_fast(data_dict):
     def prop_value_speed(mitama):
         if mitama.keys()[0] in done:
             return False
-        mitama_info = mitama.values()[0]
-        if (mitama_info[speed] and mitama_info[speed] >= speed_1p_limit):
-            return True
-        return False
+        enhance_type = mitama.values()[0][suit]
+        enhance_speed = mitama.values()[0][speed]
+        if enhance_type == type_fortune and enhance_speed == speed_1p_overflow:
+            return False
+        return enhance_speed >= speed_1p_limit
     def prop_value_fast_speed(mitama):
         if mitama.keys()[0] in done:
             return False
@@ -584,7 +594,7 @@ def filter_fast(data_dict):
         if mitama.keys()[0] in done:
             return False
         mitama_info = mitama.values()[0]
-        return mitama_info[data_format.MITAMA_COL_NAME_ZH[1]] == 0
+        return mitama_info[suit] == 0
     def build_mask_none():
         return [], int(0), int(0)
     def build_mask_x_free(soul_x_type):
@@ -605,11 +615,15 @@ def filter_fast(data_dict):
         def __filter_type(mitama):
             if mitama.keys()[0] in done:
                 return False
-            enhance_type = mitama.values()[0][data_format.MITAMA_COL_NAME_ZH[1]]
+            enhance_type = mitama.values()[0][suit]
             enhance_speed = mitama.values()[0][speed]
             if enhance_type == type_none:
                 return True
-            return enhance_type == type_fortune and enhance_speed and enhance_speed > 10
+            if enhance_type == type_fortune:
+                if enhance_speed == speed_1p_overflow:
+                    return False
+                return enhance_speed > 10
+            return False
         res, com, n, _ = filter_soul(__filter_type,
                           prop_value_none,
                           prop_value_none,
@@ -625,17 +639,68 @@ def filter_fast(data_dict):
                     done.add(x)
             comb_data = make_result(data_dict, res, com)
             comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
-            if comb_speed[1] >= 57:
-                comb_speed[1] = comb_speed[1] - 57
+            comb_speed[1] = comb_speed[1] - 57
             print ('%04d[_____]fort' % result_num), comb_data['sum'][speed] / 100.0, \
                     '(1)%0.2f' % comb_speed[0], \
-                    '(2)%0.2f' % comb_speed[1], \
+                    '57+(2)%0.2f' % comb_speed[1], \
                     '(3)%0.2f' % comb_speed[2], \
                     '(4)%0.2f' % comb_speed[3], \
                     '(5)%0.2f' % comb_speed[4], \
                     '(6)%0.2f' % comb_speed[5]
             #base_speed = 117
             #print('%02d[%s]%s()maxspeed:%.2f,+%.2f' % (result_num, '____', __[type_fortune], n / 100.0, base_speed + comb_data['sum'][speed] / 100.0))
+            return comb_data
+        return None
+    def cal_speedmax():
+        buf = 0
+        res = []
+        com = {}
+        def _build_mask():
+            soul = []
+            soul_2p_mask = int(0)
+            soul_4p_mask = int(0)
+            for (k, v) in data_format.MITAMA_ENHANCE.items():
+                if k == type_fortune:
+                    soul_4p_mask |= (4 << (3 * len(soul)))
+                    soul.append(k)
+                    break
+            return soul, soul_2p_mask, soul_4p_mask
+        for p in xrange(6):
+            def __filter_type(mitama):
+                if mitama.keys()[0] in done:
+                    return False
+                enhance_type = mitama.values()[0][suit]
+                enhance_speed = mitama.values()[0][speed]
+                if enhance_type == type_fortune and enhance_speed == speed_1p_overflow:
+                    return mitama.values()[0][pos] == (p + 1)
+                return enhance_speed > 10
+
+            r, c, n, _ = filter_soul(__filter_type,
+                              prop_value_none,
+                              prop_value_none,
+                              prop_value_none,
+                              _build_mask,
+                              speed,
+                              True,
+                              score_suit_buf_max_speed,
+                              data_dict)
+            if n > buf:
+                buf, res, com = n, r, c
+        if len(res) > 0:
+            for x in res:
+                if x not in none:
+                    done.add(x)
+            comb_data = make_result(data_dict, res, com)
+            comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
+            comb_type = ['#' if (type_fortune == comb_data['info'][i].values()[0][suit]) else ' ' for i in xrange(6)]
+            comb_speed[1] = comb_speed[1] - 57
+            print ('%04d[_____]fort' % result_num), comb_data['sum'][speed] / 100.0 - 20 + 16, \
+                    '(1)%0.2f%s' % (comb_speed[0], comb_type[0]), \
+                    '57+(2)%0.2f%s' % (comb_speed[1], comb_type[1]), \
+                    '(3)%0.2f%s' % (comb_speed[2], comb_type[2]), \
+                    '(4)%0.2f%s' % (comb_speed[3], comb_type[3]), \
+                    '(5)%0.2f%s' % (comb_speed[4], comb_type[4]), \
+                    '(6)%0.2f%s' % (comb_speed[5], comb_type[5])
             return comb_data
         return None
     def cal_x_max_speed(soul_x_type, base_speed, note):
@@ -692,11 +757,10 @@ def filter_fast(data_dict):
                     done.add(x)
             comb_data = make_result(data_dict, res, com)
             comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
-            if comb_speed[1] > 57:
-                comb_speed[1] = comb_speed[1] - 57
+            comb_speed[1] = comb_speed[1] - 57
             print ('%04d[_____]free' % result_num), comb_data['sum'][speed] / 100.0, \
                     '(1)%0.2f' % comb_speed[0], \
-                    '(2)%0.2f' % comb_speed[1], \
+                    '57+(2)%0.2f' % comb_speed[1], \
                     '(3)%0.2f' % comb_speed[2], \
                     '(4)%0.2f' % comb_speed[3], \
                     '(5)%0.2f' % comb_speed[4], \
@@ -755,7 +819,7 @@ def filter_fast(data_dict):
             def __filter_type(mitama):
                 if mitama.keys()[0] in done:
                     return False
-                enhance_type = mitama.values()[0][data_format.MITAMA_COL_NAME_ZH[1]]
+                enhance_type = mitama.values()[0][suit]
                 return enhance_type == soul_type or enhance_type == s
             def __build_mask():
                 soul = []
@@ -848,7 +912,7 @@ def filter_fast(data_dict):
             def __filter_type(mitama):
                 if mitama.keys()[0] in done:
                     return False
-                enhance_type = mitama.values()[0][data_format.MITAMA_COL_NAME_ZH[1]]
+                enhance_type = mitama.values()[0][suit]
                 return enhance_type == soul_type or enhance_type == s
             def __build_mask():
                 soul = []
@@ -1857,9 +1921,9 @@ def filter_fast(data_dict):
                 if mitama.keys()[0] in done:
                     return False
                 mitama_info = mitama.values()[0]
-                location = mitama_info[data_format.MITAMA_COL_NAME_ZH[2]]
+                location = mitama_info[pos]
                 if location in [1, 2, 3, 5]:
-                    enhance_type = mitama_info[data_format.MITAMA_COL_NAME_ZH[1]]
+                    enhance_type = mitama_info[suit]
                     return enhance_type == soul_type
                 if location in [6]:
                     return (mitama_info[crit_rate] and mitama_info[crit_rate] >= 55)
@@ -1958,8 +2022,8 @@ def filter_fast(data_dict):
         def __filter_type(mitama):
             if mitama.keys()[0] in done:
                 return False
-            enhance_type = mitama.values()[0][data_format.MITAMA_COL_NAME_ZH[1]]
-            location = mitama.values()[0][data_format.MITAMA_COL_NAME_ZH[2]]
+            enhance_type = mitama.values()[0][suit]
+            location = mitama.values()[0][pos]
             if location == loc:
                 return enhance_type == soul_type
             return enhance_type == type_none
@@ -1988,6 +2052,10 @@ def filter_fast(data_dict):
     def cal_clear():
         done.clear()
         print '--'
+        return None
+    def cal_exit():
+        sys.stdout.flush()
+        os._exit(0)
         return None
 
     dou1 = [
@@ -2214,9 +2282,12 @@ def filter_fast(data_dict):
         #cal_seductress_crit_over129_3350_11_160_117,
     ]
     cbg = [
-        cal_fortune_or_none,
-        cal_clear,
-        cal_freetype_max_speed,
+        #cal_fortune_or_none,
+        #cal_clear,
+        #cal_freetype_max_speed,
+        #cal_clear,
+        cal_speedmax,
+        cal_exit,
     ]
     order = cbg
     for f in order:

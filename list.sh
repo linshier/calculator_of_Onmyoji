@@ -9,9 +9,11 @@
 #'https://yys.cbg.163.com/cgi/api/query?platform_type=1&pass_fair_show=1&heros=%5B%7B%22hero_id%22%3A261%2C%22speed%22%3A%22272%22%7D%5D&price_min=600000&price_max=700000&order_by=selling_time%20DESC&page='$1 \
 #'https://yys.cbg.163.com/cgi/api/query?pass_fair_show=1&hero_id=322&serverid=7&price_min=30000&price_max=160000&order_by=selling_time%20DESC&page='$1 \
 
+#'https://yys.cbg.163.com/cgi/api/query_topic_equips?topic_id=1-46&serverid=11&price_min=500000&price_max=900000&platform_type=1&order_by=selling_time%20DESC&page='$1 \
+
 function getjson() {
 curl -s \
-'https://yys.cbg.163.com/cgi/api/query_topic_equips?topic_id=1-46&serverid=11&price_min=500000&price_max=900000&platform_type=1&order_by=selling_time%20DESC&page='$1 \
+'https://yys.cbg.163.com/cgi/api/query?pass_fair_show=1&serverid=7&price_min=200000&price_max=300000&order_by=selling_time%20DESC&page='$1 \
 -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Safari/537.36' \
 --compressed
 return $?
