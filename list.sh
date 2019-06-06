@@ -13,7 +13,7 @@
 
 function getjson() {
 curl -s \
-'https://yys.cbg.163.com/cgi/api/query?pass_fair_show=1&serverid=7&price_min=200000&price_max=300000&order_by=selling_time%20DESC&page='$1 \
+'https://yys.cbg.163.com/cgi/api/query?pass_fair_show=1&serverid=7&price_min=200000&price_max=500000&order_by=selling_time%20DESC&page='$1 \
 -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Safari/537.36' \
 --compressed
 return $?
