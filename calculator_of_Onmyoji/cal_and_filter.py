@@ -453,6 +453,7 @@ def filter_fast(data_dict):
     type_shadow = data_format.MITAMA_TYPES[34]
     type_tomb = data_format.MITAMA_TYPES[35]
     type_kyoukotsu = data_format.MITAMA_TYPES[36]
+    type_kasodani = data_format.MITAMA_TYPES[37]
     __ = {
         speed: 'speed',
 
@@ -478,6 +479,7 @@ def filter_fast(data_dict):
         type_shadow: 'shadow',
         type_tomb: 'tomb',
         type_kyoukotsu: 'kyoukotsu',
+        type_kasodani: 'kasodani',
     }
     append_data_dict(type_fortune, speed_1p_overflow)
 
@@ -692,7 +694,7 @@ def filter_fast(data_dict):
                     done.add(x)
             comb_data = make_result(data_dict, res, com)
             comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
-            comb_type = ['#' if (type_fortune == comb_data['info'][i].values()[0][suit]) else ' ' for i in xrange(6)]
+            comb_type = ['#' if (type_fortune == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
             comb_speed[1] = comb_speed[1] - 57
             print ('%04d[_____]fort' % result_num), comb_data['sum'][speed] / 100.0 - 20 + 16, \
                     '(1)%0.2f%s' % (comb_speed[0], comb_type[0]), \
@@ -757,14 +759,15 @@ def filter_fast(data_dict):
                     done.add(x)
             comb_data = make_result(data_dict, res, com)
             comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
+            comb_type = ['#' if (type_fortune == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
             comb_speed[1] = comb_speed[1] - 57
             print ('%04d[_____]free' % result_num), comb_data['sum'][speed] / 100.0, \
-                    '(1)%0.2f' % comb_speed[0], \
-                    '57+(2)%0.2f' % comb_speed[1], \
-                    '(3)%0.2f' % comb_speed[2], \
-                    '(4)%0.2f' % comb_speed[3], \
-                    '(5)%0.2f' % comb_speed[4], \
-                    '(6)%0.2f' % comb_speed[5]
+                    '(1)%0.2f%s' % (comb_speed[0], comb_type[0]), \
+                    '57+(2)%0.2f%s' % (comb_speed[1], comb_type[1]), \
+                    '(3)%0.2f%s' % (comb_speed[2], comb_type[2]), \
+                    '(4)%0.2f%s' % (comb_speed[3], comb_type[3]), \
+                    '(5)%0.2f%s' % (comb_speed[4], comb_type[4]), \
+                    '(6)%0.2f%s' % (comb_speed[5], comb_type[5])
             #print('%04d[_mian]freetype()maxspeed:%.2f,+%.2f' % (result_num, n / 100.0, 119 + n / 100.0))
             return comb_data
         # quick terminate
@@ -1577,6 +1580,18 @@ def filter_fast(data_dict):
         r = cal_x_max_damage(type_shadow, soul_crit, 112, prop_value_none, 0, '_lin1')
         damage_max_speed = 500
         return r
+    def cal_kyoukotsu_skull_over128_3323_15_150_112():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 3323
+        attack_buf_base = 100 + 15
+        damage_min_crit_rate = 100 - 15
+        crit_damage_base = 150
+        damage_min_speed = 128 - 112
+        return cal_x_max_damage(type_kyoukotsu, [type_skull], 112, prop_value_none, 0, '_lin1')
     def cal_shadow_crit_over0_3323_35_150_112():
         global attack_hero
         global attack_buf_base
@@ -2256,6 +2271,15 @@ def filter_fast(data_dict):
         cal_clear,
         cal_shadow_skull_over121_3323_35_150_112,   #lin        SO3
     ]
+    dou0 = [
+        cal_clear,
+        cal_freetype_max_speed,                         #mian  DO1
+        cal_clear,
+        cal_fortune_max_speed,                          #lian  DO1
+        cal_freetype_effect_over276_127,                #yan   DO0
+        cal_fortune_effect_over200_119,                 #zhu   DO2
+        cal_fire_resist_over200_109,                    #lv    DO2
+    ]
     dou6 = [
         cal_clear,
         cal_freetype_max_speed,                         #mian  DO1
@@ -2284,17 +2308,25 @@ def filter_fast(data_dict):
     cbg = [
         #cal_fortune_or_none,
         #cal_clear,
-        #cal_freetype_max_speed,
+        cal_freetype_max_speed,
         #cal_clear,
-        cal_speedmax,
+        #cal_speedmax,
         cal_exit,
     ]
-    order = cbg
+    mine11a10 = [
+        cal_kyoukotsu_skull_over128_3323_15_150_112,
+    ]
+    order = dou0
     for f in order:
-        comb = f()
-        if comb is not None:
-            yield comb
-        if 0:
-            done.clear()
+        try:
+            comb = f()
+            if comb is not None:
+                yield comb
+            if 0:
+                done.clear()
+        except Exception as e:
+            print str(e).decode('raw_unicode_escape')
+            sys.stdout.flush()
+            os._exit(0)
     return
 
