@@ -696,7 +696,7 @@ def filter_fast(data_dict):
             comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
             comb_type = ['#' if (type_fortune == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
             comb_speed[1] = comb_speed[1] - 57
-            print ('%04d[_____]fort' % result_num), comb_data['sum'][speed] / 100.0 - 20 + 16, \
+            print ('%02d[_____]fort' % result_num), comb_data['sum'][speed] / 100.0 - 20 + 16, \
                     '(1)%0.2f%s' % (comb_speed[0], comb_type[0]), \
                     '57+(2)%0.2f%s' % (comb_speed[1], comb_type[1]), \
                     '(3)%0.2f%s' % (comb_speed[2], comb_type[2]), \
@@ -731,7 +731,17 @@ def filter_fast(data_dict):
                 if x not in none:
                     done.add(x)
             comb_data = make_result(data_dict, res, com)
-            print('%02d[%s]%s()maxspeed:%.2f,+%.2f' % (result_num, note, __[soul_x_type], n / 100.0, base_speed + comb_data['sum'][speed] / 100.0))
+            comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
+            comb_type = ['#' if (type_fortune == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
+            comb_speed[1] = comb_speed[1] - 57
+            print ('%02d[%s]%s()maxspeed:%.2f,+%.2f' % (result_num, note, __[soul_x_type], n / 100.0, base_speed + comb_data['sum'][speed] / 100.0)), \
+                    '(1)%0.2f%s' % (comb_speed[0], comb_type[0]), \
+                    '57+(2)%0.2f%s' % (comb_speed[1], comb_type[1]), \
+                    '(3)%0.2f%s' % (comb_speed[2], comb_type[2]), \
+                    '(4)%0.2f%s' % (comb_speed[3], comb_type[3]), \
+                    '(5)%0.2f%s' % (comb_speed[4], comb_type[4]), \
+                    '(6)%0.2f%s' % (comb_speed[5], comb_type[5])
+            #print('%02d[%s]%s()maxspeed:%.2f,+%.2f' % (result_num, note, __[soul_x_type], n / 100.0, base_speed + comb_data['sum'][speed] / 100.0))
             return comb_data
         return None
     def cal_fortune_max_speed():
@@ -761,7 +771,7 @@ def filter_fast(data_dict):
             comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
             comb_type = ['#' if (type_fortune == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
             comb_speed[1] = comb_speed[1] - 57
-            print ('%02d[_____]free' % result_num), comb_data['sum'][speed] / 100.0, \
+            print ('%02d[_mian]freetype()maxspeed:%.2f,+%.2f' % (result_num, n / 100.0, 119 + n / 100.0)), \
                     '(1)%0.2f%s' % (comb_speed[0], comb_type[0]), \
                     '57+(2)%0.2f%s' % (comb_speed[1], comb_type[1]), \
                     '(3)%0.2f%s' % (comb_speed[2], comb_type[2]), \
@@ -899,7 +909,7 @@ def filter_fast(data_dict):
     def cal_freetype_effect_over276_127():
         global effect_min_speed
         global effect_max_speed
-        effect_min_speed = 280 - 127
+        effect_min_speed = 282 - 127
         effect_max_speed = 500
         r = cal_freetype_speed_effect(soul_effect, 127, '_yan ')
         return r
@@ -2271,15 +2281,6 @@ def filter_fast(data_dict):
         cal_clear,
         cal_shadow_skull_over121_3323_35_150_112,   #lin        SO3
     ]
-    dou0 = [
-        cal_clear,
-        cal_freetype_max_speed,                         #mian  DO1
-        cal_clear,
-        cal_fortune_max_speed,                          #lian  DO1
-        cal_freetype_effect_over276_127,                #yan   DO0
-        cal_fortune_effect_over200_119,                 #zhu   DO2
-        cal_fire_resist_over200_109,                    #lv    DO2
-    ]
     dou6 = [
         cal_clear,
         cal_freetype_max_speed,                         #mian  DO1
@@ -2315,6 +2316,18 @@ def filter_fast(data_dict):
     ]
     mine11a10 = [
         cal_kyoukotsu_skull_over128_3323_15_150_112,
+    ]
+    dou0 = [
+        cal_clear,
+        cal_freetype_max_speed,                         #mian  DO1
+        cal_clear,
+        cal_fortune_max_speed,                          #lian  DO1
+        cal_freetype_effect_over276_127,                #yan   DO0
+        cal_fortune_effect_over200_119,                 #zhu   DO2
+        cal_fire_resist_over200_109,                    #lv    DO2
+        cal_clear,
+        cal_kyoukotsu_skull_over128_3323_15_150_112,
+        cal_seductress_crit_over129_3350_11_160_117,
     ]
     order = dou0
     for f in order:
