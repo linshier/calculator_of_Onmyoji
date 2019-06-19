@@ -534,8 +534,11 @@ def filter_fast(data_dict):
     def prop_value_fast_speed(mitama):
         if mitama.keys()[0] in done:
             return False
-        mitama_info = mitama.values()[0]
-        if (mitama_info[speed] and mitama_info[speed] >= fast_min_speed):
+        enhance_type = mitama.values()[0][suit]
+        enhance_speed = mitama.values()[0][speed]
+        if enhance_type == type_fortune and enhance_speed == speed_1p_overflow:
+            return False
+        if enhance_speed >= fast_min_speed:
             return True
         return False
     def prop_value_effect(mitama):
@@ -909,7 +912,7 @@ def filter_fast(data_dict):
     def cal_freetype_effect_over276_127():
         global effect_min_speed
         global effect_max_speed
-        effect_min_speed = 282 - 127
+        effect_min_speed = 281 - 127
         effect_max_speed = 500
         r = cal_freetype_speed_effect(soul_effect, 127, '_yan ')
         return r
