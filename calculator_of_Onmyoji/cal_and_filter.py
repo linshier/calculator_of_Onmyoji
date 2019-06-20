@@ -1241,12 +1241,48 @@ def filter_fast(data_dict):
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
+        global damage_max_speed
         attack_hero = 3457
         attack_buf_base = 100 + 15
         damage_min_crit_rate = 100 - 40 - 15
         crit_damage_base = 150
         damage_min_speed = 117 - 117
-        return cal_x_max_damage(type_seductress, soul_attack, 117, prop_value_none, 0, '_li  ')
+        damage_max_speed = 120 - 117
+        r = cal_x_max_damage(type_seductress, soul_attack, 117, prop_value_none, 0, '_li1 ')
+        damage_max_speed = 500
+        return r
+    def cal_jizo_under122_3457_40_150_117():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        global damage_max_speed
+        attack_hero = 3457
+        attack_buf_base = 100
+        damage_min_crit_rate = 100 - 40 - 15
+        crit_damage_base = 150
+        damage_min_speed = 117 - 117
+        damage_max_speed = 122 - 117
+        r = cal_x_max_damage(type_jizo, soul_crit, 117, prop_value_none, 0, '_li1 ')
+        damage_max_speed = 500
+        return r
+    def cal_nymph_under120_3457_40_150_117():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        global damage_max_speed
+        attack_hero = 3457
+        attack_buf_base = 100
+        damage_min_crit_rate = 100 - 40 - 15
+        crit_damage_base = 150
+        damage_min_speed = 117 - 117
+        #damage_max_speed = 120 - 117
+        r = cal_x_max_damage(type_nymph, soul_crit, 117, prop_value_none, 0, '_li  ')
+        damage_max_speed = 500
+        return r
     def cal_jizo_over117_4074_10_150_118():
         global attack_hero
         global attack_buf_base
@@ -2284,25 +2320,6 @@ def filter_fast(data_dict):
         cal_clear,
         cal_shadow_skull_over121_3323_35_150_112,   #lin        SO3
     ]
-    dou6 = [
-        cal_clear,
-        cal_freetype_max_speed,                         #mian  DO1
-        cal_clear,
-        cal_fortune_max_speed,                          #lian  DO1
-        cal_freetype_effect_over276_127,                #yan   DO0
-        cal_scarlet_mask_l6_speed,
-        cal_seductress_crit_over110_3270_10_150_110,    #tian  DO4
-        cal_shadow_semisen_over119_2385_25_150_118,     #qin        SO6
-        cal_shadow_over158_2894_8_150_118,              #shi        SO1
-        cal_fortune_effect_over200_119,                 #zhu   DO2
-        cal_shadow_indirect_under128_4074_10_150_118,   #she1           DG4 
-        cal_shadow_crit_under128_3323_35_150_112,       #lin1               TU4
-
-        cal_seductress_attack_over0_3377_9_150_109,     #hei                ZH6
-
-        cal_seductress_over0_3457_40_150_117,           #li    DO5
-        cal_fortune_indirect_under122_4074_10_150_118,  #she2       DG5
-    ]
     fast = [
         cal_fortune_max_speed,
         cal_clear,
@@ -2332,7 +2349,24 @@ def filter_fast(data_dict):
         cal_kyoukotsu_skull_over128_3323_15_150_112,
         cal_seductress_crit_over129_3350_11_160_117,
     ]
-    order = dou0
+    dou6 = [
+        cal_clear,
+        cal_freetype_max_speed,                         #mian  DO1
+        cal_clear,
+        cal_fortune_max_speed,                          #lian  DO1
+        cal_freetype_effect_over276_127,                #yan   DO0
+        cal_seductress_crit_over110_3270_10_150_110,    #tian  DO4
+        cal_shadow_semisen_over119_2385_25_150_118,     #qin        SO6
+        cal_shadow_over158_2894_8_150_118,              #shi        SO1
+        cal_fortune_effect_over200_119,                 #zhu   DO2
+        cal_shadow_indirect_under128_4074_10_150_118,   #she1           DG4 
+        cal_shadow_crit_under128_3323_35_150_112,       #lin1               TU4
+        cal_seductress_attack_over0_3377_9_150_109,     #hei                ZH6
+        cal_jizo_under122_3457_40_150_117,              #li                     DO6
+        cal_seductress_over0_3457_40_150_117,           #li                     DA6
+        cal_fortune_indirect_under122_4074_10_150_118,  #she2       DG5
+    ]
+    order = dou6
     for f in order:
         try:
             comb = f()
