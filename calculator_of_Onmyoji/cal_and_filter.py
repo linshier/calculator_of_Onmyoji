@@ -644,14 +644,15 @@ def filter_fast(data_dict):
                     done.add(x)
             comb_data = make_result(data_dict, res, com)
             comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
+            comb_type = ['#' if (type_fortune == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
             comb_speed[1] = comb_speed[1] - 57
-            print ('%04d[_____]fort' % result_num), comb_data['sum'][speed] / 100.0, \
-                    '(1)%0.2f' % comb_speed[0], \
-                    '57+(2)%0.2f' % comb_speed[1], \
-                    '(3)%0.2f' % comb_speed[2], \
-                    '(4)%0.2f' % comb_speed[3], \
-                    '(5)%0.2f' % comb_speed[4], \
-                    '(6)%0.2f' % comb_speed[5]
+            print ('%02d[_____]fortune()maxspeed' % result_num), comb_data['sum'][speed] / 100.0, \
+                    '(1)%0.2f%s' % (comb_speed[0], comb_type[0]), \
+                    '57+(2)%0.2f%s' % (comb_speed[1], comb_type[1]), \
+                    '(3)%0.2f%s' % (comb_speed[2], comb_type[2]), \
+                    '(4)%0.2f%s' % (comb_speed[3], comb_type[3]), \
+                    '(5)%0.2f%s' % (comb_speed[4], comb_type[4]), \
+                    '(6)%0.2f%s' % (comb_speed[5], comb_type[5])
             #base_speed = 117
             #print('%02d[%s]%s()maxspeed:%.2f,+%.2f' % (result_num, '____', __[type_fortune], n / 100.0, base_speed + comb_data['sum'][speed] / 100.0))
             return comb_data
@@ -1267,22 +1268,18 @@ def filter_fast(data_dict):
         r = cal_x_max_damage(type_jizo, soul_crit, 117, prop_value_none, 0, '_li1 ')
         damage_max_speed = 500
         return r
-    def cal_nymph_under120_3457_40_150_117():
+    def cal_nymph_over0_3457_40_150_117():
         global attack_hero
         global attack_buf_base
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
-        global damage_max_speed
         attack_hero = 3457
         attack_buf_base = 100
         damage_min_crit_rate = 100 - 40 - 15
         crit_damage_base = 150
         damage_min_speed = 117 - 117
-        #damage_max_speed = 120 - 117
-        r = cal_x_max_damage(type_nymph, soul_crit, 117, prop_value_none, 0, '_li  ')
-        damage_max_speed = 500
-        return r
+        return cal_x_max_damage(type_nymph, soul_crit, 117, prop_value_none, 0, '_li  ')
     def cal_jizo_over117_4074_10_150_118():
         global attack_hero
         global attack_buf_base
@@ -1641,6 +1638,42 @@ def filter_fast(data_dict):
         crit_damage_base = 150
         damage_min_speed = 128 - 112
         return cal_x_max_damage(type_kyoukotsu, [type_skull], 112, prop_value_none, 0, '_lin1')
+    def cal_shadow_crit_over0_3136_10_150_113():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 3136
+        attack_buf_base = 100
+        damage_min_crit_rate = 100 - 10 - 30
+        crit_damage_base = 150
+        damage_min_speed = 113 - 113
+        return cal_x_max_damage(type_shadow, soul_crit, 113, prop_value_none, 0, '_tun1')
+    def cal_shadow_skull_over0_3136_10_150_113():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 3136
+        attack_buf_base = 100
+        damage_min_crit_rate = 100 - 10 - 15
+        crit_damage_base = 150
+        damage_min_speed = 113 - 113
+        return cal_x_max_damage(type_shadow, [type_skull], 113, prop_value_none, 0, '_tun2')
+    def cal_kyoukotsu_x_3136_10_150_113():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 3136
+        attack_buf_base = 100 + 15
+        damage_min_crit_rate = 100 - 10
+        crit_damage_base = 150
+        damage_min_speed = 113 - 113
+        return cal_x_max_damage(type_kyoukotsu, [type_skull], 113, prop_value_none, 0, '_tun1')
     def cal_shadow_crit_over0_3323_35_150_112():
         global attack_hero
         global attack_buf_base
@@ -2326,14 +2359,6 @@ def filter_fast(data_dict):
         cal_freetype_max_speed,
         #cal_seductress_crit_over129_3350_11_160_117,
     ]
-    cbg = [
-        #cal_fortune_or_none,
-        #cal_clear,
-        cal_freetype_max_speed,
-        #cal_clear,
-        #cal_speedmax,
-        cal_exit,
-    ]
     mine11a10 = [
         cal_kyoukotsu_skull_over128_3323_15_150_112,
     ]
@@ -2345,10 +2370,10 @@ def filter_fast(data_dict):
         cal_freetype_effect_over276_127,                #yan   DO0
         cal_fortune_effect_over200_119,                 #zhu   DO2
         cal_fire_resist_over200_109,                    #lv    DO2
-        cal_clear,
-        cal_kyoukotsu_skull_over128_3323_15_150_112,
-        cal_seductress_crit_over129_3350_11_160_117,
     ]
+        #cal_clear,
+        #cal_kyoukotsu_skull_over128_3323_15_150_112,
+        #cal_seductress_crit_over129_3350_11_160_117,
     dou6 = [
         cal_clear,
         cal_freetype_max_speed,                         #mian  DO1
@@ -2362,11 +2387,27 @@ def filter_fast(data_dict):
         cal_shadow_indirect_under128_4074_10_150_118,   #she1           DG4 
         cal_shadow_crit_under128_3323_35_150_112,       #lin1               TU4
         cal_seductress_attack_over0_3377_9_150_109,     #hei                ZH6
-        cal_jizo_under122_3457_40_150_117,              #li                     DO6
+        #cal_jizo_under122_3457_40_150_117,              #li                     DO6
         cal_seductress_over0_3457_40_150_117,           #li                     DA6
         cal_fortune_indirect_under122_4074_10_150_118,  #she2       DG5
     ]
-    order = dou6
+    cbg = [
+        cal_fortune_or_none,
+        cal_clear,
+        cal_freetype_max_speed,
+        #cal_clear,
+        #cal_speedmax,
+        cal_exit,
+    ]
+    ltt = [
+        cal_shadow_crit_over0_3136_10_150_113,
+        cal_shadow_skull_over0_3136_10_150_113,
+        cal_nymph_over0_3457_40_150_117,
+    ]
+    order = dou0
+    order.extend(ltt)
+    order.append(cal_clear)
+    order = cbg
     for f in order:
         try:
             comb = f()
