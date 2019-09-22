@@ -1561,6 +1561,18 @@ def filter_fast(data_dict):
         crit_damage_base = 150
         damage_min_speed = 117 - 112
         return cal_x_max_damage(type_kyoukotsu, soul_crit, 112, prop_value_none, 0)
+    def cal_kyoukotsu_skull_over0_3511_12_150_115():
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = 3511
+        attack_buf_base = 100 + 15
+        damage_min_crit_rate = 100 - 12 - 0
+        crit_damage_base = 150
+        damage_min_speed = 115 - 115
+        return cal_x_max_damage(type_kyoukotsu, [type_skull], 115, prop_value_none, 0, '_jin ')
     def cal_shadow_shadow_over112_3323_15_150_112():
         global attack_hero
         global attack_buf_base
@@ -2408,6 +2420,10 @@ def filter_fast(data_dict):
     order.extend(ltt)
     order.append(cal_clear)
     order = cbg
+    mine11 = [
+        cal_kyoukotsu_skull_over0_3511_12_150_115,
+    ]
+    order = mine11
     for f in order:
         try:
             comb = f()
