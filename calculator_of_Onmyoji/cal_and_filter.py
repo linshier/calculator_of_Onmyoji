@@ -454,6 +454,7 @@ def filter_fast(data_dict):
     type_tomb = data_format.MITAMA_TYPES[35]
     type_kyoukotsu = data_format.MITAMA_TYPES[36]
     type_kasodani = data_format.MITAMA_TYPES[37]
+    type_ghost = data_format.MITAMA_TYPES[38]
     __ = {
         speed: 'speed',
 
@@ -480,6 +481,7 @@ def filter_fast(data_dict):
         type_tomb: 'tomb',
         type_kyoukotsu: 'kyoukotsu',
         type_kasodani: 'kasodani',
+        type_ghost: 'ghost',
     }
     append_data_dict(type_fortune, speed_1p_overflow)
 
