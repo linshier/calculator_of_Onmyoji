@@ -777,7 +777,7 @@ def filter_fast(data_dict):
             comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
             comb_type = ['#' if (type_fortune == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
             comb_speed[1] = comb_speed[1] - 57
-            print ('%02d[_mian]freetype()maxspeed:%.2f,+%.2f' % (result_num, n / 100.0, 119 + n / 100.0)), \
+            print ('%02d[_mian(276)]freetype()maxspeed:%.2f,+%.2f' % (result_num, n / 100.0, 119 + n / 100.0)), \
                     '(1)%0.2f%s' % (comb_speed[0], comb_type[0]), \
                     '57+(2)%0.2f%s' % (comb_speed[1], comb_type[1]), \
                     '(3)%0.2f%s' % (comb_speed[2], comb_type[2]), \

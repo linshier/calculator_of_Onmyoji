@@ -12,10 +12,13 @@
 #'https://yys.cbg.163.com/cgi/api/query_topic_equips?topic_id=1-46&serverid=11&price_min=500000&price_max=900000&platform_type=1&order_by=selling_time%20DESC&page='$1 \
 
 function getjson() {
+price='&price_min=900000&price_max=2000000'
+speed='270'
+
 curl -s \
-'https://yys.cbg.163.com/cgi/api/query?pass_fair_show=1&serverid=11&price_min=100000&price_max=200000&order_by=selling_time%20DESC&page='$1 \
--H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Safari/537.36' \
---compressed
+'https://recommd.yys.cbg.163.com/cgi-bin/recommend.py?callback=jQuery33108416587861223492_1569310704203&act=recommd_by_role&search_type=role&count=15&platform_type=1&order_by=price%20ASC'${price}'&heros=%5B%7B%22hero_id%22%3A261%2C%22speed%22%3A%22'${speed}'%22%7D%5D&page='$1 \
+-H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36' --compressed \
+|sed 's/^jQ[^{]*(//;s/)$//;'
 return $?
 }
 for ((i=1;i<100;i++))
