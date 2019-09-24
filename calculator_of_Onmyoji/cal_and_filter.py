@@ -2425,7 +2425,44 @@ def filter_fast(data_dict):
     mine11 = [
         cal_kyoukotsu_skull_over0_3511_12_150_115,
     ]
+    mine11x = [
+        cal_shadow_skull_over117_3350_32_160_110,
+    ]
     order = mine11
+    order2 = [
+        #[type_shadow, [type_skull], 158, 100, 3350, 110, 12+15+15, 160, '_jiu(190) '],
+        [],
+        [type_kyoukotsu, [type_skull], 131, 100+15, 3511, 115, 12, 160, '_jin(242) '],
+        #[type_seductress, [type_ghost], 129, 100, 3511, 115, 12+15, 160, '_jin(242) '],
+    ]
+    def xcal(xtype, xsoul, xoverspeed, xattackbuf, xattack, xspeedbase, xcrit, xcritdamage, xnote):
+        global attack_hero
+        global attack_buf_base
+        global damage_min_crit_rate
+        global crit_damage_base
+        global damage_min_speed
+        attack_hero = xattack
+        attack_buf_base = xattackbuf
+        damage_min_crit_rate = 100 - xcrit
+        crit_damage_base = xcritdamage
+        damage_min_speed = xoverspeed - xspeedbase
+        return cal_x_max_damage(xtype, xsoul, xspeedbase, prop_value_none, 0, xnote)
+    for a in order2:
+        try:
+            if len(a) == 0:
+                done.clear()
+                print '--'
+                continue
+            comb = xcal(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8])
+            if comb is not None:
+                yield comb
+            if 0:
+                done.clear()
+        except Exception as e:
+            print 'except', str(e).decode('raw_unicode_escape')
+            sys.stdout.flush()
+            os._exit(0)
+    return
     for f in order:
         try:
             comb = f()
