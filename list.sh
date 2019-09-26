@@ -12,7 +12,7 @@
 #'https://yys.cbg.163.com/cgi/api/query_topic_equips?topic_id=1-46&serverid=11&price_min=500000&price_max=900000&platform_type=1&order_by=selling_time%20DESC&page='$1 \
 
 function getjson() {
-price='&price_min=900000&price_max=2000000'
+price='&price_min=500000&price_max=1900000'
 speed='270'
 
 curl -s \

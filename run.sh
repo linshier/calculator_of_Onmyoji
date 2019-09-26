@@ -14,6 +14,8 @@ cat db/$sn.json|python -m json.tool|grep '\<price\>'
 #cat db/$sn.json|jq -r '.equip.equip_desc'|python -m json.tool|grep '901240.. .,\|901130.. .,\|\<901226\> ' #|| exit 0
 python calculator_of_Onmyoji/cal_mitama.py db/$sn.xls res.xls
 sleep 11
+else
+python calculator_of_Onmyoji/cal_mitama.py db/$sn.xls res.xls
 fi
 
 #if [ -f db/$sn.xls ]; then

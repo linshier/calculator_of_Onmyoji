@@ -751,7 +751,7 @@ def filter_fast(data_dict):
             return comb_data
         return None
     def cal_fortune_max_speed():
-        return cal_x_max_speed(type_fortune, 117, '_you1')
+        return cal_x_max_speed(type_fortune, 117, '_you1(270)')
     def cal_fire_max_speed():
         return cal_x_max_speed(type_fire)
     def cal_fortune_speed_107():
@@ -2429,10 +2429,10 @@ def filter_fast(data_dict):
         cal_shadow_skull_over117_3350_32_160_110,
     ]
     order = mine11
-    order2 = [
+    order = [
         #[type_shadow, [type_skull], 158, 100, 3350, 110, 12+15+15, 160, '_jiu(190) '],
-        [cal_freetype_max_speed],
-        [cal_clear],
+        cal_fortune_max_speed,                          #lian  DO1
+        cal_clear,
         [type_kyoukotsu, [type_skull], 131, 100+15, 3511, 115, 12, 160, '_jin (242)'],
         #[type_seductress, [type_ghost], 129, 100, 3511, 115, 12+15, 160, '_jin(242) '],
     ]
@@ -2448,30 +2448,18 @@ def filter_fast(data_dict):
         crit_damage_base = xcritdamage
         damage_min_speed = xoverspeed - xspeedbase
         return cal_x_max_damage(xtype, xsoul, xspeedbase, prop_value_none, 0, xnote)
-    for a in order2:
+    for a in order:
         try:
-            if len(a) == 1:
-                a[0]()
-                continue
-            comb = xcal(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8])
+            if isinstance(a, list):
+                comb = xcal(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8])
+            else:
+                comb = a()
             if comb is not None:
                 yield comb
             if 0:
                 done.clear()
         except Exception as e:
             print 'except', str(e).decode('raw_unicode_escape')
-            sys.stdout.flush()
-            os._exit(0)
-    return
-    for f in order:
-        try:
-            comb = f()
-            if comb is not None:
-                yield comb
-            if 0:
-                done.clear()
-        except Exception as e:
-            print str(e).decode('raw_unicode_escape')
             sys.stdout.flush()
             os._exit(0)
     return
