@@ -711,6 +711,13 @@ def filter_fast(data_dict):
                     '(6)%0.2f%s' % (comb_speed[5], comb_type[5])
             return comb_data
         return None
+    freepos = []
+    for f1p in range(6):
+        for f2p in range(6):
+            if f2p > f1p:
+                freepos.append([f1p+1, f2p+1])
+    if 0: print freepos
+
     def cal_x_max_speed(soul_x_type, base_speed, note):
         def _build_mask():
             soul = []
@@ -718,12 +725,26 @@ def filter_fast(data_dict):
             soul_4p_mask = int(0)
             for (k, v) in data_format.MITAMA_ENHANCE.items():
                 if k == soul_x_type:
-                    soul_2p_mask |= (2 << (3 * len(soul)))
                     soul_4p_mask |= (4 << (3 * len(soul)))
                     soul.append(k)
                     break
             return soul, soul_2p_mask, soul_4p_mask
-        res, com, n, _ = filter_soul(prop_value_speed,
+
+        speedbuf = 0
+        res = []
+        com = {}
+        for fp in freepos:
+            def __filter_type(mitama):
+                if mitama.keys()[0] in done:
+                    return False
+                if not prop_value_speed(mitama):
+                    return False
+                location = mitama.values()[0][pos]
+                if location in fp:
+                    return True
+                enhance_type = mitama.values()[0][suit]
+                return enhance_type == soul_x_type
+            r, c, n, _ = filter_soul(__filter_type,
                           prop_value_l2_speed,
                           prop_value_speed,
                           prop_value_speed,
@@ -732,6 +753,8 @@ def filter_fast(data_dict):
                           True,
                           score_suit_buf_max_speed,
                           data_dict)
+            if n > speedbuf:
+                res, com, speedbuf = r, c, n
         if len(res) > 0:
             for x in res:
                 if x not in none:
@@ -740,7 +763,7 @@ def filter_fast(data_dict):
             comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
             comb_type = ['#' if (type_fortune == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
             comb_speed[1] = comb_speed[1] - 57
-            print ('%02d[%s]%s()maxspeed:%.2f,+%.2f' % (result_num, note, __[soul_x_type], n / 100.0, base_speed + comb_data['sum'][speed] / 100.0)), \
+            print ('%02d[%s]%s()maxspeed:%.2f,+%.2f' % (result_num, note, __[soul_x_type], speedbuf / 100.0, base_speed + comb_data['sum'][speed] / 100.0)), \
                     '(1)%0.2f%s' % (comb_speed[0], comb_type[0]), \
                     '57+(2)%0.2f%s' % (comb_speed[1], comb_type[1]), \
                     '(3)%0.2f%s' % (comb_speed[2], comb_type[2]), \
