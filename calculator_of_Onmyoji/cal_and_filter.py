@@ -800,7 +800,7 @@ def filter_fast(data_dict):
             comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
             comb_type = ['#' if (type_fortune == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
             comb_speed[1] = comb_speed[1] - 57
-            print ('%02d[_mian(276)]freetype()maxspeed:%.2f,+%.2f' % (result_num, n / 100.0, 119 + n / 100.0)), \
+            print ('%02d[_mian(276)]freetype()maxspeed:%.2f,+%.2f' % (result_num, 119 + n / 100.0, n / 100.0)), \
                     '(1)%0.2f%s' % (comb_speed[0], comb_type[0]), \
                     '57+(2)%0.2f%s' % (comb_speed[1], comb_type[1]), \
                     '(3)%0.2f%s' % (comb_speed[2], comb_type[2]), \
@@ -1076,9 +1076,10 @@ def filter_fast(data_dict):
             #print('%s(+%s):%d,+%d' % (__[soul_type], __[p], int(damage), base_speed + comb_data['sum'][speed]))
             if 1:
                 info = comb_data['info']
+                comb_type = ['#' if (soul_type == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
                 for i in xrange(6):
                     v = info[i].values()[0]
-                    print('[%d]%3dA%3dR%3dD%3dS' % (i+1, v[attack_buf], v[crit_rate], v[crit_damage], v[speed]))
+                    print('[%d]%3dA%3dR%3dD%3dS %s' % (i+1, v[attack_buf], v[crit_rate], v[crit_damage], v[speed], comb_type[i]))
             return comb_data
         return None
     def cal_seductress_crit_over129_3350_11_160_117():
@@ -2459,11 +2460,13 @@ def filter_fast(data_dict):
     order = mine11
     order = [
         #[type_shadow, [type_skull], 158, 100, 3350, 110, 12+15+15, 160, '_jiu(190) '],
-        cal_freetype_max_speed,                         #mian  DO1
-        cal_clear,
         cal_fortune_max_speed,                          #lian  DO1
         cal_clear,
-        [type_shadow, soul_crit, 128, 0, 100, 3323, 112, 15+30, 150,  '_lin (215)'],
+        cal_freetype_max_speed,                         #mian  DO1
+        #cal_freetype_effect_over276_127,                #yan   DO0
+        cal_clear,
+        [type_seductress, soul_crit,   0, 128, 100, 3270, 110, 10+30, 150, '_tian (203)'],
+        [type_shadow,     soul_crit, 128,   0, 100, 3323, 112, 15+30, 150, '_lin (215)'],
         #[type_kyoukotsu, [type_skull], 0, 131, 100+15, 3511, 115, 12, 160, '_jin (242)'],
 
         #[type_seductress, [type_ghost], 0, 129, 100, 3511, 115, 12+15, 160, '_jin(242) '],
@@ -2479,10 +2482,8 @@ def filter_fast(data_dict):
         attack_buf_base = xattackbuf
         damage_min_crit_rate = 100 - xcrit
         crit_damage_base = xcritdamage
-        if xmaxspeed >= xspeedbase:
-            damage_max_speed = xmaxspeed - xspeedbase
-        if xminspeed >= xspeedbase:
-            damage_min_speed = xminspeed - xspeedbase
+        damage_max_speed = (xmaxspeed - xspeedbase) if xmaxspeed >= xspeedbase else 500
+        damage_min_speed = (xminspeed - xspeedbase) if xminspeed >= xspeedbase else 0
         r = calxmaxdamage(xtype, xsoul, xspeedbase, prop_value_none, 0, xnote)
         damage_max_speed = 500
         return r
