@@ -2454,6 +2454,8 @@ def filter_fast(data_dict):
     order = mine11
     order = [
         #[type_shadow, [type_skull], 158, 100, 3350, 110, 12+15+15, 160, '_jiu(190) '],
+        cal_freetype_max_speed,                         #mian  DO1
+        cal_clear,
         cal_fortune_max_speed,                          #lian  DO1
         cal_clear,
         [type_kyoukotsu, [type_skull], 131, 100+15, 3511, 115, 12, 160, '_jin (242)'],
