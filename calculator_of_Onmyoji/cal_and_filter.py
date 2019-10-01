@@ -1079,7 +1079,7 @@ def filter_fast(data_dict):
                 comb_type = ['#' if (soul_type == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
                 for i in xrange(6):
                     v = info[i].values()[0]
-                    print('[%d]%3dA%3dR%3dD%3dS %s' % (i+1, v[attack_buf], v[crit_rate], v[crit_damage], v[speed], comb_type[i]))
+                    print('[%d]%3dA%3dR%3dD%3dS %s' % (i+1, int(v[attack_buf]+0.5), int(v[crit_rate]+0.5), int(v[crit_damage]+0.5), int(v[speed]+0.5), comb_type[i]))
             return comb_data
         return None
     def cal_seductress_crit_over129_3350_11_160_117():
@@ -2465,7 +2465,8 @@ def filter_fast(data_dict):
         cal_freetype_max_speed,                         #mian  DO1
         #cal_freetype_effect_over276_127,                #yan   DO0
         cal_clear,
-        [type_seductress, soul_crit,   0, 128, 100, 3270, 110, 10+30, 150, '_tian (203)'],
+        [type_jizo,       soul_crit, 128,   0, 100, 3457, 117, 10+45, 150, '_li  (243)'],
+        [type_seductress, soul_crit,   0, 128, 100, 3270, 110, 10+30, 150, '_tian(203)'],
         [type_shadow,     soul_crit, 128,   0, 100, 3323, 112, 15+30, 150, '_lin (215)'],
         #[type_kyoukotsu, [type_skull], 0, 131, 100+15, 3511, 115, 12, 160, '_jin (242)'],
 
