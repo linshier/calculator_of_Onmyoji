@@ -2463,25 +2463,33 @@ def filter_fast(data_dict):
         cal_clear,
         cal_fortune_max_speed,                          #lian  DO1
         cal_clear,
-        [type_kyoukotsu, [type_skull], 131, 100+15, 3511, 115, 12, 160, '_jin (242)'],
-        #[type_seductress, [type_ghost], 129, 100, 3511, 115, 12+15, 160, '_jin(242) '],
+        [type_shadow, soul_crit, 128, 0, 100, 3323, 112, 15+30, 150,  '_lin (215)'],
+        #[type_kyoukotsu, [type_skull], 0, 131, 100+15, 3511, 115, 12, 160, '_jin (242)'],
+
+        #[type_seductress, [type_ghost], 0, 129, 100, 3511, 115, 12+15, 160, '_jin(242) '],
     ]
-    def xcal(xtype, xsoul, xoverspeed, xattackbuf, xattack, xspeedbase, xcrit, xcritdamage, xnote):
+    def xcal(xtype, xsoul, xmaxspeed, xminspeed, xattackbuf, xattack, xspeedbase, xcrit, xcritdamage, xnote):
         global attack_hero
         global attack_buf_base
         global damage_min_crit_rate
         global crit_damage_base
+        global damage_max_speed
         global damage_min_speed
         attack_hero = xattack
         attack_buf_base = xattackbuf
         damage_min_crit_rate = 100 - xcrit
         crit_damage_base = xcritdamage
-        damage_min_speed = xoverspeed - xspeedbase
-        return calxmaxdamage(xtype, xsoul, xspeedbase, prop_value_none, 0, xnote)
+        if xmaxspeed >= xspeedbase:
+            damage_max_speed = xmaxspeed - xspeedbase
+        if xminspeed >= xspeedbase:
+            damage_min_speed = xminspeed - xspeedbase
+        r = calxmaxdamage(xtype, xsoul, xspeedbase, prop_value_none, 0, xnote)
+        damage_max_speed = 500
+        return r
     for a in order:
         try:
             if isinstance(a, list):
-                comb = xcal(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8])
+                comb = xcal(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9])
             else:
                 comb = a()
             if comb is not None:
