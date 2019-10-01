@@ -1074,6 +1074,11 @@ def filter_fast(data_dict):
                   (crit_damage_base * 10.0 + __decode(cc, offset_critdamage, bits_critdamage)) / 1000.0,
                   base_speed + comb_data['sum'][speed] / 100.0))
             #print('%s(+%s):%d,+%d' % (__[soul_type], __[p], int(damage), base_speed + comb_data['sum'][speed]))
+            if 1:
+                info = comb_data['info']
+                for i in xrange(6):
+                    v = info[i].values()[0]
+                    print('[%d]%3dA%3dR%3dD%3dS' % (i+1, v[attack_buf], v[crit_rate], v[crit_damage], v[speed]))
             return comb_data
         return None
     def cal_seductress_crit_over129_3350_11_160_117():
