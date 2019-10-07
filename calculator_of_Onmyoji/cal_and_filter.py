@@ -2487,8 +2487,12 @@ def filter_fast(data_dict):
         #cal_freetype_effect_over276_127,                #yan   DO0
         cal_clear,
         [type_kyoukotsu, [type_geisha], 0, 158, 15+100, 3511, 115,    12, 160, '_jin (184)', score_buf_max_crit_damage_only],
+        [type_kyoukotsu,     soul_crit, 0, 170, 15+100, 3136, 113, 15+10, 150, '_tun1(167)'],
+        [type_kyoukotsu,     soul_crit, 0, 170, 15+100, 3136, 113, 15+10, 150, '_tun2(167)'],
         [type_shadow,        soul_crit, 0,   0,    100, 3377, 111, 30+12, 150, '_chi (238)'],   
-        [type_watcher,    [type_skull], 0,   0, 15+100, 3323, 112,    15, 150, '_lin ()'],
+
+        #[type_watcher,    [type_skull], 0,   0, 15+100, 3323, 112,    15, 150, '_lin ()'],
+
         #[type_jizo,       soul_crit, 128,   0, 100, 3457, 117, 10+45, 150, '_li  (243)'],
         #[type_seductress, soul_crit,   0, 128, 100, 3270, 110, 10+30, 150, '_tian(203)'],
         #[type_shadow,     soul_crit, 128,   0, 100, 3323, 112, 15+30, 150, '_lin (215)'],
