@@ -459,11 +459,13 @@ def filter_fast(data_dict):
     type_spider = data_format.MITAMA_TYPES[6]
     type_skull = data_format.MITAMA_TYPES[8]
     type_catfish = data_format.MITAMA_TYPES[9]
+    type_shinkirou = data_format.MITAMA_TYPES[10]
     type_jizo = data_format.MITAMA_TYPES[12]
     type_semisen = data_format.MITAMA_TYPES[15]
     type_mimic = data_format.MITAMA_TYPES[16]
     type_fortune = data_format.MITAMA_TYPES[18]
     type_taker = data_format.MITAMA_TYPES[20]
+    type_dawnfairy = data_format.MITAMA_TYPES[21]
     type_scarlet = data_format.MITAMA_TYPES[24]
     type_fire = data_format.MITAMA_TYPES[25]
     type_watcher = data_format.MITAMA_TYPES[28]
@@ -487,11 +489,13 @@ def filter_fast(data_dict):
         type_spider: 'spider',
         type_skull: 'skull',
         type_catfish: 'catfish',
+        type_shinkirou: 'shinkirou',
         type_jizo: 'jizo',
         type_semisen: 'semisen',
         type_mimic: 'mimic',
         type_fortune: 'fortune',
         type_taker: 'taker',
+        type_dawnfairy: 'dawnfairy',
         type_scarlet: 'scarlet',
         type_fire: 'fire',
         type_watcher: 'watcher',
@@ -2488,12 +2492,13 @@ def filter_fast(data_dict):
         cal_freetype_max_speed,                         #mian  DO1
         #cal_freetype_effect_over276_127,                #yan   DO0
         cal_clear,
-        [type_kyoukotsu,  [type_geisha], 0, 158, 15+100, 3511, 115,    12, 160, '_jin (184)', score_buf_max_crit_damage_only],
-        [type_kyoukotsu,      soul_crit, 0, 170, 15+100, 3136, 113, 15+10, 150, '_tun1(167)'],
-        [type_kyoukotsu,      soul_crit, 0, 170, 15+100, 3136, 113, 15+10, 150, '_tun2(167)'],
-        [type_shadow,         soul_crit, 0,   0,    100, 3377, 111, 30+12, 150, '_chi (238)'],   
+        [type_kyoukotsu,    [type_geisha], 0, 158, 15+100, 3511, 115,    12, 160, '_jin (184)', score_buf_max_crit_damage_only],
+        [type_dawnfairy, [type_shinkirou], 0, 162,    100, 2412, 105,     5, 150, '_qin ( 92)'],
+        [type_kyoukotsu,        soul_crit, 0, 170, 15+100, 3136, 113, 15+10, 150, '_tun1(167)'],
+        [type_kyoukotsu,        soul_crit, 0, 170, 15+100, 3136, 113, 15+10, 150, '_tun2(167)'],
+        [type_shadow,           soul_crit, 0,   0,    100, 3377, 111, 30+12, 150, '_chi (238)'],   
+        [type_shadow,    [type_shinkirou], 0, 128,    100, 3457, 117, 15+10, 150, '_li  (185)'],
 
-        #[type_kyoukotsu, [type_catfish], 0, 128, 15+100, 3457, 117,    10, 150, '_li  (193)'],
         #[type_watcher,    [type_skull], 0,   0, 15+100, 3323, 112,    15, 150, '_lin ()'],
         #[type_jizo,       soul_crit, 128,   0, 100, 3457, 117, 10+45, 150, '_li  (243)'],
         #[type_seductress, soul_crit,   0, 128, 100, 3270, 110, 10+30, 150, '_tian(203)'],
