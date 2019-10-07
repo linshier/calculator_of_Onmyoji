@@ -119,6 +119,26 @@ def score_suit_buf_max_damage(soul_2p_mask, buf_max, n, t):
     #print damage_limit, d
     return d + 1, n, False
 
+def score_buf_max_crit_damage_only(soul_2p_mask, buf_max, n, t):
+    #test speed
+    s = __decode(n, offset_speed, bits_speed)
+    if s < int(damage_min_speed * 100) or s > int(damage_max_speed * 100):
+        return buf_max, 1, True
+    ##test crit rate with suit enhance
+    if soul_2p_mask and (t & soul_2p_mask) == 0:
+        return buf_max, 2, True
+    #test crit rate
+    if __decode(n, offset_critrate, bits_critrate) < damage_min_crit_rate * 10:
+        return buf_max, 3, True
+    ab = 100 * 10
+    cd = crit_damage_base * 10 + __decode(n, offset_critdamage, bits_critdamage)
+    d = ab * cd
+    if buf_max >= d:
+        return buf_max, 4, True
+    if 0 < damage_limit and damage_limit < int(attack_hero * d / 1000000 / 100):
+        return buf_max, 5, True
+    return d + 1, n, False
+
 def score_suit_buf_none(soul_2p_mask, buf_max, n, t):
     return n, n, False
 
@@ -454,7 +474,7 @@ def filter_fast(data_dict):
     type_tomb = data_format.MITAMA_TYPES[35]
     type_kyoukotsu = data_format.MITAMA_TYPES[36]
     type_kasodani = data_format.MITAMA_TYPES[37]
-    type_ghost = data_format.MITAMA_TYPES[38]
+    type_geisha = data_format.MITAMA_TYPES[38]
     __ = {
         speed: 'speed',
 
@@ -481,7 +501,7 @@ def filter_fast(data_dict):
         type_tomb: 'tomb',
         type_kyoukotsu: 'kyoukotsu',
         type_kasodani: 'kasodani',
-        type_ghost: 'ghost',
+        type_geisha: 'geisha',
     }
     append_data_dict(type_fortune, speed_1p_overflow)
 
@@ -1016,7 +1036,7 @@ def filter_fast(data_dict):
         resist_base = 0
         return r
 
-    def calxmaxdamage(soul_type, soul_peer, base_speed, prop_value_l6, buf_limit, note):
+    def calxmaxdamage(soul_type, soul_peer, base_speed, prop_value_l6, buf_limit, note, score_buf):
         global effect_min_speed
         global effect_max_speed
         global damage_limit
@@ -1058,7 +1078,7 @@ def filter_fast(data_dict):
                                   __build_mask,
                                   crit_rate,
                                   False,
-                                  score_suit_buf_max_damage,
+                                  score_buf,
                                   data_dict)
             #if len(r) > 0: print '+type', s, int(attack_hero * n / 1000000 / 100), ('%s' % (make_result(data_dict, r, c)['sum'])).decode('raw_unicode_escape')
             if n > damage:
@@ -1068,10 +1088,11 @@ def filter_fast(data_dict):
                 if x not in none:
                     done.add(x)
             comb_data = make_result(data_dict, res, com)
+            pa = (attack_buf_base * 10.0 + __decode(cc, offset_attackbuf, bits_attackbuf)) / 1000.0 * attack_hero
+            pd = (crit_damage_base * 10.0 + __decode(cc, offset_critdamage, bits_critdamage)) / 1000.0
             print('%02d[%s]%s(+%s):%d=%.2f*%.2f,+%.2f' % (result_num, note,
-                  __[soul_type], __[p], int(attack_hero * damage / 1000000 / 100),
-                  (attack_buf_base * 10.0 + __decode(cc, offset_attackbuf, bits_attackbuf)) / 1000.0 * attack_hero,
-                  (crit_damage_base * 10.0 + __decode(cc, offset_critdamage, bits_critdamage)) / 1000.0,
+                  __[soul_type], __[p], int(pa * pd / 100.0),
+                  pa, pd,
                   base_speed + comb_data['sum'][speed] / 100.0))
             #print('%s(+%s):%d,+%d' % (__[soul_type], __[p], int(damage), base_speed + comb_data['sum'][speed]))
             if 1:
@@ -2465,14 +2486,17 @@ def filter_fast(data_dict):
         cal_freetype_max_speed,                         #mian  DO1
         #cal_freetype_effect_over276_127,                #yan   DO0
         cal_clear,
-        [type_jizo,       soul_crit, 128,   0, 100, 3457, 117, 10+45, 150, '_li  (243)'],
-        [type_seductress, soul_crit,   0, 128, 100, 3270, 110, 10+30, 150, '_tian(203)'],
-        [type_shadow,     soul_crit, 128,   0, 100, 3323, 112, 15+30, 150, '_lin (215)'],
+        [type_kyoukotsu, [type_geisha], 0, 158, 15+100, 3511, 115,    12, 160, '_jin (184)', score_buf_max_crit_damage_only],
+        [type_shadow,        soul_crit, 0,   0,    100, 3377, 111, 30+12, 150, '_chi (238)'],   
+        [type_watcher,    [type_skull], 0,   0, 15+100, 3323, 112,    15, 150, '_lin ()'],
+        #[type_jizo,       soul_crit, 128,   0, 100, 3457, 117, 10+45, 150, '_li  (243)'],
+        #[type_seductress, soul_crit,   0, 128, 100, 3270, 110, 10+30, 150, '_tian(203)'],
+        #[type_shadow,     soul_crit, 128,   0, 100, 3323, 112, 15+30, 150, '_lin (215)'],
         #[type_kyoukotsu, [type_skull], 0, 131, 100+15, 3511, 115, 12, 160, '_jin (242)'],
 
-        #[type_seductress, [type_ghost], 0, 129, 100, 3511, 115, 12+15, 160, '_jin(242) '],
+        #[type_seductress, [type_geisha], 0, 129, 100, 3511, 115, 12+15, 160, '_jin(242) '],
     ]
-    def xcal(xtype, xsoul, xmaxspeed, xminspeed, xattackbuf, xattack, xspeedbase, xcrit, xcritdamage, xnote):
+    def xcal(xtype, xsoul, xmaxspeed, xminspeed, xattackbuf, xattack, xspeedbase, xcrit, xcritdamage, xnote, xscore):
         global attack_hero
         global attack_buf_base
         global damage_min_crit_rate
@@ -2485,13 +2509,14 @@ def filter_fast(data_dict):
         crit_damage_base = xcritdamage
         damage_max_speed = (xmaxspeed - xspeedbase) if xmaxspeed >= xspeedbase else 500
         damage_min_speed = (xminspeed - xspeedbase) if xminspeed >= xspeedbase else 0
-        r = calxmaxdamage(xtype, xsoul, xspeedbase, prop_value_none, 0, xnote)
+        r = calxmaxdamage(xtype, xsoul, xspeedbase, prop_value_none, 0, xnote, xscore)
         damage_max_speed = 500
         return r
     for a in order:
         try:
             if isinstance(a, list):
-                comb = xcal(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9])
+                fscore = score_suit_buf_max_damage if len(a) == 10 else a[10]
+                comb = xcal(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], fscore)
             else:
                 comb = a()
             if comb is not None:

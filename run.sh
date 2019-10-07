@@ -15,6 +15,7 @@ cat db/$sn.json|python -m json.tool|grep '\<price\>'
 python calculator_of_Onmyoji/cal_mitama.py db/$sn.xls res.xls
 sleep 11
 else
+cp *.xls db/
 python calculator_of_Onmyoji/cal_mitama.py db/$sn.xls res.xls
 fi
 
