@@ -109,11 +109,6 @@ def generate_mitama_list(acc_id, filename,
             mitama_pos = str(mitama_info['pos'])
             mitama_name = mitama_info['name']
             mitama_attrs = dict()
-            # 获取首领御魂独立属性
-            single_prop = mitama_info.get('single_attr')
-            if single_prop:
-                mitama_attrs[single_prop[0]] = int(
-                    single_prop[1].replace('%', ''))
             if 'rattr' in mitama_info:
                 base_prop = mitama_info['attrs'][0]
                 mitama_attrs[base_prop[0]] = float(base_prop[1].replace('%', ''))
@@ -129,6 +124,15 @@ def generate_mitama_list(acc_id, filename,
                         mitama_attrs[prop] = value
                     else:
                         mitama_attrs[prop] += value
+            # 获取首领御魂独立属性
+            single_prop = mitama_info.get('single_attr')
+            if single_prop:
+                prop = single_prop[0]
+                value = int(single_prop[1].replace('%', ''))
+                if prop not in mitama_attrs:
+                    mitama_attrs[prop] = value
+                else:
+                    mitama_attrs[prop] += value
 
             mitama_sheet.write(mitama_num, 0, label=mitama_id)
             mitama_sheet.write(mitama_num, 1, label=mitama_name)
