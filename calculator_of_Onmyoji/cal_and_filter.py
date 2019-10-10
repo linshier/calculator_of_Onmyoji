@@ -139,6 +139,26 @@ def score_buf_max_crit_damage_only(soul_2p_mask, buf_max, n, t):
         return buf_max, 5, True
     return d + 1, n, False
 
+def score_buf_max_attack_only(soul_2p_mask, buf_max, n, t):
+    #test speed
+    s = __decode(n, offset_speed, bits_speed)
+    if s < int(damage_min_speed * 100) or s > int(damage_max_speed * 100):
+        return buf_max, 1, True
+    ##test crit rate with suit enhance
+    if soul_2p_mask and (t & soul_2p_mask) == 0:
+        return buf_max, 2, True
+    #test crit rate
+    if __decode(n, offset_critrate, bits_critrate) < damage_min_crit_rate * 10:
+        return buf_max, 3, True
+    ab = attack_buf_base * 10 + __decode(n, offset_attackbuf, bits_attackbuf)
+    cd = 100 * 10
+    d = ab * cd
+    if buf_max >= d:
+        return buf_max, 4, True
+    if 0 < damage_limit and damage_limit < int(attack_hero * d / 1000000 / 100):
+        return buf_max, 5, True
+    return d + 1, n, False
+
 def score_suit_buf_none(soul_2p_mask, buf_max, n, t):
     return n, n, False
 
@@ -461,6 +481,7 @@ def filter_fast(data_dict):
     type_catfish = data_format.MITAMA_TYPES[9]
     type_shinkirou = data_format.MITAMA_TYPES[10]
     type_jizo = data_format.MITAMA_TYPES[12]
+    type_nightwing = data_format.MITAMA_TYPES[13]
     type_semisen = data_format.MITAMA_TYPES[15]
     type_mimic = data_format.MITAMA_TYPES[16]
     type_fortune = data_format.MITAMA_TYPES[18]
@@ -468,6 +489,7 @@ def filter_fast(data_dict):
     type_dawnfairy = data_format.MITAMA_TYPES[21]
     type_scarlet = data_format.MITAMA_TYPES[24]
     type_fire = data_format.MITAMA_TYPES[25]
+    type_house = data_format.MITAMA_TYPES[26]
     type_watcher = data_format.MITAMA_TYPES[28]
     type_nymph = data_format.MITAMA_TYPES[29]
     type_spirit = data_format.MITAMA_TYPES[30]
@@ -491,6 +513,7 @@ def filter_fast(data_dict):
         type_catfish: 'catfish',
         type_shinkirou: 'shinkirou',
         type_jizo: 'jizo',
+        type_nightwing: 'nightwing',
         type_semisen: 'semisen',
         type_mimic: 'mimic',
         type_fortune: 'fortune',
@@ -498,6 +521,7 @@ def filter_fast(data_dict):
         type_dawnfairy: 'dawnfairy',
         type_scarlet: 'scarlet',
         type_fire: 'fire',
+        type_house: 'house',
         type_watcher: 'watcher',
         type_nymph: 'nymph',
         type_spirit: 'spirit',
@@ -2495,20 +2519,26 @@ def filter_fast(data_dict):
         #[type_sprite,           soul_crit, 0, 250,    100, 4074, 118, 15+10, 150, '_she (   )'],   
         #[type_seductress,       soul_crit, 0, 194,    100, 3350, 117, 30+11, 160, '_qie (   )'],   
         #cal_clear,
-        [type_seductress,     soul_attack, 0, 194, 15+100, 3350, 117, 15+11, 160, '_qie (   )'],   
-        cal_clear,
+        #[type_seductress,     soul_attack, 0, 194, 15+100, 3350, 117, 15+11, 160, '_qie (   )'],   
         [type_kyoukotsu,    [type_geisha], 0, 158, 15+100, 3511, 115,    12, 160, '_jin (184)', score_buf_max_crit_damage_only],
-        [type_dawnfairy, [type_shinkirou], 0, 162,    100, 2412, 105,     5, 150, '_qin ( 92)'],
-        [type_kyoukotsu,        soul_crit, 0, 170, 15+100, 3136, 113, 15+10, 150, '_tun1(167)'],
-        [type_kyoukotsu,        soul_crit, 0, 170, 15+100, 3136, 113, 15+10, 150, '_tun2(167)'],
+        [type_kyoukotsu,     [type_skull], 0,   0, 15+100, 3136, 113,    30, 150, '_tun1(196)'],
+        [type_kyoukotsu,        soul_crit, 0,   0, 15+100, 3136, 113, 15+30, 150, '_tun2(196)'],
+        cal_exit,
         [type_shadow,           soul_crit, 0,   0,    100, 2948, 109, 30+ 8, 180, '_jiu (230)'],
         [type_shadow,           soul_crit, 0,   0,    100, 3377, 111, 30+12, 150, '_chi (238)'],   
+        cal_exit,
+        [type_taker,          soul_attack, 0, 240, 30+100, 2841, 111,   100, 150, '_jing(   )', score_buf_max_attack_only],   
+        [type_nymph,          soul_attack, 0, 240, 15+100, 2841, 111,   100, 150, '_jing(   )', score_buf_max_attack_only],   
+        [type_kyoukotsu,        soul_crit, 0, 170, 15+100, 3136, 113, 15+10, 150, '_tun1(167)'],
+        [type_kyoukotsu,        soul_crit, 0, 170, 15+100, 3136, 113, 15+10, 150, '_tun2(167)'],
         #[type_shadow,    [type_shinkirou], 0, 128,    100, 3457, 117, 15+10, 150, '_li  (185)'],
+        [type_jizo,             soul_crit, 0,   0,    100, 3457, 117, 10+45, 150, '_li  (243)'],
+        [type_jizo,             soul_crit, 0, 194, 15+100, 3350, 117, 15+11, 160, '_qie (   )'],   
+        [type_dawnfairy, [type_shinkirou], 0, 162,    100, 2412, 105,     5, 150, '_qin ( 92)'],
 
         #[type_fortune,          soul_crit, 0, 210,    100, 2894, 118, 15+ 8, 150, '_shi (   )'],
 
         #[type_watcher,    [type_skull], 0,   0, 15+100, 3323, 112,    15, 150, '_lin ()'],
-        #[type_jizo,       soul_crit, 128,   0, 100, 3457, 117, 10+45, 150, '_li  (243)'],
         #[type_seductress, soul_crit,   0, 128, 100, 3270, 110, 10+30, 150, '_tian(203)'],
         #[type_shadow,     soul_crit, 128,   0, 100, 3323, 112, 15+30, 150, '_lin (215)'],
         #[type_kyoukotsu, [type_skull], 0, 131, 100+15, 3511, 115, 12, 160, '_jin (242)'],
