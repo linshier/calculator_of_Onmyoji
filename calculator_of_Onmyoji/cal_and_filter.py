@@ -851,12 +851,12 @@ def filter_fast(data_dict):
             comb_type = ['#' if (type_fortune == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
             comb_speed[1] = comb_speed[1] - 57
             print ('%02d[_mian(276)]freetype()maxspeed:%.2f,+%.2f' % (result_num, 119 + n / 100.0, n / 100.0)), \
-                    '(1)%0.2f%s' % (comb_speed[0], comb_type[0]), \
-                    '57+(2)%0.2f%s' % (comb_speed[1], comb_type[1]), \
-                    '(3)%0.2f%s' % (comb_speed[2], comb_type[2]), \
-                    '(4)%0.2f%s' % (comb_speed[3], comb_type[3]), \
-                    '(5)%0.2f%s' % (comb_speed[4], comb_type[4]), \
-                    '(6)%0.2f%s' % (comb_speed[5], comb_type[5])
+                    '\n[1]     %0.2f %s' % (comb_speed[0], comb_type[0]), \
+                    '\n[2] 57+ %0.2f %s' % (comb_speed[1], comb_type[1]), \
+                    '\n[3]     %0.2f %s' % (comb_speed[2], comb_type[2]), \
+                    '\n[4]     %0.2f %s' % (comb_speed[3], comb_type[3]), \
+                    '\n[5]     %0.2f %s' % (comb_speed[4], comb_type[4]), \
+                    '\n[6]     %0.2f %s' % (comb_speed[5], comb_type[5])
             #print('%04d[_mian]freetype()maxspeed:%.2f,+%.2f' % (result_num, n / 100.0, 119 + n / 100.0))
             return comb_data
         # quick terminate
@@ -1082,6 +1082,9 @@ def filter_fast(data_dict):
                 if mitama.keys()[0] in done:
                     return False
                 enhance_type = mitama.values()[0][suit]
+                if enhance_type == type_fortune:
+                    if mitama.values()[0][speed] == speed_1p_overflow:
+                        return False
                 return enhance_type == soul_type or enhance_type == s
             def __build_mask():
                 soul = []
@@ -2511,24 +2514,26 @@ def filter_fast(data_dict):
     order = mine11
     order = [
         #[type_shadow, [type_skull], 158, 100, 3350, 110, 12+15+15, 160, '_jiu(190) '],
-        cal_fortune_max_speed,                          #lian  DO1
-        cal_clear,
-        cal_freetype_max_speed,                         #mian  DO1
         #cal_freetype_effect_over276_127,                #yan   DO0
-        cal_clear,
         #[type_sprite,           soul_crit, 0, 250,    100, 4074, 118, 15+10, 150, '_she (   )'],   
         #[type_seductress,       soul_crit, 0, 194,    100, 3350, 117, 30+11, 160, '_qie (   )'],   
         #cal_clear,
         #[type_seductress,     soul_attack, 0, 194, 15+100, 3350, 117, 15+11, 160, '_qie (   )'],   
-        [type_kyoukotsu,    [type_geisha], 0, 158, 15+100, 3511, 115,    12, 160, '_jin (184)', score_buf_max_crit_damage_only],
-        [type_kyoukotsu,     [type_skull], 0,   0, 15+100, 3136, 113,    30, 150, '_tun1(196)'],
-        [type_kyoukotsu,        soul_crit, 0,   0, 15+100, 3136, 113, 15+30, 150, '_tun2(196)'],
+        cal_clear,
+        cal_fortune_max_speed,                          #lian  DO1
+        cal_freetype_max_speed,                         #mian  DO1
+        [type_kyoukotsu,    [type_geisha],   0, 158, 15+100, 3511, 115,    12, 160, '_jin (184)', score_buf_max_crit_damage_only],
+        [type_kyoukotsu,     [type_skull],   0, 117, 15+100, 3136, 113, 15+10, 150, '_tun1(196)'],
+        [type_kyoukotsu,        soul_crit,   0, 117, 15+100, 3136, 113, 30+10, 150, '_tun2(196)'],
+        cal_exit,
+        [type_kyoukotsu, [type_shinkirou], 117,   0, 15+100, 3457, 117,    15, 150, '_li  (   )'],
+        [type_nymph,          soul_attack, 0, 199, 15+100, 2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
+        [type_taker,          soul_attack, 0, 199, 30+100, 2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
+        [type_fortune,        soul_attack, 0, 199, 15+100, 2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
         cal_exit,
         [type_shadow,           soul_crit, 0,   0,    100, 2948, 109, 30+ 8, 180, '_jiu (230)'],
         [type_shadow,           soul_crit, 0,   0,    100, 3377, 111, 30+12, 150, '_chi (238)'],   
         cal_exit,
-        [type_taker,          soul_attack, 0, 240, 30+100, 2841, 111,   100, 150, '_jing(   )', score_buf_max_attack_only],   
-        [type_nymph,          soul_attack, 0, 240, 15+100, 2841, 111,   100, 150, '_jing(   )', score_buf_max_attack_only],   
         [type_kyoukotsu,        soul_crit, 0, 170, 15+100, 3136, 113, 15+10, 150, '_tun1(167)'],
         [type_kyoukotsu,        soul_crit, 0, 170, 15+100, 3136, 113, 15+10, 150, '_tun2(167)'],
         #[type_shadow,    [type_shinkirou], 0, 128,    100, 3457, 117, 15+10, 150, '_li  (185)'],
