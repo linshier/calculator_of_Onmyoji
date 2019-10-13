@@ -2523,9 +2523,12 @@ def filter_fast(data_dict):
         cal_fortune_max_speed,                          #lian  DO1
         cal_clear,
         cal_freetype_max_speed,                         #mian  DO1
-        [type_taker,          soul_attack, 0, 194, 30+100, 2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
-        [type_taker,          soul_attack, 0, 194, 30+100, 2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
-        [type_senecio,        soul_attack, 0, 202, 15+100, 2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
+        [type_taker,          soul_attack,   0, 194, 30+100, 2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
+        [type_taker,          soul_attack,   0, 194, 30+100, 2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
+        [type_senecio,        soul_attack,   0, 202, 15+100, 2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
+        [type_seductress,       soul_crit,   0, 130,    100, 3511, 120, 30+10, 150, '_cha (   )'],
+        [type_shadow,           soul_crit, 128,   0,    311, 4074, 118, 30+10, 150, '_she1(   )'],
+        [type_fortune,          soul_crit, 120,   0,    311, 4074, 118, 15+10, 150, '_she2(   )'],
         cal_exit,
         [type_semisen,        soul_attack, 0, 199, 15+100, 2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
         cal_exit,
