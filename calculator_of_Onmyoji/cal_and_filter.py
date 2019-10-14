@@ -80,6 +80,8 @@ def score_buf_max_effect(soul_2p_mask, buf_max, n, t):
     if buf_max >= e:
         return buf_max, 3, True
     return e, n, False
+def score_buf_max_resist(soul_2p_mask, buf_max, n, t):
+    return score_buf_max_effect(soul_2p_mask, buf_max, n, t)
 def score_freetype_max_effect(soul_2p_mask, buf_max, n, t):
     #test speed
     s = __decode(n, offset_speed, bits_speed)
@@ -1029,7 +1031,7 @@ def filter_fast(data_dict):
                               __build_mask,
                               resist,
                               True,
-                              score_buf_max_effect, # same with resit
+                              score_buf_max_effect, # same with resist
                               data_dict)
             if n > score:
                 score, res, com, p = n, r, c, s
@@ -1125,7 +1127,7 @@ def filter_fast(data_dict):
             info = comb_data['info']
             comb_type = ['#' if (soul_type == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
 
-            if 1 and score_buf != score_buf_max_effect:
+            if 1 and score_buf in [score_buf_max_damage, score_buf_max_attack_only, score_buf_max_crit_damage_only]:
                 pa = (attack_buf_base * 10.0 + __decode(cc, offset_attackbuf, bits_attackbuf)) / 1000.0 * attack_hero
                 pd = (crit_damage_base * 10.0 + __decode(cc, offset_critdamage, bits_critdamage)) / 1000.0
                 print('%02d[%s]%s(+%s):%d=%.2f*%.2f,+%.2f' % (result_num, note,
@@ -1136,8 +1138,9 @@ def filter_fast(data_dict):
                     v = info[i].values()[0]
                     print('[%d]%3dS%3dA%3dR%3dD %s' % (i+1, int(v[speed]+0.5), int(v[attack_buf]+0.5), int(v[crit_rate]+0.5), int(v[crit_damage]+0.5), comb_type[i]))
 
-            if 1 and score_buf == score_buf_max_effect:
-                print('%02d[%s]%s(+%s)maxeffect:%.1f,+%.2f' % (result_num, note, __[soul_type], __[p], n / 10.0 + effect_base, base_speed + comb_data['sum'][speed] / 100.0))
+            if 1 and score_buf in [score_buf_max_effect, score_buf_max_resist]:
+                ptype = 'maxeffect' if score_buf == score_buf_max_effect else 'maxresist'
+                print('%02d[%s]%s(+%s)%s:%.1f,+%.2f' % (result_num, note, __[soul_type], __[p], ptype, n / 10.0 + effect_base, base_speed + comb_data['sum'][speed] / 100.0))
                 for i in xrange(6):
                     v = info[i].values()[0]
                     print('[%d]%3dS%3dE %s' % (i+1, int(v[speed]+0.5), int(v[effect]+0.5), comb_type[i]))
@@ -2533,6 +2536,7 @@ def filter_fast(data_dict):
         cal_freetype_max_speed,                         #mian  DO1
         [type_kyoukotsu,    [type_geisha],   0, 158, 15+100, 3511, 115,    12, 160, '_jin (184)', score_buf_max_crit_damage_only],
         [type_fire,           soul_effect,   0, 194,    100, 2412, 119, 95+ 5, 150, '_zhu (   )', score_buf_max_effect, prop_value_none, effect, True],
+        [type_sprite,         soul_effect,   0, 195,    100, 2251, 111, 97+ 3, 150, '_xion(   )', score_buf_max_resist, prop_value_none, resist, True],
         cal_exit,
         [type_shadow,           soul_crit,   0, 128,    100, 2948, 109, 30+ 8, 180, '_jiu (   )'],
         [type_fortune,     [type_semisen],   0, 194,    100, 2948, 109, 15+ 8, 180, '_jiu (   )', score_buf_max_damage, prop_value_l6_crit_rate],
@@ -2595,15 +2599,25 @@ def filter_fast(data_dict):
         damage_min_speed = (xminspeed - xspeedbase) if xminspeed >= xspeedbase else 0
         effect_max_speed = damage_max_speed
         effect_min_speed = damage_min_speed
-        if xtype in soul_effect:
-            effect_base = 0 + 15
-        for isoul in xsoul:
-            if isoul in soul_effect:
-                effect_base = effect_base + 15
-                break
+        if xscore == score_buf_max_effect:
+            if xtype in soul_effect:
+                effect_base = 0 + 15
+            for isoul in xsoul:
+                if isoul in soul_effect:
+                    effect_base = effect_base + 15
+                    break
+        if xscore == score_buf_max_resist:
+            if xtype in soul_resist:
+                effect_base = 0 + 15
+            for isoul in xsoul:
+                if isoul in soul_resist:
+                    effect_base = effect_base + 15
+                    break
+            encode_hp_resist = True
         r = calxmaxdamage(xtype, xsoul, xspeedbase, xprop, 0, xnote, xscore, xsort, xone)
         damage_max_speed = 500
         effect_base = 0
+        encode_hp_resist = False
         return r
     for a in order:
         try:
