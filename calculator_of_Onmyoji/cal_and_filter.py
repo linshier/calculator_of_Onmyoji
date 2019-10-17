@@ -123,6 +123,8 @@ def score_buf_max_damage(soul_2p_mask, buf_max, n, t):
         return buf_max, 5, True
     #print damage_limit, d
     return d + 1, n, False
+def score_buf_max_hp_shield(soul_2p_mask, buf_max, n, t):
+    return score_buf_max_damage(soul_2p_mask, buf_max, n, t)
 
 def score_buf_max_crit_damage_only(soul_2p_mask, buf_max, n, t):
     #test speed
@@ -163,6 +165,8 @@ def score_buf_max_attack_only(soul_2p_mask, buf_max, n, t):
     if 0 < damage_limit and damage_limit < int(attack_hero * d / 1000000 / 100):
         return buf_max, 5, True
     return d + 1, n, False
+def score_buf_max_hp_only(soul_2p_mask, buf_max, n, t):
+    return score_buf_max_attack_only(soul_2p_mask, buf_max, n, t)
 
 def score_suit_buf_none(soul_2p_mask, buf_max, n, t):
     return n, n, False
@@ -285,7 +289,6 @@ def filter_soul(prop_value, prop_value_l2, prop_value_l4, prop_value_l6,
         #print(ra)
         if b > suit_buf_max:
             result, comb_sum, suit_buf_max, comb_code = r, c, b, v
-            #print b, __decode(v, offset_attackbuf, bits_attackbuf), __decode(v, offset_critdamage, bits_critdamage)
     #print('result: %s' % result)
     #print(('%s %s' % (d, comb_sum)).decode('raw_unicode_escape'))
     return result, comb_sum, suit_buf_max, comb_code
@@ -559,6 +562,12 @@ def filter_fast(data_dict):
         enhance_type = v[u"加成类型"]
         if enhance_type == resist:
             soul_resist.append(k)
+            continue
+    soul_hp = []
+    for (k, v) in data_format.MITAMA_ENHANCE.items():
+        enhance_type = v[u"加成类型"]
+        if enhance_type == hp_buf:
+            soul_hp.append(k)
             continue
     soul_free = set()
     for (k, v) in data_format.MITAMA_ENHANCE.items():
@@ -1153,6 +1162,11 @@ def filter_fast(data_dict):
                 for i in xrange(6):
                     v = info[i].values()[0]
                     print('[%d]%3dS%3dH%3dR%3dT %s' % (i+1, int(v[speed]+0.5), int(v[hp_buf]+0.5), int(v[crit_rate]+0.5), int(v[resist]+0.5), comb_type[i]))
+            if 1 and score_buf == score_buf_max_hp_only:
+                print('%02d[%s]%s(+%s)maxhp:%.1f,+%.2f' % (result_num, note, __[soul_type], __[p], score / 10.0 + attack_buf_base, base_speed + comb_data['sum'][speed] / 100.0))
+                for i in xrange(6):
+                    v = info[i].values()[0]
+                    print('[%d]%3dS%3dH%3dR%3dT %s' % (i+1, int(v[speed]+0.5), int(v[hp_buf]+0.5), int(v[crit_rate]+0.5), int(v[resist]+0.5), comb_type[i]))
             return comb_data
         return None
     def cal_seductress_crit_over129_3350_11_160_117():
@@ -1316,809 +1330,6 @@ def filter_fast(data_dict):
         r = calxmaxdamage(type_pearl, soul_crit, 112, prop_value_none, 0, '_fan ')
         encode_hp_resist = False
         return r
-    def cal_jizo_over140_4074_10_150_118():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 4074
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 10 - 15
-        crit_damage_base = 150
-        damage_min_speed = 141 - 118
-        return calxmaxdamage(type_jizo, soul_crit, 118, prop_value_none, 0)
-    def cal_jizo_over0_3457_10_150_117():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3457
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 10 - 15
-        crit_damage_base = 150
-        damage_min_speed = 118 - 118
-        return calxmaxdamage(type_jizo, soul_crit, 118, prop_value_none, 0, '_li  ')
-    def cal_seductress_over0_3457_40_150_117():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        global damage_max_speed
-        attack_hero = 3457
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 40 - 15
-        crit_damage_base = 150
-        damage_min_speed = 117 - 117
-        damage_max_speed = 120 - 117
-        r = calxmaxdamage(type_seductress, soul_attack, 117, prop_value_none, 0, '_li1 ')
-        damage_max_speed = 500
-        return r
-    def cal_jizo_under122_3457_40_150_117():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        global damage_max_speed
-        attack_hero = 3457
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 40 - 15
-        crit_damage_base = 150
-        damage_min_speed = 117 - 117
-        damage_max_speed = 122 - 117
-        r = calxmaxdamage(type_jizo, soul_crit, 117, prop_value_none, 0, '_li1 ')
-        damage_max_speed = 500
-        return r
-    def cal_nymph_over0_3457_40_150_117():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3457
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 40 - 15
-        crit_damage_base = 150
-        damage_min_speed = 117 - 117
-        return calxmaxdamage(type_nymph, soul_crit, 117, prop_value_none, 0, '_li  ')
-    def cal_jizo_over117_4074_10_150_118():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 4074
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 10 - 15
-        crit_damage_base = 150
-        damage_min_speed = 141 - 118
-        return calxmaxdamage(type_jizo, soul_crit, 118, prop_value_none, 0)
-    def cal_shadow_indirect_over129_4074_10_150_118():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        global damage_max_speed
-        attack_hero = 4074
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 10 - 30
-        crit_damage_base = 150 + 211
-        damage_min_speed = 129 - 118
-        damage_max_speed = 132 - 118
-        r = calxmaxdamage(type_shadow, soul_crit, 118, prop_value_none, 0, '_she1')
-        damage_max_speed = 500
-        return r
-    def cal_shadow_indirect_under128_4074_10_150_118():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        global damage_max_speed
-        attack_hero = 4074
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 10 - 30
-        crit_damage_base = 150 + 211
-        damage_min_speed = 118 - 118
-        damage_max_speed = 128 - 118
-        r = calxmaxdamage(type_shadow, soul_crit, 118, prop_value_none, 0, '_she1')
-        damage_max_speed = 500
-        return r
-    def cal_fortune_indirect_over129_4074_10_150_118():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        global damage_max_speed
-        attack_hero = 4074
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 10 - 15
-        crit_damage_base = 150 + 211
-        damage_min_speed = 129 - 118
-        damage_max_speed = 131 - 118
-        r = calxmaxdamage(type_fortune, [type_seductress], 118, prop_value_l6_crit_damage, 0, '_she2')
-        damage_max_speed = 500
-        return r
-    def cal_fortune_indirect_under122_4074_10_150_118():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        global damage_max_speed
-        attack_hero = 4074
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 10 - 15
-        crit_damage_base = 150 + 211
-        damage_min_speed = 118 - 118
-        damage_max_speed = 122 - 118
-        r = calxmaxdamage(type_fortune, [type_seductress], 118, prop_value_none, 0, '_she2')
-        damage_max_speed = 500
-        return r
-    def cal_fortune_over120_2573_5_150_120():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        global damage_max_speed
-        attack_hero = 2573
-        attack_buf_base = 100 + 15 + int(199100 / attack_hero)
-        damage_min_crit_rate = 100 - 5 - 15 - int(20)
-        crit_damage_base = 150 + 0 + int(45)
-        damage_min_speed = 129 - 120
-        damage_max_speed = 131 - 120
-        r = calxmaxdamage(type_fortune, [type_taker], 120, prop_value_none, 0, ' yao2')
-        damage_max_speed = 500
-        return r
-    def cal_fortune_over120_1548_5_150_120():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        global damage_max_speed
-        attack_hero = 1548
-        attack_buf_base = 100 + 15 + int(199100 / attack_hero)
-        damage_min_crit_rate = 100 - 5 - 15 - int(20)
-        crit_damage_base = 150 + 0 + int(45)
-        damage_min_speed = 129 - 120
-        damage_max_speed = 131 - 120
-        r = calxmaxdamage(type_fortune, [type_watcher], 120, prop_value_none, 0, ' yao1')
-        damage_max_speed = 500
-        return r
-    def cal_fire_over110_639_5_150_110():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        global damage_max_speed
-        attack_hero = 639
-        attack_buf_base = 100 + 15 + int(199100 / attack_hero)
-        damage_min_crit_rate = 100 - 5 - 15 - int(20)
-        crit_damage_base = 150 + 0 + int(45)
-        damage_min_speed = 129 - 110
-        damage_max_speed = 130 - 110
-        r = calxmaxdamage(type_fire, soul_attack, 110, prop_value_none, 0, ' yao3')
-        damage_max_speed = 500
-        return r
-    def cal_fortune_over170_2680_8_150_109():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 2680
-        attack_buf_base = 100 + 0
-        damage_min_crit_rate = 100 - 8 - 15
-        crit_damage_base = 150 + 0
-        damage_min_speed = 170 - 109
-        return calxmaxdamage(type_fortune, soul_crit, 109, prop_value_none, 0, '_shu ')
-    def cal_shadow_over0_3350_12_160_110():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3350
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 12 - 30
-        crit_damage_base = 160
-        damage_min_speed = 110 - 110
-        return calxmaxdamage(type_shadow, soul_crit, 110, prop_value_none, 0, '_yu  ')
-    def cal_shadow_over129_3028_10_150_113():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3028
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 11 - 15
-        crit_damage_base = 150
-        damage_min_speed = 129 - 113
-        return calxmaxdamage(type_shadow, soul_attack, 117, prop_value_none, 0, '_lu1 ')
-    def cal_shadow_over0_3350_11_160_117():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3350
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 11 - 15
-        crit_damage_base = 160
-        damage_min_speed = 117 - 117
-        return calxmaxdamage(type_shadow, soul_attack, 117, prop_value_none, 0, ' qie2')
-    def cal_shadow_over0_3109_10_165_115():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3109
-        attack_buf_base = 100 + 0
-        damage_min_crit_rate = 100 - 0 - 10 - 30
-        crit_damage_base = 150 + 15
-        damage_min_speed = 115 - 115
-        return calxmaxdamage(type_shadow, soul_crit, 115, prop_value_none, 0)
-    def cal_shadow_over0_3323_45_230_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3323
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 30 - 15 - 15
-        crit_damage_base = 150 + 80
-        damage_min_speed = 112 - 112
-        return calxmaxdamage(type_shadow, soul_attack, 112, prop_value_none, 0)
-    def cal_shadow_over126_3136_28_198_113():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3136
-        attack_buf_base = 100 + 0
-        damage_min_crit_rate = 100 - 18 - 10 - 15
-        crit_damage_base = 150 + 48
-        damage_min_speed = 126 + 0 - 113
-        return calxmaxdamage(type_shadow, [type_skull], 113, prop_value_none, 0)
-    def cal_shadow_crit_over131_3350_12_160_110():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3350
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 12 - 30
-        crit_damage_base = 160
-        damage_min_speed = 131 - 110
-        return calxmaxdamage(type_shadow, soul_crit, 110, prop_value_l6_crit_damage, 0)
-    def cal_shadow_skull_over117_3350_32_160_110():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3350
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 20 - 12 - 15
-        crit_damage_base = 160
-        damage_min_speed = 117 - 110
-        return calxmaxdamage(type_shadow, [type_skull], 110, prop_value_none, 0)
-    def cal_shadow_skull_over117_3350_32_160_110():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3350
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 20 - 12 - 15
-        crit_damage_base = 160
-        damage_min_speed = 122 - 110
-        return calxmaxdamage(type_shadow, [type_skull], 110, prop_value_none, 0)
-    def cal_shadow_skull_over0_3350_32_160_110():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3350
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 20 - 12 - 15
-        crit_damage_base = 160
-        damage_min_speed = 110 - 110
-        return calxmaxdamage(type_shadow, [type_skull], 110, prop_value_none, 0)
-    def cal_shadow_over0_3350_32_160_110():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3350
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 32 - 30
-        crit_damage_base = 160
-        damage_min_speed = 110 - 110
-        return calxmaxdamage(type_shadow, soul_crit, 110, prop_value_l6_crit_damage, 0)
-        #return calxmaxdamage(type_shadow, [type_skull], 110, prop_value_l6_crit_damage, 0)
-    def cal_kyoukotsu_crit_over117_3323_15_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3323
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 15 - 15
-        crit_damage_base = 150
-        damage_min_speed = 117 - 112
-        return calxmaxdamage(type_kyoukotsu, soul_crit, 112, prop_value_none, 0)
-    def cal_kyoukotsu_skull_over0_3511_12_150_115():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3511
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 12 - 0
-        crit_damage_base = 150
-        damage_min_speed = 115 - 115
-        return calxmaxdamage(type_kyoukotsu, [type_skull], 115, prop_value_none, 0, '_jin ')
-    def cal_shadow_shadow_over112_3323_15_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3323
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 15 - 30
-        crit_damage_base = 150
-        damage_min_speed = 112 - 112
-        return calxmaxdamage(type_shadow, [type_shadow], 112, prop_value_none, 0, '_lin ')
-    def cal_shadow_skull_over112_3323_15_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3323
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 15 - 15
-        crit_damage_base = 150
-        damage_min_speed = 112 - 112
-        return calxmaxdamage(type_shadow, [type_skull], 112, prop_value_none, 0, '_lin ')
-    def cal_shadow_skull_under129_3323_15_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3323
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 15 - 30
-        crit_damage_base = 150
-        damage_min_speed = 112 - 112
-        damage_max_speed = 129 - 112
-        return calxmaxdamage(type_shadow, [type_skull], 112, prop_value_none, 0, '_lin ')
-    def cal_shadow_skull_over121_3323_35_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3323
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 20 - 15 - 15
-        crit_damage_base = 150
-        damage_min_speed = 121 - 112
-        return calxmaxdamage(type_shadow, [type_skull], 112, prop_value_none, 0, '_lin1')
-    def cal_shadow_crit_under128_3323_35_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        global damage_max_speed
-        attack_hero = 3323
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 30
-        crit_damage_base = 150
-        damage_min_speed = 112 - 112
-        damage_max_speed = 128 - 112
-        r = calxmaxdamage(type_shadow, soul_crit, 112, prop_value_none, 0, '_lin1')
-        damage_max_speed = 500
-        return r
-    def cal_kyoukotsu_skull_over128_3323_15_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3323
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 15
-        crit_damage_base = 150
-        damage_min_speed = 128 - 112
-        return calxmaxdamage(type_kyoukotsu, [type_skull], 112, prop_value_none, 0, '_lin1')
-    def cal_shadow_crit_over0_3136_10_150_113():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3136
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 10 - 30
-        crit_damage_base = 150
-        damage_min_speed = 113 - 113
-        return calxmaxdamage(type_shadow, soul_crit, 113, prop_value_none, 0, '_tun1')
-    def cal_shadow_skull_over0_3136_10_150_113():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3136
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 10 - 15
-        crit_damage_base = 150
-        damage_min_speed = 113 - 113
-        return calxmaxdamage(type_shadow, [type_skull], 113, prop_value_none, 0, '_tun2')
-    def cal_kyoukotsu_x_3136_10_150_113():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3136
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 10
-        crit_damage_base = 150
-        damage_min_speed = 113 - 113
-        return calxmaxdamage(type_kyoukotsu, [type_skull], 113, prop_value_none, 0, '_tun1')
-    def cal_shadow_crit_over0_3323_35_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3323
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 35 - 30
-        crit_damage_base = 150
-        damage_min_speed = 112 - 112
-        return calxmaxdamage(type_shadow, soul_crit, 112, prop_value_none, 0)
-    def cal_shadow_crit_over117_3323_35_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3323
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 20 - 15 - 30
-        crit_damage_base = 150
-        damage_min_speed = 117 - 112
-        return calxmaxdamage(type_shadow, soul_crit, 112, prop_value_none, 0)
-    def cal_watcher_crit_over117_3323_15_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3323
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 15 - 15
-        crit_damage_base = 150
-        damage_min_speed = 117 - 112
-        return calxmaxdamage(type_watcher, soul_crit, 112, prop_value_none, 0)
-    def cal_watcher_skull_over117_3323_15_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3323
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 15 - 0
-        crit_damage_base = 150
-        damage_min_speed = 117 - 112
-        return calxmaxdamage(type_watcher, [type_skull], 112, prop_value_none, 0)
-    def cal_watcher_skull_under117_3323_15_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3323
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 15 - 0
-        crit_damage_base = 150
-        damage_min_speed = 112 - 112
-        damage_max_speed = 117 - 112
-        r = calxmaxdamage(type_watcher, [type_skull], 112, prop_value_none, 0)
-        damage_max_speed = 500
-        return r
-    def cal_watcher_crit_over117_3323_35_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3323
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 20 - 15
-        crit_damage_base = 150
-        damage_min_speed = 117 - 112
-        return calxmaxdamage(type_watcher, [type_skull], 112, prop_value_none, 0)
-    def cal_watcher_crit_over0_3350_12_160_110():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3350
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 15 - 15
-        crit_damage_base = 160
-        damage_min_speed = 110 - 110
-        return calxmaxdamage(type_watcher, soul_crit, 110, prop_value_none, 0)
-    def cal_watcher_skull_over0_3350_12_160_110():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3350
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 15 - 0
-        crit_damage_base = 160
-        damage_min_speed = 110 - 110
-        return calxmaxdamage(type_watcher, [type_skull], 110, prop_value_none, 0)
-    def cal_watcher_crit_over0_3323_35_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3323
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 35 - 15
-        crit_damage_base = 150
-        damage_min_speed = 112 - 112
-        return calxmaxdamage(type_watcher, soul_crit, 112, prop_value_none, 0)
-    def cal_watcher_skull_over117_3323_35_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3323
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 35 - 0
-        crit_damage_base = 150
-        damage_min_speed = 112 - 112
-        return calxmaxdamage(type_watcher, [type_skull], 112, prop_value_none, 0)
-    def cal_watcher_crit_over0_3270_12_150_111():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3270
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 15 - 15
-        crit_damage_base = 150
-        damage_min_speed = 111 - 111
-        return calxmaxdamage(type_watcher, soul_crit, 111, prop_value_none, 0, '_dao ')
-    def cal_shadow_over0_3002_8_150_107():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3002
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 8 - 15
-        crit_damage_base = 150
-        damage_min_speed = 107 - 107
-        return calxmaxdamage(type_shadow, soul_attack, 107, prop_value_none, 0, ' xi  ')
-    def cal_shadow_overstar_3350_12_160_110():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3350
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 12 - 30
-        crit_damage_base = 160
-        damage_min_speed = 128 - 110
-        return calxmaxdamage(type_shadow, soul_crit, 110, prop_value_l6_crit_damage, 0)
-    def cal_shadow_crit_over120_3216_10_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3216
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 10 - 30
-        crit_damage_base = 150
-        damage_min_speed = 120 - 112
-        return calxmaxdamage(type_shadow, soul_crit, 112, prop_value_none, 0)
-    def cal_shadow_crit_over0_3216_10_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3216
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 10 - 30
-        crit_damage_base = 150
-        damage_min_speed = 112 - 112
-        return calxmaxdamage(type_shadow, soul_crit, 112, prop_value_none, 0)
-    def cal_shadow_semisen_over119_2385_25_150_118():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 2385
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 20 - 5 - 30
-        crit_damage_base = 150
-        damage_min_speed = 119 - 118
-        r = calxmaxdamage(type_shadow, [type_semisen], 118, prop_value_none, 0, ' qin ')
-        return r
-    def cal_shadow_crit_over122_3216_10_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3216
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 10 - 30
-        crit_damage_base = 150
-        damage_min_speed = 122 - 112
-        return calxmaxdamage(type_shadow, soul_crit, 112, prop_value_none, 0)
-    def cal_shadow_skull_over122_3216_10_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3216
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 10 - 15
-        crit_damage_base = 150
-        damage_min_speed = 122 - 112
-        return calxmaxdamage(type_shadow, [type_skull], 112, prop_value_none, 0)
-    def cal_shadow_skull_over130_3216_30_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3216
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 20 - 10 - 15
-        crit_damage_base = 150
-        damage_min_speed = 130 - 112
-        return calxmaxdamage(type_shadow, [type_skull], 112, prop_value_none, 0)
-    def cal_shadow_crit_over128_4074_10_150_118():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 4074
-        attack_buf_base = 100 + 0
-        damage_min_crit_rate = 100 - 10 - 15
-        crit_damage_base = 150
-        damage_min_speed = 128 - 118
-        return calxmaxdamage(type_shadow, [type_skull], 118, prop_value_none, 0, '_she1')
-    def cal_shadow_skull_over128_4074_10_150_118():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 4074
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 10 - 15
-        crit_damage_base = 150
-        damage_min_speed = 129 - 118
-        return calxmaxdamage(type_shadow, soul_crit, 118, prop_value_none, 0, '_she1')
-    def cal_shadow_attack_over128_3216_10_150_112():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3216
-        attack_buf_base = 100 + 15
-        damage_min_crit_rate = 100 - 10 - 15
-        crit_damage_base = 150
-        damage_min_speed = 129 - 112
-        return calxmaxdamage(type_shadow, soul_attack, 112, prop_value_none, 0)
-    def cal_shadow_crit_over158_1741_8_150_118():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 1741
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 8 - 15
-        crit_damage_base = 150
-        damage_min_speed = 158 - 118
-        return calxmaxdamage(type_shadow, [type_spider], 118, prop_value_none, 0)
-    def cal_shadow_over158_2894_8_150_118():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 2894
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 20 - 8 - 30
-        crit_damage_base = 150
-        damage_min_speed = 158 - 118
-        return calxmaxdamage(type_shadow, soul_crit, 118, prop_value_none, 157, ' shi ')
-    def cal_fire_over158_2894_8_150_118():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 2894
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 8 - 15
-        crit_damage_base = 150
-        damage_min_speed = 158 - 118
-        return calxmaxdamage(type_fire, soul_crit, 118, prop_value_none, 0)
-    def cal_shadow_over163_2894_28_150_118():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 2894
-        attack_buf_base = 100
-        damage_min_crit_rate = 100 - 8 - 30
-        crit_damage_base = 150
-        damage_min_speed = 163 - 118
-        return calxmaxdamage(type_shadow, soul_crit, 118, prop_value_none, 0)
-        #return calxmaxdamage(type_shadow, [type_none], 118, prop_value_none, 27900)
-    def cal_shadow_over0_3002_10_150_115():
-        global attack_hero
-        global attack_buf_base
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3002
-        attack_buf_base = 100 + 0
-        damage_min_crit_rate = 100 - 10 - 30
-        crit_damage_base = 150
-        damage_min_speed = 115 - 115
-        return calxmaxdamage(type_shadow, soul_crit, 115, prop_value_none, 0)
 
     def cal_x_free_max_damage(soul_type, base_speed, prop_value_l6, buf_limit, note):
         global damage_limit
@@ -2201,36 +1412,6 @@ def filter_fast(data_dict):
         damage_min_speed = 131 - 118
         return cal_x_free_max_damage(type_phenix, 118, prop_value_none, 0, ' she1')
 
-    def cal_seductress_free_over140_3350_12_160_117():
-        global attack_hero
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3350
-        damage_min_crit_rate = 100 - 11 - 15
-        crit_damage_base = 160
-        damage_min_speed = 141 - 117
-        return cal_x_free_max_damage(type_seductress, 117)
-    def cal_shadow_free_3350_12_160_110():
-        global attack_hero
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3350
-        damage_min_crit_rate = 100 - 12 - 15
-        crit_damage_base = 160
-        damage_min_speed = 129 - 110
-        return cal_x_free_max_damage(type_shadow, 110)
-    def cal_shadow_free_over128_3216_10_150_112():
-        global attack_hero
-        global damage_min_crit_rate
-        global crit_damage_base
-        global damage_min_speed
-        attack_hero = 3216
-        damage_min_crit_rate = 100 - 10 - 15
-        crit_damage_base = 150
-        damage_min_speed = 129 - 112
-        return cal_x_free_max_damage(type_shadow, 112)
     def cal_mask_top1(soul_type, loc, attr, note):
         def __filter_type(mitama):
             if mitama.keys()[0] in done:
@@ -2271,242 +1452,6 @@ def filter_fast(data_dict):
         os._exit(0)
         return None
 
-    dou1 = [
-            cal_freetype_max_speed,
-            #
-            #cal_fortune_max_speed,
-            cal_sprite_over140_13785_5_150_108,
-            #cal_seductress_crit_over129_3350_11_160_117,
-            cal_seductress_crit_over140_3350_11_160_117, #cal_seductress_free_over140_3350_12_160_117,
-            cal_jizo_over140_4074_10_150_118,
-            #
-            cal_shadow_crit_over120_3216_10_150_112,
-            cal_shadow_over0_3350_12_160_110,
-            #cal_shadow_xstar_max_damage,
-        ]
-    test = [
-            cal_shadow_skull_over112_3323_15_150_112,
-            #cal_seductress_crit_over129_3350_11_160_117,
-            #cal_seductress_crit_over140_3350_11_160_117, #cal_seductress_free_over140_3350_12_160_117,
-            #
-            #cal_shadow_over0_3350_12_160_110,
-        ]
-    mine = [
-            ##cal_shadow_free_over128_3216_10_150_112,
-            cal_seductress_crit_over140_3350_11_160_117, #cal_seductress_attack_over140_3350_11_160_117,
-            cal_shadow_crit_over120_3216_10_150_112, #cal_shadow_attack_over128_3216_10_150_112,
-            cal_shadow_over0_3350_12_160_110,
-            cal_shadow_over0_3002_8_150_107,
-        ]
-    supp = [
-            cal_shadow_over158_2894_8_150_118,
-        ]
-    min2 = [
-            #cal_seductress_crit_over129_3350_11_160_117,
-            cal_shadow_over0_3350_32_160_110,
-        ]
-    sup2 = [
-            cal_shadow_over163_2894_28_150_118,
-        ]
-    brief = [
-            cal_fortune_max_speed,
-            #
-            cal_clear,
-            cal_freetype_max_speed,
-            cal_seductress_crit_over129_3350_11_160_117,
-            #
-            cal_clear,
-            cal_shadow_indirect_over129_4074_10_150_118,
-            #
-            cal_clear,
-            #cal_shadow_skull_over117_3350_32_160_110,
-            cal_shadow_skull_over121_3323_35_150_112,
-            #cal_clear,
-            #cal_watcher_crit_over0_3323_35_150_112,
-            #cal_shadow_skull_over121_3323_35_150_112,
-            #cal_clear,
-            #cal_shadow_crit_over0_3323_35_150_112,
-        ]
-    dou2 = [
-        cal_freetype_max_speed,
-        cal_fortune_max_speed,
-        cal_fire_max_speed,
-        cal_sprite_over140_13785_5_150_108,
-        cal_seductress_crit_over129_3350_11_160_117,
-        cal_shadow_indirect_over129_4074_10_150_118,
-        #
-        cal_shadow_over0_3350_12_160_110,
-        cal_seductress_over111_3323_10_150_104,
-    ]
-    mine11 = [
-        #03_33s light+star+lin+lin
-        #cal_clear, #cal_shadow_skull_over121_3323_35_150_112, #lin #cal_shadow_over158_2894_8_150_118, #shi
-        #cal_watcher_skull_over117_3323_35_150_112, #lin2
-
-        #04_31s star+220lin+205lin
-        cal_clear,
-        #cal_shadow_skull_over112_3323_15_150_112, #lin #cal_clear, #cal_shadow_over158_2894_8_150_118, #shi
-        #cal_watcher_crit_over117_3323_15_150_112, #lin2
-        cal_watcher_skull_over117_3323_15_150_112,
-
-        #06_32s light+lin
-        cal_clear,
-        cal_shadow_skull_over121_3323_35_150_112,
-
-        #09_35s jiu
-        cal_clear,
-        cal_shadow_skull_over0_3350_32_160_110, #jiu
-        cal_clear,
-        cal_shadow_skull_over122_3216_10_150_112,
-
-        #10_33s shi+ci+chou+qin+jiu
-        #cal_clear, #cal_shadow_skull_over117_3350_32_160_110,
-        #cal_shadow_skull_over122_3216_10_150_112, #cal_watcher_crit_over0_3350_12_160_110,
-        #cal_clear,
-        #cal_watcher_skull_over0_3350_12_160_110, #jiu
-
-        #cal_clear,
-        #cal_shadow_crit_over122_3216_10_150_112,
-        #cal_clear,
-        #cal_watcher_crit_over0_3350_12_160_110, #jiu
-        #cal_fire_over158_2894_8_150_118, #shi
-    ]
-    dou4 = [
-        cal_fortune_max_speed,
-    ]
-    man = [
-        cal_shadow_skull_over117_3350_32_160_110,   #jiu        SO
-        cal_shadow_skull_over0_3350_32_160_110,     #jiu        SO
-        cal_shadow_crit_over158_1741_8_150_118,     #shi        SO
-    ]
-    mine11A = [
-        cal_clear,
-        cal_shadow_skull_over122_3216_10_150_112,   #ci         SO3
-        cal_shadow_over158_2894_8_150_118,          #shi        SO2
-    ]
-    mine11B = [
-        cal_clear,
-        cal_shadow_skull_over0_3350_32_160_110,     #jiu        SO5
-    ]
-    dou3 = [
-        cal_freetype_max_speed,                      #mian  DO1
-        cal_fortune_max_speed,                       #lian  DO1
-        cal_shadow_semisen_over119_2385_25_150_118,  #qin       SO5
-        cal_seductress_crit_over129_3350_11_160_117, #qie   DO
-        cal_shadow_over158_2894_8_150_118,           #shi       SO1
-        cal_seductress_crit_over140_3350_11_160_117, #qie   DO
-        cal_shadow_indirect_over129_4074_10_150_118, #she   DO
-        cal_shadow_over0_3350_12_160_110,            #jiu           TU3
-        cal_seductress_attack_over0_3377_9_150_109,  #hei               SE
-        cal_shadow_over0_3350_11_160_117,            #qie               SE
-        cal_seductress_over111_3323_10_150_104,      #huang DO5
-    ]
-    dou4 = [
-        cal_clear,
-        cal_freetype_max_speed,                         #mian  DO1
-        cal_clear,
-        cal_fortune_max_speed,                          #lian  DO1
-        cal_freetype_effect_over276_127,                #yan   DO0
-        cal_scarlet_mask_l6_speed,
-        cal_seductress_crit_over129_3350_11_160_117,    #qie1  DO4
-        cal_shadow_semisen_over119_2385_25_150_118,     #qin        SO5
-        cal_shadow_over158_2894_8_150_118,              #shi        SO1
-        cal_shadow_over0_3002_8_150_107,                #xi                         YU5
-        cal_senecio_effect_over200_116,                 #bin   DO2
-        cal_fortune_effect_over200_119,                 #zhu   DO2
-        cal_fire_resist_over200_109,                    #lv    DO2
-        cal_shadow_indirect_over129_4074_10_150_118,    #she1  DO5
-        cal_shadow_over0_3350_12_160_110,               #yu             TU3
-        cal_seductress_attack_over0_3377_9_150_109,     #hei                ZH6
-        cal_scarlet_crit_over129_3350_11_160_117,       #qie2                                   SU3
-        cal_phenix_over129_4074_10_150_118,             #she1                           MO5
-        cal_fortune_indirect_over129_4074_10_150_118,   #she2  DO5
-        #cal_fire_effect_over135_114,                   #ban                    DC2
-        cal_sprite_over140_13785_5_150_108,             #ji1   DO3
-        cal_nymph_resist_over140_108,                   #ji2   DO3
-        cal_watcher_crit_over0_3270_12_150_111,         #dao                                ME5
-        cal_fortune_over120_2573_5_150_120,             #yao2                       YU4
-        cal_fortune_over120_1548_5_150_120,             #yao1                       YU3
-        cal_fire_over110_639_5_150_110,                 #yao3                       YU5
-        cal_pearl_over129_14013_5_150_112,              #fan   DO5
-        cal_seductress_under129_3136_10_150_110,        #gou1                                       LI
-        cal_seductress_over111_3323_10_150_104,         #huan           TU5
-        #cal_shadow_over0_3350_11_160_117,               #qie2               ZH4
-        #cal_shadow_over129_3028_10_150_113,             #lu1                                    SU2
-        #cal_fortune_speed_107,                          #you2                               ME1
-    ]
-    lidao = [
-        #cal_shadow_skull_over128_4074_10_150_118,        #she1
-        cal_shadow_skull_under129_3323_15_150_112,      #lin                                        LI
-    ]
-    dou5 = [
-        cal_clear,
-        cal_freetype_max_speed,                         #mian  DO1
-        cal_clear,
-        cal_fortune_max_speed,                          #lian  DO1
-        cal_freetype_effect_over276_127,                #yan   DO0
-        cal_scarlet_mask_l6_speed,
-        cal_seductress_crit_over129_3350_11_160_117,    #qie1  DO4
-        cal_shadow_semisen_over119_2385_25_150_118,     #qin        SO5
-        cal_shadow_over158_2894_8_150_118,              #shi        SO1
-        cal_fortune_effect_over200_119,                 #zhu   DO2
-        cal_fire_resist_over200_109,                    #lv    DO2
-        cal_shadow_indirect_over129_4074_10_150_118,    #she1  DO5
-        cal_shadow_over0_3350_12_160_110,               #yu             TU3
-        cal_seductress_attack_over0_3377_9_150_109,     #hei                ZH6
-        cal_scarlet_crit_over129_3350_11_160_117,       #qie2                                   SU3
-        cal_phenix_over129_4074_10_150_118,             #she1                           MO5
-        cal_fortune_indirect_over129_4074_10_150_118,   #she2  DO5
-        cal_seductress_crit_over110_3270_10_150_110,    #tian  DO4
-    ]
-    mine11a6 = [
-        cal_clear,
-        cal_shadow_over158_2894_8_150_118,          #shi        SO2
-        cal_shadow_semisen_over119_2385_25_150_118, #qin        SO3
-        cal_seductress_crit_over129_3350_11_160_117,
-    ]
-    mine11b6 = [
-        cal_clear,
-        cal_shadow_skull_over121_3323_35_150_112,   #lin        SO3
-    ]
-    fast = [
-        cal_fortune_max_speed,
-        cal_clear,
-        cal_freetype_max_speed,
-        #cal_seductress_crit_over129_3350_11_160_117,
-    ]
-    mine11a10 = [
-        cal_kyoukotsu_skull_over128_3323_15_150_112,
-    ]
-    dou0 = [
-        cal_clear,
-        cal_freetype_max_speed,                         #mian  DO1
-        cal_clear,
-        cal_fortune_max_speed,                          #lian  DO1
-        cal_freetype_effect_over276_127,                #yan   DO0
-        cal_fortune_effect_over200_119,                 #zhu   DO2
-        cal_fire_resist_over200_109,                    #lv    DO2
-    ]
-        #cal_clear,
-        #cal_kyoukotsu_skull_over128_3323_15_150_112,
-        #cal_seductress_crit_over129_3350_11_160_117,
-    dou6 = [
-        cal_clear,
-        cal_freetype_max_speed,                         #mian  DO1
-        cal_clear,
-        cal_fortune_max_speed,                          #lian  DO1
-        cal_freetype_effect_over276_127,                #yan   DO0
-        cal_seductress_crit_over110_3270_10_150_110,    #tian  DO4
-        cal_shadow_semisen_over119_2385_25_150_118,     #qin        SO6
-        cal_shadow_over158_2894_8_150_118,              #shi        SO1
-        cal_fortune_effect_over200_119,                 #zhu   DO2
-        cal_shadow_indirect_under128_4074_10_150_118,   #she1           DG4 
-        cal_shadow_crit_under128_3323_35_150_112,       #lin1               TU4
-        cal_seductress_attack_over0_3377_9_150_109,     #hei                ZH6
-        #cal_jizo_under122_3457_40_150_117,              #li                     DO6
-        cal_seductress_over0_3457_40_150_117,           #li                     DA6
-        cal_fortune_indirect_under122_4074_10_150_118,  #she2       DG5
-    ]
     cbg = [
         cal_fortune_or_none,
         cal_clear,
@@ -2515,22 +1460,9 @@ def filter_fast(data_dict):
         #cal_speedmax,
         cal_exit,
     ]
-    ltt = [
-        cal_shadow_crit_over0_3136_10_150_113,
-        cal_shadow_skull_over0_3136_10_150_113,
-        cal_nymph_over0_3457_40_150_117,
-    ]
-    order = dou0
-    order.extend(ltt)
+    order = cbg
     order.append(cal_clear)
     order = cbg
-    mine11 = [
-        cal_kyoukotsu_skull_over0_3511_12_150_115,
-    ]
-    mine11x = [
-        cal_shadow_skull_over117_3350_32_160_110,
-    ]
-    order = mine11
     order = [
         #[type_shadow, [type_skull], 158, 100, 3350, 110, 12+15+15, 160, '_jiu(190) '],
         #cal_freetype_effect_over276_127,                #yan   DO0
@@ -2544,10 +1476,17 @@ def filter_fast(data_dict):
         cal_fortune_max_speed,                          #lian  DO1
         cal_freetype_max_speed,                         #mian  DO1
         #tu
-        [type_kyoukotsu,    [type_geisha],   0, 158, 15+100, 3511, 115,    12, 160, '_jin (184)', score_buf_max_crit_damage_only],
+        [type_kyoukotsu,    [type_geisha],   0, 158, 15+100,  3511, 115,    12, 160, '_jin (184)', score_buf_max_crit_damage_only],
         #dou
-        [type_sprite,         soul_resist,   0, 195,    100, 2251, 111,  0+ 3, 150, '_xion(   )', score_buf_max_resist, prop_value_none, resist, True],
+        [type_nymph,              soul_hp,   0, 225,    100, 14241, 111, 95+ 5, 150, '_bai (   )', score_buf_max_hp_only],
         cal_exit,
+        [type_fire,             soul_crit,   0, 140,    100, 3457, 117, 45+10, 150, '_li2 (243)'],
+        [type_fortune,          soul_crit,   0, 210,    100, 2948, 109, 15+ 8, 180, '_jiu (   )', score_buf_max_damage, prop_value_l6_crit_rate],
+        cal_exit,
+        [type_jizo,             soul_crit, 128,   0,    100, 3457, 117, 45+10, 150, '_li  (243)'],
+        [type_fortune,          soul_crit,   0, 128,    100, 2948, 109, 15+ 8, 180, '_jiu (   )', score_buf_max_damage, prop_value_l6_crit_rate],
+        [type_sprite,         soul_resist,   0, 195,    100, 2251, 111,  0+ 3, 150, '_xion(   )', score_buf_max_resist, prop_value_none, resist],
+
         [type_shadow,           soul_crit,   0, 128,    100, 2948, 109, 30+ 8, 180, '_jiu (   )'],
         [type_jizo,             soul_crit, 128,   0,    100, 3457, 117, 45+10, 150, '_li  (243)'],
         [type_fire,           soul_effect,   0, 194,    100, 2412, 119, 95+ 5, 150, '_zhu (   )', score_buf_max_effect, prop_value_none, effect, True],
@@ -2605,7 +1544,6 @@ def filter_fast(data_dict):
         global effect_base
         global encode_hp_resist
         attack_hero = xattack
-        attack_buf_base = xattackbuf
         damage_min_crit_rate = 100 - xcrit
         crit_damage_base = xcritdamage
         damage_max_speed = (xmaxspeed - xspeedbase) if xmaxspeed >= xspeedbase else 500
@@ -2626,6 +1564,16 @@ def filter_fast(data_dict):
             for isoul in xsoul:
                 if isoul in soul_resist:
                     effect_base = effect_base + 15
+                    break
+        attack_buf_base = xattackbuf
+        if xscore == score_buf_max_hp_only:
+            encode_hp_resist = True
+            attack_buf_base = 100
+            if xtype in soul_hp:
+                attack_buf_base = attack_buf_base + 15
+            for isoul in xsoul:
+                if isoul in soul_hp:
+                    attack_buf_base = attack_buf_base + 15
                     break
         r = calxmaxdamage(xtype, xsoul, xspeedbase, xprop, 0, xnote, xscore, xsort, xone)
         damage_max_speed = 500
