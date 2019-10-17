@@ -1163,7 +1163,7 @@ def filter_fast(data_dict):
                     v = info[i].values()[0]
                     print('[%d]%3dS%3dH%3dR%3dT %s' % (i+1, int(v[speed]+0.5), int(v[hp_buf]+0.5), int(v[crit_rate]+0.5), int(v[resist]+0.5), comb_type[i]))
             if 1 and score_buf == score_buf_max_hp_only:
-                print('%02d[%s]%s(+%s)maxhp:%.1f,+%.2f' % (result_num, note, __[soul_type], __[p], score / 10.0 + attack_buf_base, base_speed + comb_data['sum'][speed] / 100.0))
+                print('%02d[%s]%s(+%s)maxhp:%d+%.1f,+%.2f' % (result_num, note, __[soul_type], __[p], attack_hero, (score / 1000000.0 - 1) * attack_hero, base_speed + comb_data['sum'][speed] / 100.0))
                 for i in xrange(6):
                     v = info[i].values()[0]
                     print('[%d]%3dS%3dH%3dR%3dT %s' % (i+1, int(v[speed]+0.5), int(v[hp_buf]+0.5), int(v[crit_rate]+0.5), int(v[resist]+0.5), comb_type[i]))
@@ -1478,18 +1478,19 @@ def filter_fast(data_dict):
         #tu
         [type_kyoukotsu,    [type_geisha],   0, 158, 15+100,  3511, 115,    12, 160, '_jin (184)', score_buf_max_crit_damage_only],
         #dou
+        [type_fire,        [type_semisen],   0, 140,    100,  3457, 117, 45+10, 150, '_li2 (243)'],
+        [type_fortune,     [type_semisen],   0, 210,    100,  2948, 109, 15+ 8, 180, '_jiu (   )', score_buf_max_damage, prop_value_l6_crit_rate],
         [type_nymph,              soul_hp,   0, 225,    100, 14241, 111, 95+ 5, 150, '_bai (   )', score_buf_max_hp_only],
+        [type_fortune,        soul_effect,   0, 240,    100,  6744, 118, 95+ 5, 150, '_mu  (   )', score_buf_max_effect],
         cal_exit,
-        [type_fire,             soul_crit,   0, 140,    100, 3457, 117, 45+10, 150, '_li2 (243)'],
-        [type_fortune,          soul_crit,   0, 210,    100, 2948, 109, 15+ 8, 180, '_jiu (   )', score_buf_max_damage, prop_value_l6_crit_rate],
         cal_exit,
         [type_jizo,             soul_crit, 128,   0,    100, 3457, 117, 45+10, 150, '_li  (243)'],
         [type_fortune,          soul_crit,   0, 128,    100, 2948, 109, 15+ 8, 180, '_jiu (   )', score_buf_max_damage, prop_value_l6_crit_rate],
         [type_sprite,         soul_resist,   0, 195,    100, 2251, 111,  0+ 3, 150, '_xion(   )', score_buf_max_resist, prop_value_none, resist],
+        [type_fire,           soul_effect,   0, 194,    100,  2412, 119, 95+ 5, 150, '_zhu (   )', score_buf_max_effect, prop_value_none, effect, True],
 
         [type_shadow,           soul_crit,   0, 128,    100, 2948, 109, 30+ 8, 180, '_jiu (   )'],
         [type_jizo,             soul_crit, 128,   0,    100, 3457, 117, 45+10, 150, '_li  (243)'],
-        [type_fire,           soul_effect,   0, 194,    100, 2412, 119, 95+ 5, 150, '_zhu (   )', score_buf_max_effect, prop_value_none, effect, True],
 
         [type_fortune,     [type_semisen],   0, 194,    100, 2948, 109, 15+ 8, 180, '_jiu (   )', score_buf_max_damage, prop_value_l6_crit_rate],
         [type_seductress,       soul_crit,   0, 130,    100, 3511, 120, 30+10, 150, '_cha (   )'],
