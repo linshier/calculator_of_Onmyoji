@@ -36,9 +36,13 @@ damage_max_speed = 500
 damage_limit = 0
 damage_indirect = 0
 damage_min_crit_rate = 90
-attack_buf_base = 100
+attack_buf_base_only = 100
+hp_buf_base_only = 100
+attack_buf_base_or_hp_buf_base = 100
 crit_damage_base = 160
-attack_hero = 3350
+hero_attack_only = 3350
+hero_hp_only = 3350
+hero_attack_or_hero_hp = 3350
 effect_base = 0
 # |-effect(11)-|-attackbuf(14)-|-critrate(13)-|-critdamage(11)-|-speed(12)-|
 bits_speed = 14
@@ -113,14 +117,14 @@ def score_buf_max_damage(soul_2p_mask, buf_max, n, t):
     #test crit rate
     if __decode(n, offset_critrate, bits_critrate) < damage_min_crit_rate * 10:
         return buf_max, 3, True
-    ab = attack_buf_base * 10 + __decode(n, offset_attackbuf, bits_attackbuf)
+    ab = attack_buf_base_or_hp_buf_base * 10 + __decode(n, offset_attackbuf, bits_attackbuf)
     cd = crit_damage_base * 10 + __decode(n, offset_critdamage, bits_critdamage)
     d = ab * cd
-    #print attack_buf_base + ab, crit_damage_base + cd, d
-    #if (ab == 129) and (cd == 360): print 'score:', d, attack_buf_base, crit_damage_base
+    #print attack_buf_base_or_hp_buf_base + ab, crit_damage_base + cd, d
+    #if (ab == 129) and (cd == 360): print 'score:', d, attack_buf_base_or_hp_buf_base, crit_damage_base
     if buf_max >= d:
         return buf_max, 4, True
-    if 0 < damage_limit and damage_limit < int(attack_hero * d / 1000000 / 100):
+    if 0 < damage_limit and damage_limit < int(hero_attack_or_hero_hp * d / 1000000 / 100):
         return buf_max, 5, True
     #print damage_limit, d
     return d + 1, n, False
@@ -143,7 +147,7 @@ def score_buf_max_crit_damage_only(soul_2p_mask, buf_max, n, t):
     d = ab * cd
     if buf_max >= d:
         return buf_max, 4, True
-    if 0 < damage_limit and damage_limit < int(attack_hero * d / 1000000 / 100):
+    if 0 < damage_limit and damage_limit < int(hero_attack_or_hero_hp * d / 1000000 / 100):
         return buf_max, 5, True
     return d + 1, n, False
 
@@ -158,12 +162,12 @@ def score_buf_max_attack_only(soul_2p_mask, buf_max, n, t):
     #test crit rate
     if __decode(n, offset_critrate, bits_critrate) < damage_min_crit_rate * 10:
         return buf_max, 3, True
-    ab = attack_buf_base * 10 + __decode(n, offset_attackbuf, bits_attackbuf)
+    ab = attack_buf_base_or_hp_buf_base * 10 + __decode(n, offset_attackbuf, bits_attackbuf)
     cd = 100 * 10
     d = ab * cd
     if buf_max >= d:
         return buf_max, 4, True
-    if 0 < damage_limit and damage_limit < int(attack_hero * d / 1000000 / 100):
+    if 0 < damage_limit and damage_limit < int(hero_attack_or_hero_hp * d / 1000000 / 100):
         return buf_max, 5, True
     return d + 1, n, False
 def score_buf_max_hp_only(soul_2p_mask, buf_max, n, t):
@@ -323,17 +327,17 @@ def map2list(codes, dx):
                 code = j
                 break
         val = int(0)
-        #if k == '5b47041108942d6ee02ea362': print 'map2list', v[attack], (int(v[attack_buf]) + int(v[attack]*100/attack_hero))
+        #if k == '5b47041108942d6ee02ea362': print 'map2list', v[attack], (int(v[attack_buf]) + int(v[attack]*100/hero_attack_or_hero_hp))
         if encode_hp_resist:
             val <<= bits_resist
             val += int(v[resist] * 10)
             val <<= bits_hpbuf
-            val += (int(v[hp_buf] * 10) + int(v[hp]*100/attack_hero * 10))
+            val += (int(v[hp_buf] * 10) + int(v[hp]*100/hero_attack_or_hero_hp * 10))
         else:
             val <<= bits_effect
             val += int(v[effect] * 10)
             val <<= bits_attackbuf
-            val += (int(v[attack_buf] * 10) + int(v[attack]*100/attack_hero * 10))
+            val += (int(v[attack_buf] * 10) + int(v[attack]*100/hero_attack_or_hero_hp * 10))
         val <<= bits_critrate
         val += int(v[crit_rate] * 10)
         val <<= bits_critdamage
@@ -1143,7 +1147,7 @@ def filter_fast(data_dict):
                                   find_one,
                                   score_buf,
                                   data_dict)
-            if 0 and len(r) > 0: print '+type', s, int(attack_hero * n / 1000000 / 100), ('%s' % (make_result(data_dict, r, c)['sum'])).decode('raw_unicode_escape')
+            if 0 and len(r) > 0: print '+type', s, int(hero_attack_or_hero_hp * n / 1000000 / 100), ('%s' % (make_result(data_dict, r, c)['sum'])).decode('raw_unicode_escape')
             if n > score:
                 score, res, com, p, cc = n, r, c, s, v
         if len(res) == 0:
@@ -1157,12 +1161,22 @@ def filter_fast(data_dict):
             comb_type = ['#' if (soul_type == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
 
             if 1 and score_buf in [score_buf_max_damage, score_buf_max_attack_only, score_buf_max_crit_damage_only, score_buf_max_hp_shield]:
-                pa = (attack_buf_base * 10.0 + __decode(cc, offset_attackbuf, bits_attackbuf)) / 1000.0 * attack_hero
-                pd = (crit_damage_base * 10.0 + __decode(cc, offset_critdamage, bits_critdamage)) / 1000.0
-                print('%02d[%s]%s(+%s):%d=%.2f*%.2f,+%.2f' % (result_num, note,
-                      __[soul_type], __[p], int(pa * pd / 100.0),
-                      pa, pd,
-                      base_speed + comb_data['sum'][speed] / 100.0))
+                ab = 0
+                cd = 0
+                ph = 0
+                for i in xrange(6):
+                    v = info[i].values()[0]
+                    ab += v[attack_buf] * 10
+                    ab += v[attack] * 10 / hero_attack_only
+                    cd += v[crit_damage] * 10
+                    ph += v[hp_buf] * hero_hp_only / 100.0
+                    ph += v[hp]
+                pa = (attack_buf_base_or_hp_buf_base * 10.0 + ab) / 1000.0 * hero_attack_only
+                pd = (crit_damage_base * 10.0 + cd) / 1000.0
+                extras = ''
+                if score_buf == score_buf_max_hp_shield:
+                    extras = ',+%dH' % int(ph)
+                print('%02d[%s]%s(+%s):%d=%.2f*%.2f,+%.2f%s' % (result_num, note, __[soul_type], __[p], int(pa * pd / 100.0), pa, pd, base_speed + comb_data['sum'][speed] / 100.0, extras))
                 for i in xrange(6):
                     v = info[i].values()[0]
                     print('[%d]%3dS%3dA%3dR%3dD %s' % (i+1, int(v[speed]+0.5), int(v[attack_buf]+0.5), int(v[crit_rate]+0.5), int(v[crit_damage]+0.5), comb_type[i]))
@@ -1177,69 +1191,69 @@ def filter_fast(data_dict):
                     v = info[i].values()[0]
                     print('[%d]%3dS%3dH%3dR%3dT %s' % (i+1, int(v[speed]+0.5), int(v[hp_buf]+0.5), int(v[crit_rate]+0.5), int(v[resist]+0.5), comb_type[i]))
             if 1 and score_buf == score_buf_max_hp_only:
-                print('%02d[%s]%s(+%s)maxhp:%d+%.1f,+%.2f' % (result_num, note, __[soul_type], __[p], attack_hero, (score / 1000000.0 - 1) * attack_hero, base_speed + comb_data['sum'][speed] / 100.0))
+                print('%02d[%s]%s(+%s)maxhp:%d+%.1f,+%.2f' % (result_num, note, __[soul_type], __[p], hero_attack_or_hero_hp, (score / 1000000.0 - 1) * hero_attack_or_hero_hp, base_speed + comb_data['sum'][speed] / 100.0))
                 for i in xrange(6):
                     v = info[i].values()[0]
                     print('[%d]%3dS%3dH%3dR%3dT %s' % (i+1, int(v[speed]+0.5), int(v[hp_buf]+0.5), int(v[crit_rate]+0.5), int(v[resist]+0.5), comb_type[i]))
             return comb_data
         return None
     def cal_seductress_crit_over129_3350_11_160_117():
-        global attack_hero
-        global attack_buf_base
+        global hero_attack_or_hero_hp
+        global attack_buf_base_or_hp_buf_base
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
-        attack_hero = 3350
-        attack_buf_base = 100
+        hero_attack_or_hero_hp = 3350
+        attack_buf_base_or_hp_buf_base = 100
         damage_min_crit_rate = 100 - 11 - 30
         crit_damage_base = 160
         damage_min_speed = 129 - 117
         return calxmaxdamage(type_seductress, soul_crit, 117, prop_value_l6_crit_damage, 0, '_qie1')
     def cal_scarlet_crit_over129_3350_11_160_117():
-        global attack_hero
-        global attack_buf_base
+        global hero_attack_or_hero_hp
+        global attack_buf_base_or_hp_buf_base
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
-        attack_hero = 3350
-        attack_buf_base = 100 + 15
+        hero_attack_or_hero_hp = 3350
+        attack_buf_base_or_hp_buf_base = 100 + 15
         damage_min_crit_rate = 100 - 11 - 15
         crit_damage_base = 160
         damage_min_speed = 129 - 117
         return calxmaxdamage(type_scarlet, soul_crit, 117, prop_value_none, 0, '_qie2')
     def cal_seductress_crit_over140_3350_11_160_117():
-        global attack_hero
-        global attack_buf_base
+        global hero_attack_or_hero_hp
+        global attack_buf_base_or_hp_buf_base
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
-        attack_hero = 3350
-        attack_buf_base = 100
+        hero_attack_or_hero_hp = 3350
+        attack_buf_base_or_hp_buf_base = 100
         damage_min_crit_rate = 100 - 11 - 30
         crit_damage_base = 160
         damage_min_speed = 140 - 117
         return calxmaxdamage(type_seductress, soul_crit, 117, prop_value_none, 0)
     def cal_seductress_attack_over140_3350_11_160_117():
-        global attack_hero
-        global attack_buf_base
+        global hero_attack_or_hero_hp
+        global attack_buf_base_or_hp_buf_base
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
-        attack_hero = 3350
-        attack_buf_base = 100
+        hero_attack_or_hero_hp = 3350
+        attack_buf_base_or_hp_buf_base = 100
         damage_min_crit_rate = 100 - 11 - 15
         crit_damage_base = 160 + 15
         damage_min_speed = 140 - 117
         return calxmaxdamage(type_seductress, soul_attack, 117, prop_value_l6_crit_damage, 0)
     def cal_seductress_under129_3136_10_150_110():
-        global attack_hero
-        global attack_buf_base
+        global hero_attack_or_hero_hp
+        global attack_buf_base_or_hp_buf_base
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
         global damage_max_speed
-        attack_hero = 3323
-        attack_buf_base = 100 + 15
+        hero_attack_or_hero_hp = 3323
+        attack_buf_base_or_hp_buf_base = 100 + 15
         damage_min_crit_rate = 100 - 10 - 15
         crit_damage_base = 150 + 15
         damage_min_speed = 110 - 110
@@ -1248,51 +1262,51 @@ def filter_fast(data_dict):
         damage_max_speed = 500
         return r
     def cal_seductress_skull_over109_3136_10_150_109():
-        global attack_hero
-        global attack_buf_base
+        global hero_attack_or_hero_hp
+        global attack_buf_base_or_hp_buf_base
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
         global damage_max_speed
-        attack_hero = 3136
-        attack_buf_base = 100
+        hero_attack_or_hero_hp = 3136
+        attack_buf_base_or_hp_buf_base = 100
         damage_min_crit_rate = 100 - 10 - 15
         crit_damage_base = 150
         damage_min_speed = 109 - 109
         return calxmaxdamage(type_seductress, [type_skull], 109, prop_value_none, 0, '_fo  ')
     def cal_seductress_over0_2412_5_150_105():
-        global attack_hero
-        global attack_buf_base
+        global hero_attack_or_hero_hp
+        global attack_buf_base_or_hp_buf_base
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
-        attack_hero = 2412
-        attack_buf_base = 100
+        hero_attack_or_hero_hp = 2412
+        attack_buf_base_or_hp_buf_base = 100
         damage_min_crit_rate = 100 - 5 - 30
         crit_damage_base = 150
         damage_min_speed = 105 + 57 - 105
         return calxmaxdamage(type_seductress, soul_crit, 105, prop_value_none, 0)
     def cal_seductress_attack_over0_3377_9_150_109():
-        global attack_hero
-        global attack_buf_base
+        global hero_attack_or_hero_hp
+        global attack_buf_base_or_hp_buf_base
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
-        attack_hero = 3377
-        attack_buf_base = 100 + 15
+        hero_attack_or_hero_hp = 3377
+        attack_buf_base_or_hp_buf_base = 100 + 15
         damage_min_crit_rate = 100 - 9 - 15
         crit_damage_base = 150
         damage_min_speed = 109 - 109
         return calxmaxdamage(type_seductress, soul_attack, 109, prop_value_none, 0, ' hei ')
     def cal_sprite_over140_13785_5_150_108():
         global encode_hp_resist
-        global attack_hero
-        global attack_buf_base
+        global hero_attack_or_hero_hp
+        global attack_buf_base_or_hp_buf_base
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
-        attack_hero = 13785 #hp
-        attack_buf_base = 100
+        hero_attack_or_hero_hp = 13785 #hp
+        attack_buf_base_or_hp_buf_base = 100
         damage_min_crit_rate = 100 - 5 - 15
         crit_damage_base = 150
         damage_min_speed = 140 - 108
@@ -1302,13 +1316,13 @@ def filter_fast(data_dict):
         return r
     def cal_pearl_over129_14013_5_150_112():
         global encode_hp_resist
-        global attack_hero
-        global attack_buf_base
+        global hero_attack_or_hero_hp
+        global attack_buf_base_or_hp_buf_base
         global damage_min_crit_rate
         global crit_damage_base
         global damage_min_speed
-        attack_hero = 14013 #hp
-        attack_buf_base = 100 + 0
+        hero_attack_or_hero_hp = 14013 #hp
+        attack_buf_base_or_hp_buf_base = 100 + 0
         damage_min_crit_rate = 100 - 5 - 15
         crit_damage_base = 150
         damage_min_speed = 129 - 112
@@ -1367,8 +1381,8 @@ def filter_fast(data_dict):
                     done.add(x)
             comb_data = make_result(data_dict, res, com)
             print('%02d[%s]%s(+%s):%d=%.2f*%.2f,+%.2f' % (result_num, note,
-                  __[soul_type], 'free', int(attack_hero * damage / 1000000 / 100),
-                  (attack_buf_base * 10.0 + __decode(cc, offset_attackbuf, bits_attackbuf)) / 1000.0 * attack_hero,
+                  __[soul_type], 'free', int(hero_attack_or_hero_hp * damage / 1000000 / 100),
+                  (attack_buf_base_or_hp_buf_base * 10.0 + __decode(cc, offset_attackbuf, bits_attackbuf)) / 1000.0 * hero_attack_or_hero_hp,
                   (crit_damage_base * 10.0 + __decode(cc, offset_critdamage, bits_critdamage)) / 1000.0,
                   base_speed + comb_data['sum'][speed] / 100.0))
             return comb_data
@@ -1437,13 +1451,13 @@ def filter_fast(data_dict):
         cal_clear,
         cal_fortune_max_speed,                          #lian  DO1
         cal_freetype_max_speed,                         #mian  DO1
-        [type_kyoukotsu,    [type_geisha],   0, 158, 15+100,  3511, 115,  0+12, 160, '_jin (184)', score_buf_max_crit_damage_only],
+        [type_kyoukotsu,    [type_geisha],   0, 158, 15+100,  3511,     0, 115,  0+12, 160, '_jin (184)', score_buf_max_crit_damage_only],
         #dou1
-        [type_kyoukotsu, [type_nightwing],   0, 235, 30+100,  2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
-        [type_fire,           soul_attack,   0, 235, 15+100,  2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
-        [type_taker,          soul_attack,   0, 234, 30+100,  2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
-        [type_watcher,          soul_crit,   0, 128, 30+100,  3002, 107,  0+ 8, 150, '_hua (   )'],   
-        [type_jizo,             soul_crit,   0, 140,    100,  9229, 117, 15+10, 150, '_li  (243)', score_buf_max_hp_shield],
+        [type_kyoukotsu, [type_nightwing],   0, 235, 30+100,  2841,     0, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
+        [type_fire,           soul_attack,   0, 235, 15+100,  2841,     0, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
+        [type_taker,          soul_attack,   0, 234, 30+100,  2841,     0, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
+        [type_watcher,          soul_crit,   0, 128, 30+100,  3002,     0, 107,  0+ 8, 150, '_hua (   )'],   
+        [type_jizo,             soul_crit,   0, 140,    100,  3457,  9229, 117, 45+10, 150, '_li  (243)', score_buf_max_hp_shield],
         cal_exit,
         #dou2
         [type_seductress,       soul_crit,   0, 140,    100,  3511, 120, 30+10, 150, '_cha (   )'],
@@ -1516,9 +1530,13 @@ def filter_fast(data_dict):
 
         #[type_seductress, [type_geisha], 0, 129, 100, 3511, 115, 12+15, 160, '_jin(242) '],
     ]
-    def xcal(xtype, xsoul, xmaxspeed, xminspeed, xattackbuf, xattack, xspeedbase, xcrit, xcritdamage, xnote, xscore, xprop, xsort, xone):
-        global attack_hero
-        global attack_buf_base
+    def xcal(xtype, xsoul, xmaxspeed, xminspeed, xattackbuf, xattack, xhp, xspeedbase, xcrit, xcritdamage, xnote, xscore, xprop, xsort, xone):
+        global hero_attack_only
+        global hero_hp_only
+        global hero_attack_or_hero_hp
+        global attack_buf_base_only
+        global hp_buf_base_only
+        global attack_buf_base_or_hp_buf_base
         global damage_min_crit_rate
         global crit_damage_base
         global damage_max_speed
@@ -1527,7 +1545,24 @@ def filter_fast(data_dict):
         global effect_max_speed
         global effect_base
         global encode_hp_resist
-        attack_hero = xattack
+        hero_attack_only = xattack
+        hero_hp_only = xhp
+        hero_attack_or_hero_hp = xattack
+        attack_buf_base_only = xattackbuf
+        hp_buf_base_only = 100
+        attack_buf_base_or_hp_buf_base = xattackbuf
+        if xscore in [score_buf_max_hp_only, score_buf_max_hp_shield]:
+            encode_hp_resist = True
+            hero_attack_or_hero_hp = xhp
+            attack_buf_base_or_hp_buf_base = 100
+            if xtype in soul_hp:
+                attack_buf_base_or_hp_buf_base += 15
+                hp_buf_base_only += 15
+            for isoul in xsoul:
+                if isoul in soul_hp:
+                    attack_buf_base_or_hp_buf_base += 15
+                    hp_buf_base_only += 15
+                    break
         damage_min_crit_rate = 100 - xcrit
         crit_damage_base = xcritdamage
         damage_max_speed = (xmaxspeed - xspeedbase) if xmaxspeed >= xspeedbase else 500
@@ -1549,16 +1584,6 @@ def filter_fast(data_dict):
                 if isoul in soul_resist:
                     effect_base = effect_base + 15
                     break
-        attack_buf_base = xattackbuf
-        if xscore == score_buf_max_hp_only:
-            encode_hp_resist = True
-            attack_buf_base = 100
-            if xtype in soul_hp:
-                attack_buf_base = attack_buf_base + 15
-            for isoul in xsoul:
-                if isoul in soul_hp:
-                    attack_buf_base = attack_buf_base + 15
-                    break
         r = calxmaxdamage(xtype, xsoul, xspeedbase, xprop, 0, xnote, xscore, xsort, xone)
         damage_max_speed = 500
         effect_base = 0
@@ -1567,11 +1592,11 @@ def filter_fast(data_dict):
     for a in order:
         try:
             if isinstance(a, list):
-                fscore = score_buf_max_damage if len(a) <= 10 else a[10]
-                fprop = prop_value_none if len(a) <= 11 else a[11]
-                ssort = crit_rate if len(a) <= 12 else a[12]
-                bone = False if len(a) <= 13 else a[13]
-                comb = xcal(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], fscore, fprop, ssort, bone)
+                fscore = score_buf_max_damage if len(a) <= 11 else a[11]
+                fprop = prop_value_none if len(a) <= 12 else a[12]
+                ssort = crit_rate if len(a) <= 13 else a[13]
+                bone = False if len(a) <= 14 else a[14]
+                comb = xcal(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], fscore, fprop, ssort, bone)
             else:
                 comb = a()
             if comb is not None:
