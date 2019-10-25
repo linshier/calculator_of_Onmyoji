@@ -364,52 +364,6 @@ def list2map(codes, nx, ny, nz, mask, soul):
             speed:       __decode(nx, offset_speed, bits_speed),
             suit:        mitama_type}
 
-def filter_loc(data_dict):
-    if len(data_dict) != 6:
-        raise KeyError("combination dict source must have 6 keys")
-
-    d1, d2, d3, d4, d5, d6 = data_dict.values()
-    print('mitama nums by loc is %s %s %s %s %s %s' % (len(d1), len(d2),
-                                                       len(d3), len(d4),
-                                                       len(d5), len(d6)))
-    def prop_value_quick(mitama):
-        mitama_info = mitama.values()[0]
-        if (mitama_info[speed] and mitama_info[speed] >= speed_1p_limit):
-            return True
-        enhance_type = data_format.MITAMA_ENHANCE[mitama_info[suit]][u"加成类型"]
-        if (enhance_type != u"攻击加成" and enhance_type != u"暴击"):
-            return False
-        if (mitama_info[attack_buf] and mitama_info[attack_buf] > 0):
-            return True
-        if (mitama_info[crit_rate] and mitama_info[crit_rate] > 0):
-            return True
-        if (mitama_info[crit_damage] and mitama_info[crit_damage] > 0):
-            return True
-        return False
-    d1 = filter(prop_value_quick, d1)
-    d2 = filter(prop_value_quick, d2)
-    #for i in d2:
-    #    print(('%s' % i).decode('raw_unicode_escape'))
-    d3 = filter(prop_value_quick, d3)
-    d4 = filter(prop_value_quick, d4)
-    d5 = filter(prop_value_quick, d5)
-    d6 = filter(prop_value_quick, d6)
-    def prop_value_attack_buf(mitama):
-        mitama_info = mitama.values()[0]
-        if (mitama_info[speed] and mitama_info[speed] >= speed_1p_limit):
-            return True
-        if (mitama_info[attack_buf] and mitama_info[attack_buf] >= 55):
-            return True
-        return False
-    d2 = filter(prop_value_attack_buf, d2)
-    d4 = filter(prop_value_attack_buf, d4)
-
-    print('after filter by loc prop %s %s %s %s %s %s' % (len(d1), len(d2),
-                                                          len(d3), len(d4),
-                                                          len(d5), len(d6)))
-    return dict(zip(range(1, 7), [d1, d2, d3, d4, d5, d6]))
-
-
 mitama_codes = []
 mitama_codes_2p_suit_mask = int(0)
 mitama_codes_4p_suit_mask = int(0)
@@ -659,7 +613,14 @@ def filter_fast(data_dict):
         if (mitama_info[effect] and mitama_info[effect] >= 55):
             return True
         return False
-    def prop_value_l2_attack(mitama):
+    def prop_value_hp(mitama):
+        if mitama.keys()[0] in done:
+            return False
+        mitama_info = mitama.values()[0]
+        if (mitama_info[hp_buf] and mitama_info[hp_buf] >= 55):
+            return True
+        return False
+    def prop_value_attack(mitama):
         if mitama.keys()[0] in done:
             return False
         mitama_info = mitama.values()[0]
@@ -1102,7 +1063,7 @@ def filter_fast(data_dict):
         resist_base = 0
         return r
 
-    def calxmaxdamage(soul_type, soul_peer, base_speed, prop_value_l6, buf_limit, note, score_buf, sort_key, find_one):
+    def calxmaxdamage(soul_type, soul_peer, base_speed, prop_func, buf_limit, note, score_buf, sort_key, find_one):
         global effect_min_speed
         global effect_max_speed
         global damage_limit
@@ -1113,6 +1074,9 @@ def filter_fast(data_dict):
         cc = 0
         desc = ''
         p = type_none
+        prop_l2 = prop_value_none if len(prop_func) <= 2 else prop_func[2]
+        prop_l4 = prop_value_none if len(prop_func) <= 1 else prop_func[1]
+        prop_l6 = prop_func[0]
         for s in soul_peer:
             def __filter_type(mitama):
                 if mitama.keys()[0] in done:
@@ -1139,9 +1103,9 @@ def filter_fast(data_dict):
                 return soul, soul_2p_mask, soul_4p_mask
 
             r, c, n, v = filter_soul(__filter_type,
-                                  prop_value_none,
-                                  prop_value_none,
-                                  prop_value_l6,
+                                  prop_l2,
+                                  prop_l4,
+                                  prop_l6,
                                   __build_mask,
                                   sort_key,
                                   find_one,
@@ -1174,7 +1138,7 @@ def filter_fast(data_dict):
                 pa = (attack_buf_base_or_hp_buf_base * 10.0 + ab) / 1000.0 * hero_attack_only
                 pd = (crit_damage_base * 10.0 + cd) / 1000.0
                 extras = ''
-                if score_buf == score_buf_max_hp_shield:
+                if info[4-1].values()[0][hp_buf] >= 55:
                     extras = ',+%dH' % int(ph)
                 print('%02d[%s]%s(+%s):%d=%.2f*%.2f,+%.2f%s' % (result_num, note, __[soul_type], __[p], int(pa * pd / 100.0), pa, pd, base_speed + comb_data['sum'][speed] / 100.0, extras))
                 for i in xrange(6):
@@ -1451,27 +1415,34 @@ def filter_fast(data_dict):
         cal_clear,
         cal_fortune_max_speed,                          #lian  DO1
         cal_freetype_max_speed,                         #mian  DO1
-        [type_kyoukotsu,    [type_geisha],   0, 158, 15+100,  3511,     0, 115,  0+12, 160, '_jin (184)', score_buf_max_crit_damage_only],
+        [type_kyoukotsu,    [type_geisha],   0, 158, 15+100, 3511,     0, 115,  0+12, 160, '_jin (184)', score_buf_max_crit_damage_only],
         #dou1
-        [type_kyoukotsu, [type_nightwing],   0, 235, 30+100,  2841,     0, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
-        [type_fire,           soul_attack,   0, 235, 15+100,  2841,     0, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
-        [type_taker,          soul_attack,   0, 234, 30+100,  2841,     0, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
-        [type_watcher,          soul_crit,   0, 128, 30+100,  3002,     0, 107,  0+ 8, 150, '_hua (   )'],   
-        [type_jizo,             soul_crit,   0, 140,    100,  3457,  9229, 117, 45+10, 150, '_li  (243)', score_buf_max_hp_shield],
-        cal_exit,
+        [type_kyoukotsu, [type_nightwing],   0, 235, 30+100, 2841,     0, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
+        [type_fire,           soul_attack,   0, 235, 15+100, 2841,     0, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
+        [type_taker,          soul_attack,   0, 234, 30+100, 2841,     0, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
+        [type_jizo,             soul_crit,   0, 128,    100, 3457,  9229, 117, 45+10, 150, '_li  (243)', score_buf_max_damage, [prop_value_l6_crit_damage, prop_value_hp]],
         #dou2
-        [type_seductress,       soul_crit,   0, 140,    100,  3511, 120, 30+10, 150, '_cha (   )'],
-        [type_sprite,           soul_crit, 140, 128,    100, 12418, 118, 15+10, 150, '_she2(   )', score_buf_max_hp_shield],
-        [type_fortune,          soul_crit,   0, 142,    100,  2332, 108, 15+ 5, 150, '_ye1 (   )'],
+        [type_fortune,     [type_semisen],   0, 194,    100, 2948,     0, 109, 15+ 8, 180, '_jiu1(   )', score_buf_max_damage, [prop_value_l6_crit_rate, prop_value_attack]],
+        [type_seductress,       soul_crit,   0, 134,    100, 3511,     0, 120, 30+10, 150, '_cha1(   )'],
+        [type_sprite,           soul_crit, 134, 128,    311, 4074, 12418, 118, 15+10, 150, '_she2(   )', score_buf_max_damage, [prop_value_l6_crit_rate, prop_value_hp]],
+        [type_fortune,      [type_phenix],   0, 142,    100, 2332,     0, 108, 15+ 5, 150, '_ye1 (   )', score_buf_max_damage, [prop_value_l6_crit_rate, prop_value_attack]],
+        #etc
+        [type_watcher,          soul_crit,   0, 128, 30+100, 3002,     0, 107,  0+ 8, 150, '_hua (   )'],   
         cal_exit,
+        #dou3
+        [type_seductress,       soul_crit,   0, 134,    100, 3270,     0, 110, 10+30, 150, '_tian(203)'],
+        #dong
+        [type_shadow,        [type_skull],   0,   0,    100, 3511,     0, 120,-15+10, 150, '_cha2(   )'],
+        cal_exit,
+        #feng
+        [type_kyoukotsu,        soul_crit,   0,   0, 15+100, 3136,     0, 113, 55+10, 150, '_tun1(216)'],
+        [type_kyoukotsu,     [type_skull],   0,   0, 15+100, 3136,     0, 113, 40+10, 150, '_tun2(216)'],
+        [type_kyoukotsu,        soul_crit,   0, 134, 15+100, 2948,     0, 109, 55+ 8, 180, '_jiu3(   )'],
+        cal_exit,
+
         [type_fortune,        [type_fire],   0, 183,    100, 13330, 116, 95+ 5, 150, '_bin (   )', score_buf_max_effect],
-        [type_fortune,     [type_scarlet],   0, 239, 15+100,  2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
-        [type_semisen,        soul_attack,   0, 239, 15+100,  2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
-        [type_shadow,        [type_skull],   0,   0,    100,  3511, 120, 15+10, 150, '_cha2(   )'],
         cal_exit,
-        [type_seductress,    [type_skull],   0, 140,    100,  3511, 120, 15+10, 150, '_cha2(   )'],
         [type_snow,           [type_fire],   0, 183,    100, 11849, 105, 95+ 5, 150, '_qin (   )', score_buf_max_effect],
-        [type_fortune,     [type_semisen],   0, 210,    100,  2948, 109, 15+ 8, 180, '_jiu1(   )', score_buf_max_damage, prop_value_l6_crit_rate],
         [type_shadow,           soul_crit,   0, 140,    100,  2948, 109, 30+ 8, 180, '_jiu2(   )'],
         [type_nymph,              soul_hp,   0, 225,    100, 14241, 111, 95+ 5, 150, '_bai (   )', score_buf_max_hp_only],
         [type_fortune,        soul_effect,   0, 240,    100,  6744, 118, 95+ 5, 150, '_mu  (   )', score_buf_max_effect],
@@ -1489,7 +1460,6 @@ def filter_fast(data_dict):
         [type_shadow,           soul_crit, 128,   0,    100,  3323, 112, 30+15, 150, '_lin (215)'],
         [type_shadow,           soul_crit,   0, 140,    311,  4074, 118, 30+10, 150, '_she1(   )'],
         cal_exit,
-        [type_seductress,       soul_crit,   0, 134,    100,  3270, 110, 10+30, 150, '_tian(203)'],
         [type_seductress,       soul_crit,   0, 130,    100,  3350, 117, 30+11, 160, '_qie (   )'],   
         [type_fire,           soul_effect,   0, 194,    100, 2412, 119, 95+ 5, 150, '_zhu (   )', score_buf_max_effect, prop_value_none, effect, True],
         [type_jizo,             soul_crit, 128,   0,    100, 3457, 117, 45+10, 150, '_li  (243)'],
@@ -1501,18 +1471,11 @@ def filter_fast(data_dict):
         [type_fortune,          soul_crit,   0, 128,    311, 4074, 118, 15+10, 150, '_she2(   )', score_buf_max_damage, prop_value_l6_crit_rate],
         #[type_sprite,           soul_crit,   0, 270,    311, 4074, 118, 90+10, 150, '_she4(   )'],
         [type_fire,             soul_crit, 128,   0,    100, 3457, 117, 30+10, 150, '_li  (   )'],
-        [type_taker,          soul_attack,   0, 194, 30+100, 2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
-        [type_taker,          soul_attack,   0, 194, 30+100, 2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
-        [type_senecio,        soul_attack,   0, 202, 15+100, 2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
 
         [type_fortune,          soul_crit, 120,   0,    311, 4074, 118, 15+10, 150, '_she2(   )'],
-        [type_kyoukotsu,     [type_skull],   0, 117, 15+100, 3136, 113, 20+10, 150, '_tun1(216)'],
-        [type_kyoukotsu,        soul_crit,   0, 117, 15+100, 3136, 113, 35+10, 150, '_tun2(216)'],
         [type_shadow,           soul_crit,   0,   0,    100, 3377, 111, 30+12, 150, '_chi (238)'],   
         cal_exit,
-        [type_semisen,        soul_attack, 0, 199, 15+100, 2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
         cal_exit,
-        [type_fortune,        soul_attack, 0, 195, 15+100, 2841, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
         [type_kyoukotsu, [type_shinkirou], 117,   0, 15+100, 3457, 117,    15, 150, '_li  (   )'],
         cal_exit,
         [type_shadow,           soul_crit, 0,   0,    100, 2948, 109, 30+ 8, 180, '_jiu (230)'],
@@ -1593,7 +1556,7 @@ def filter_fast(data_dict):
         try:
             if isinstance(a, list):
                 fscore = score_buf_max_damage if len(a) <= 11 else a[11]
-                fprop = prop_value_none if len(a) <= 12 else a[12]
+                fprop = [prop_value_none] if len(a) <= 12 else a[12]
                 ssort = crit_rate if len(a) <= 13 else a[13]
                 bone = False if len(a) <= 14 else a[14]
                 comb = xcal(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], fscore, fprop, ssort, bone)
