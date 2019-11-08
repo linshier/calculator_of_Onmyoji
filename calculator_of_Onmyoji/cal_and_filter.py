@@ -755,8 +755,11 @@ def filter_fast(data_dict):
             comb_data = make_result(data_dict, res, com)
             comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
             comb_type = ['#' if (type_fortune == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
+            ps = 0
+            for i in xrange(6):
+                ps += comb_speed[i]
             comb_speed[1] = comb_speed[1] - 57
-            print ('%02d[%s]%s()maxspeed:%.2f,+%.2f' % (result_num, note, __[soul_x_type], base_speed + comb_data['sum'][speed] / 100.0, speedbuf / 100.0)), \
+            print ('%02d[%s]%s()maxspeed:%.2f/%.2f,+%.2f' % (result_num, note, __[soul_x_type], base_speed + ps, base_speed + comb_data['sum'][speed] / 100.0, ps)), \
                     '\n[1]     %0.2f %s' % (comb_speed[0], comb_type[0]), \
                     '\n[2] 57+ %0.2f %s' % (comb_speed[1], comb_type[1]), \
                     '\n[3]     %0.2f %s' % (comb_speed[2], comb_type[2]), \
@@ -792,8 +795,11 @@ def filter_fast(data_dict):
             comb_data = make_result(data_dict, res, com)
             comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
             comb_type = ['#' if (type_fortune == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
+            ps = 0
+            for i in xrange(6):
+                ps += comb_speed[i]
             comb_speed[1] = comb_speed[1] - 57
-            print ('%02d[_mian(276)]freetype()maxspeed:%.2f,+%.2f' % (result_num, 119 + n / 100.0, n / 100.0)), \
+            print ('%02d[_mian(276)]freetype()maxspeed:%.2f/%.2f,+%.2f' % (result_num, 119 + ps, 119 + n / 100.0, ps)), \
                     '\n[1]     %0.2f %s' % (comb_speed[0], comb_type[0]), \
                     '\n[2] 57+ %0.2f %s' % (comb_speed[1], comb_type[1]), \
                     '\n[3]     %0.2f %s' % (comb_speed[2], comb_type[2]), \
@@ -916,6 +922,7 @@ def filter_fast(data_dict):
                 ab = 0
                 cd = 0
                 ph = 0
+                ps = 0
                 for i in xrange(6):
                     v = info[i].values()[0]
                     ab += v[attack_buf] * 10
@@ -923,12 +930,14 @@ def filter_fast(data_dict):
                     cd += v[crit_damage] * 10
                     ph += v[hp_buf] * hero_hp_only / 100.0
                     ph += v[hp]
+                    ps += v[speed]
                 pa = (attack_buf_base_or_hp_buf_base * 10.0 + ab) / 1000.0 * hero_attack_only
                 pd = (crit_damage_base * 10.0 + cd) / 1000.0
                 extras = ''
                 if info[4-1].values()[0][hp_buf] >= 55:
                     extras = ',+%dH' % int(ph)
-                print('%02d[%s]%s(+%s):%d=%.2f*%.2f,+%.2f%s' % (result_num, note, __[soul_type], __[p], int(pa * pd / 100.0), pa, pd, base_speed + comb_data['sum'][speed] / 100.0, extras))
+                print('%02d[%s]%s(+%s):%d=%.2f*%.2f,+%.2f/%.2f)%s' % (result_num, note, __[soul_type], __[p], int(pa * pd / 100.0), pa, pd,
+                    base_speed + ps, base_speed + comb_data['sum'][speed] / 100.0, extras))
                 for i in xrange(6):
                     v = info[i].values()[0]
                     print('[%d]%3dS%3dA%3dR%3dD %s' % (i+1, int(v[speed]+0.5), int(v[attack_buf]+0.5), int(v[crit_rate]+0.5), int(v[crit_damage]+0.5), comb_type[i]))
@@ -1063,6 +1072,7 @@ def filter_fast(data_dict):
     order = [
         cal_fortune_max_speed,                          #lian  DO1
         cal_freetype_max_speed,                         #mian  DO1
+        cal_exit,
         [type_kyoukotsu,               [type_geisha],   0, 158, 15+100, 3511,     0, 115,  0+12, 160, '_jin (184)', score_buf_max_crit_damage_only],
         [type_shadow,                   [type_skull],   0,   0,    100, 3377,     0, 111, 15+12, 150, '_chi (238)'],   
         [type_kyoukotsu,  x_(soul_attack,type_taker),   0, 235, 30+100, 2841,     0, 111, 95+ 5, 150, '_jing(   )', score_buf_max_attack_only],   
