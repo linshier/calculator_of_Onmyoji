@@ -921,7 +921,7 @@ def filter_fast(data_dict):
             if 1 and score_buf in [score_buf_max_damage, score_buf_max_attack_only, score_max_crit_damage_only, score_buf_max_hp_shield]:
                 ab = 0
                 cd = 0
-                ph = 0
+                ph = hero_hp_only
                 ps = 0
                 pc = 0
                 for i in xrange(6):
@@ -935,11 +935,8 @@ def filter_fast(data_dict):
                     pc += v[crit_rate]
                 pa = (attack_buf_base_or_hp_buf_base * 10.0 + ab) / 1000.0 * hero_attack_only
                 pd = (crit_damage_base * 10.0 + cd) / 1000.0
-                extras = ''
-                if info[4-1].values()[0][hp_buf] >= 55:
-                    extras = ',+%dH' % int(ph)
-                print('%02d[%s]%s(+%s):%d=%.2f*%.2f,%.2fC,%.2fS%s' % (result_num, note, __[soul_type], __[p], int(pa * pd / 100.0), pa, pd,
-                    pc + 100 - damage_min_crit_rate, base_speed + ps, extras))
+                print('%02d[%s]%s(+%s):%d=%.2f*%.2f,%.2fC,%.2fH,%.2fS' % (result_num, note, __[soul_type], __[p], int(pa * pd), pa, pd,
+                    pc + 100 - damage_min_crit_rate, int(ph), base_speed + ps))
                 for i in xrange(6):
                     v = info[i].values()[0]
                     print('[%d]%3dS%3dA%3dR%3dD %s' % (i+1, int(v[speed]+0.5), int(v[attack_buf]+0.5), int(v[crit_rate]+0.5), int(v[crit_damage]+0.5), comb_type[i]))
@@ -1072,6 +1069,10 @@ def filter_fast(data_dict):
         csoul.remove(bsoul)
         return csoul
     order = [
+        [type_kyoukotsu,                   soul_crit, 158, 156, 15+100, 3511, 12532, 115, 15+12, 160, '_jin (198)', score_max_crit_damage_only],
+        cal_clear,
+        [type_kyoukotsu,                [type_skull], 158, 156, 15+100, 3511, 12532, 115,  0+12, 160, '_jin (180)', score_max_crit_damage_only],
+        cal_clear,
         [type_kyoukotsu,                   soul_crit,   0, 158, 15+100, 3350, 12532, 110, 15+12, 160, '_yu  (179)'],
         cal_clear,
         [type_kyoukotsu,                [type_skull],   0, 158, 15+100, 3350, 12532, 110,  0+12, 160, '_yu  (161)'],
@@ -1108,12 +1109,8 @@ def filter_fast(data_dict):
         [type_kyoukotsu,                   soul_crit,   0,   0, 15+100, 3136,     0, 113, 15+10, 150, '_tun2(216)'],
 
         cal_clear,
-        [type_kyoukotsu,                [type_skull],   0, 158, 15+100, 3350, 12532, 110,  0+12, 160, '_yu  (161)', score_max_crit_damage_only],
-        cal_clear,
-        cal_clear,
         [type_kyoukotsu,                [type_skull], 158, 156, 15+100, 3511,     0, 115,  0+12, 160, '_jin (180)', score_max_crit_damage_only],
         cal_clear,
-        [type_kyoukotsu,                [type_skull], 158, 156, 15+100, 3511,     0, 115,  0+12, 160, '_jin (180)'],
         cal_exit,
 
         [type_kyoukotsu,                   soul_crit,   0, 128, 15+100, 3511,     0, 115, 15+12, 160, '_jin (226)'],
