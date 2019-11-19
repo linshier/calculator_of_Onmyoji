@@ -69,7 +69,7 @@ offset_resist = offset_effect
 def __decode(v, offset, bits):
     return (v >> offset) & ((1 << bits) - 1)
 
-def score_suit_buf_max_speed(soul_2p_mask, buf_max, n, t):
+def score_max_speed(soul_2p_mask, buf_max, n, t):
     if __decode(n, offset_speed, bits_speed) <= buf_max:
         return buf_max, n, True
     return __decode(n, offset_speed, bits_speed), n, False
@@ -89,7 +89,7 @@ def score_buf_max_effect(soul_2p_mask, buf_max, n, t):
     if buf_max >= e:
         return buf_max, 4, True
     return e, n, False
-def score_buf_max_resist(soul_2p_mask, buf_max, n, t):
+def score_max_resist(soul_2p_mask, buf_max, n, t):
     return score_buf_max_effect(soul_2p_mask, buf_max, n, t)
 def score_freetype_max_effect(soul_2p_mask, buf_max, n, t):
     #test speed
@@ -129,7 +129,7 @@ def score_max_damage(soul_2p_mask, buf_max, n, t):
         return buf_max, 5, True
     #print damage_limit, d
     return d + 1, n, False
-def score_buf_max_hp_shield(soul_2p_mask, buf_max, n, t):
+def score_max_hp_shield(soul_2p_mask, buf_max, n, t):
     return score_max_damage(soul_2p_mask, buf_max, n, t)
 
 def score_max_crit_damage_only(soul_2p_mask, buf_max, n, t):
@@ -683,7 +683,7 @@ def filter_fast(data_dict):
                           build_mask_none,
                           speed,
                           True,
-                          score_suit_buf_max_speed,
+                          score_max_speed,
                           data_dict)
         if len(res) > 0:
             for x in res:
@@ -744,7 +744,7 @@ def filter_fast(data_dict):
                           _build_mask,
                           speed,
                           True,
-                          score_suit_buf_max_speed,
+                          score_max_speed,
                           data_dict)
             if n > speedbuf:
                 res, com, speedbuf = r, c, n
@@ -754,7 +754,7 @@ def filter_fast(data_dict):
                     done.add(x)
             comb_data = make_result(data_dict, res, com)
             comb_speed = [comb_data['info'][i].values()[0][speed] for i in xrange(6)]
-            comb_type = ['#' if (type_fortune == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
+            comb_type = ['#' if (soul_x_type == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
             ps = 0
             for i in xrange(6):
                 ps += comb_speed[i]
@@ -786,7 +786,7 @@ def filter_fast(data_dict):
                           build_mask_none,
                           speed,
                           True,
-                          score_suit_buf_max_speed,
+                          score_max_speed,
                           data_dict)
         if len(res) > 0:
             for x in res:
@@ -918,7 +918,7 @@ def filter_fast(data_dict):
             info = comb_data['info']
             comb_type = ['#' if (soul_type == comb_data['info'][i].values()[0][suit]) else '' for i in xrange(6)]
 
-            if 1 and score_buf in [score_max_damage, score_buf_max_attack_only, score_max_crit_damage_only, score_buf_max_hp_shield]:
+            if 1 and score_buf in [score_max_damage, score_buf_max_attack_only, score_max_crit_damage_only, score_max_hp_shield]:
                 ab = 0
                 cd = 0
                 ph = hero_hp_only
@@ -945,7 +945,7 @@ def filter_fast(data_dict):
                 for i in xrange(6):
                     v = info[i].values()[0]
                     print('[%d]%3dS%3dH%3dR%3dE %s' % (i+1, int(v[speed]+0.5), int(v[hp_buf]+0.5), int(v[crit_rate]+0.5), int(v[effect]+0.5), comb_type[i]))
-            if 1 and score_buf == score_buf_max_resist:
+            if 1 and score_buf == score_max_resist:
                 print('%02d[%s]%s(+%s)maxresist:%.1f,+%.2f' % (result_num, note, __[soul_type], __[p], score / 10.0 + effect_base, base_speed + comb_data['sum'][speed] / 100.0))
                 for i in xrange(6):
                     v = info[i].values()[0]
@@ -1069,15 +1069,27 @@ def filter_fast(data_dict):
         csoul.remove(bsoul)
         return csoul
     order = [
+        [type_dawnfairy,                           0,   0,   0,    100, 3055, 11735, 115, 90+10, 150, '_yuan(   )', score_max_speed],
+        cal_exit,
         cal_fortune_max_speed,                          #lian  DO1
         cal_freetype_max_speed,                         #mian  DO1
-        [type_kyoukotsu,                [type_skull], 158, 156, 15+100, 3511, 12532, 115,  0+12, 160, '_jin (180)', score_max_crit_damage_only],
+        [type_kyoukotsu,                [type_skull], 158, 157, 15+100, 3511, 12532, 115,  0+12, 160, '_jin (180)'],
+        [type_kyoukotsu,                   soul_crit, 157, 156, 15+100, 3002, 10937, 115, 15+10, 150, '_xue (   )'],
+        [type_seductress,             [type_semisen],   0, 134,    100, 3511,     0, 120, 30+10, 150, '_cha2(   )', score_max_damage, [prop_crit_damage]],
+        [type_fire,                      soul_resist,   0, 194,    100, 3082, 11393, 109, 90+10, 150, '_splv(   )', score_max_resist],
+        [type_shadow,                      soul_crit,   0, 230,    100, 3189, 11963, 109, 30+10, 150, '_gui1(105)', score_max_damage, [prop_crit_rate, prop_attack]],
+        [type_fortune,                     soul_crit, 134, 131,    311, 4074, 12418, 118, 15+10, 150, '_she1(   )', score_max_damage, [prop_crit_rate, prop_attack, prop_attack]],
+        [type_sprite,                      soul_crit,   0, 140,    100, 2332, 13785, 108, 15+10, 150, '_hui2(   )', score_max_hp_shield],
+        cal_exit,
+        [type_kyoukotsu,               [type_geisha], 157, 156, 15+100, 3511, 12532, 115,  0+12, 160, '_jin (180)'],
+        cal_clear,
+        [type_kyoukotsu,               [type_geisha], 157, 156, 15+100, 3055, 11735, 115,  0+10, 150, '_yuan(180)'],
+        cal_clear,
+        cal_exit,
         #[type_kyoukotsu,               [type_geisha], 157, 156, 15+100, 3055, 11735, 115,  0+10, 150, '_yuan(180)'],
         [type_kyoukotsu,                   soul_crit,   0,   0, 15+100, 3136, 11165, 113, 15+10, 150, '_tun1(216)'],
         [type_kyoukotsu,                   soul_crit,   0,   0, 15+100, 3136, 11165, 113, 15+10, 150, '_tun2(216)'],
         cal_clear,
-        cal_exit,
-        [type_kyoukotsu,                [type_skull], 157, 156, 15+100, 3002, 10937, 115,  0+10, 150, '_xi  (199)'],
         cal_exit,
         [type_kyoukotsu,               [type_geisha],   0, 158, 15+100, 3511,     0, 115,  0+12, 160, '_jin (184)', score_max_crit_damage_only],
         cal_exit,
@@ -1088,14 +1100,11 @@ def filter_fast(data_dict):
         [type_seductress,              [type_geisha],   0,   0,    115, 3136, 10026, 110, 15+10, 165, '_gou1(   )'],
         [type_seductress,              [type_geisha],   0,   0,    115, 3136, 10026, 110, 15+10, 165, '_gou2(   )'],
         [type_jizo,                        soul_crit,   0, 128,    100, 3457,  9229, 117, 45+10, 150, '_li  (243)', score_max_damage, [prop_crit_damage, prop_value_hp]],
-        [type_shadow,                      soul_crit,   0, 194,    100, 3189, 11963, 109, 30+10, 150, '_gui1(   )', score_max_damage, [prop_crit_rate, prop_attack]],
         [type_fortune,                     soul_crit,   0, 194,    100, 3189, 11963, 109, 15+10, 150, '_gui2(   )', score_max_damage, [prop_crit_rate, prop_attack]],
         [type_watcher,                     soul_crit,   0, 128, 15+100, 3002,     0, 107, 15+ 8, 150, '_hua (   )'],   
-        [type_seductress,                  soul_crit,   0, 134,    100, 3511,     0, 120, 30+10, 150, '_cha2(   )', score_max_damage, [prop_crit_damage]],
-        [type_fortune,                     soul_crit, 134, 131,    311, 4074, 12418, 118, 15+10, 150, '_she1(   )', score_max_damage, [prop_crit_rate, prop_attack, prop_attack]],
         [type_sprite,                      soul_crit, 134, 131,    311, 4074, 12418, 118, 15+10, 150, '_she2(   )', score_max_damage, [prop_crit_rate, prop_value_hp]],
         [type_fire,                        soul_crit, 128, 111,    100, 2332, 13785, 108, 15+10, 150, '_hui1(   )'],
-        [type_pearl,                       soul_crit,   0,   0,    100, 2385, 13785,  99, 15+ 3, 150, '_ying(   )', score_buf_max_hp_shield],
+        [type_pearl,                       soul_crit,   0,   0,    100, 2385, 13785,  99, 15+ 3, 150, '_ying(   )', score_max_hp_shield],
         cal_exit,
         [type_kyoukotsu,                   soul_crit, 158, 156, 15+100, 3511, 12532, 115, 15+12, 160, '_jin (198)', score_max_crit_damage_only],
         cal_clear,
@@ -1111,16 +1120,11 @@ def filter_fast(data_dict):
         cal_exit,
         [type_shadow,                   [type_skull],   0,   0,    100, 3377,     0, 111, 15+12, 150, '_chi (238)'],   
 
-        cal_clear,
         [type_kyoukotsu,                [type_skull], 158, 156, 15+100, 3511,     0, 115,  0+12, 160, '_jin (180)', score_max_crit_damage_only],
-        cal_clear,
-        cal_exit,
 
         [type_kyoukotsu,                   soul_crit,   0, 128, 15+100, 3511,     0, 115, 15+12, 160, '_jin (226)'],
         [type_seductress,              [type_geisha],   0, 128, 15+100, 3511,     0, 115,  0+12, 160, '_jin (195)'],
-        cal_exit,
 
-        cal_exit,
         [type_kyoukotsu,               [type_geisha], 155, 134, 15+100, 3511,     0, 115,  0+12, 160, '_jin (180)', score_max_crit_damage_only],
         cal_exit,
         cal_freetype_max_speed,                         #mian  DO1
@@ -1156,9 +1160,9 @@ def filter_fast(data_dict):
         [type_shadow,           soul_crit,   0, 140,    100,  3323, 100, 30+10, 150, '_yue (   )'],
         [type_priestess,      soul_effect,   0, 210,    100,  2305, 112, 95+ 5, 150, '_niao(   )', score_buf_max_effect],
         [type_fire,             soul_crit,   0, 140,    100,  3457, 117, 45+10, 150, '_li2 (243)'],
-        [type_sprite,         soul_resist,   0, 195,    100,  2251, 111,  0+ 3, 150, '_xun (   )', score_buf_max_resist, prop_value_none, resist],
+        [type_sprite,         soul_resist,   0, 195,    100,  2251, 111,  0+ 3, 150, '_xun (   )', score_max_resist, prop_value_none, resist],
         [type_shadow,           soul_crit,   0, 140,    100,  3404, 110, 30+20, 150, '_lan (   )'],
-        [type_jizo,           soul_attack,   0, 140,    100, 11393, 121,  0+10, 150, '_lian(   )', score_buf_max_hp_shield],
+        [type_jizo,           soul_attack,   0, 140,    100, 11393, 121,  0+10, 150, '_lian(   )', score_max_hp_shield],
         cal_exit,
 
 
@@ -1211,7 +1215,7 @@ def filter_fast(data_dict):
         attack_buf_base_only = xattackbuf
         hp_buf_base_only = 100
         attack_buf_base_or_hp_buf_base = xattackbuf
-        if xscore in [score_buf_max_hp_only, score_buf_max_hp_shield]:
+        if xscore in [score_buf_max_hp_only, score_max_hp_shield]:
             encode_hp_resist = True
             hero_attack_or_hero_hp = xhp
             attack_buf_base_or_hp_buf_base = 100
@@ -1236,7 +1240,7 @@ def filter_fast(data_dict):
                 if isoul in soul_effect:
                     effect_base = effect_base + 15
                     break
-        if xscore == score_buf_max_resist:
+        if xscore == score_max_resist:
             encode_hp_resist = True
             if xtype in soul_resist:
                 effect_base = 0 + 15
@@ -1244,7 +1248,10 @@ def filter_fast(data_dict):
                 if isoul in soul_resist:
                     effect_base = effect_base + 15
                     break
-        r = calxmaxdamage(xtype, xsoul, xspeedbase, xprop, 0, xnote, xscore, xsort, xone)
+        if isinstance(xsoul, list):
+            r = calxmaxdamage(xtype, xsoul, xspeedbase, xprop, 0, xnote, xscore, xsort, xone)
+        if isinstance(xsoul, int) and xsoul == 0 and xscore == score_max_speed:
+            r = cal_x_max_speed(xtype, xspeedbase, xnote)
         damage_max_speed = 500
         effect_base = 0
         encode_hp_resist = False
