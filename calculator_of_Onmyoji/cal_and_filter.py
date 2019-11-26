@@ -762,7 +762,7 @@ def filter_fast(data_dict):
             for i in xrange(6):
                 ps += comb_speed[i]
             comb_speed[1] = comb_speed[1] - 57
-            print ('%02d[%s]%s()maxspeed:%.2f/%.2f,+%.2f' % (result_num, note, __[soul_x_type], base_speed + ps, base_speed + comb_data['sum'][speed] / 100.0, ps)), \
+            print ('%02d[%s]%s()maxspeed:%.2f,+%.2f' % (result_num, note, __[soul_x_type], base_speed + ps, ps)), \
                     '\n[1]     %0.2f %s' % (comb_speed[0], comb_type[0]), \
                     '\n[2] 57+ %0.2f %s' % (comb_speed[1], comb_type[1]), \
                     '\n[3]     %0.2f %s' % (comb_speed[2], comb_type[2]), \
@@ -802,7 +802,7 @@ def filter_fast(data_dict):
             for i in xrange(6):
                 ps += comb_speed[i]
             comb_speed[1] = comb_speed[1] - 57
-            print ('%02d[_mian(276)]freetype()maxspeed:%.2f/%.2f,+%.2f' % (result_num, 119 + ps, 119 + n / 100.0, ps)), \
+            print ('%02d[_mian(276)]freetype()maxspeed:%.2f,+%.2f' % (result_num, 119 + ps, ps)), \
                     '\n[1]     %0.2f %s' % (comb_speed[0], comb_type[0]), \
                     '\n[2] 57+ %0.2f %s' % (comb_speed[1], comb_type[1]), \
                     '\n[3]     %0.2f %s' % (comb_speed[2], comb_type[2]), \
@@ -1072,8 +1072,8 @@ def filter_fast(data_dict):
         csoul.remove(bsoul)
         return csoul
     order = [
-        cal_freetype_max_speed,                         #mian  DO1
         [type_kyoukotsu,                [type_skull], 158  , 157  , 15+100, 3511, 12532, 115,  0+12, 160, '_jin (180)'],
+        cal_exit,
         [type_seductress,              [type_shadow], 131.5, 130  ,    100, 3511,     0, 120, 30+10, 150, '_cha2(   )', score_max_damage, [prop_crit_damage]],
         [type_fire,                      soul_resist,   0  , 184  ,    100, 3082, 11393, 109, 90+10, 150, '_splv(   )', score_max_resist],
         [type_dawnfairy,                           0,   0  ,   0  ,    100, 3055, 11735, 115, 90+10, 150, '_yuan(   )', score_max_speed,  [prop_hp, prop_hp, prop_l2_speed]],
@@ -1088,14 +1088,15 @@ def filter_fast(data_dict):
         [type_fortune,                     soul_crit, 130  , 129  ,    100, 1548,  9019, 120, 35+10, 150, '_shi2(   )', score_max_damage, [prop_crit_rate]],
         [type_fire,                        soul_crit, 129  , 128  ,    100, 1386,  8206, 110, 35+10, 150, '_shi3(   )', score_max_damage, [prop_crit_rate, prop_attack, prop_attack]],
         cal_exit,
-        [type_shadow,                      soul_crit,   0  , 134  ,    311, 4074, 12418, 118, 30+10, 150, '_she1(   )', score_max_damage, [prop_crit_damage]],
         cal_fortune_max_speed,                          #lian  DO1
+        cal_freetype_max_speed,                         #mian  DO1
         cal_exit,
+        [type_watcher,                 [type_geisha], 157  , 156  , 15+100, 3511, 12532, 115,  0+12, 160, '_jin2(180)'],
+        [type_shadow,                      soul_crit,   0  , 134  ,    311, 4074, 12418, 118, 30+10, 150, '_she1(   )', score_max_damage, [prop_crit_damage]],
         [type_sprite,                      soul_crit, 130  , 128  ,    311, 4074, 12418, 118, 15+10, 150, '_she2(   )', score_max_damage, [prop_crit_rate, prop_hp]],
         [type_fortune,                     soul_crit, 130  , 129  ,    311, 4074, 12418, 118, 15+10, 150, '_she1(   )', score_max_damage, [prop_crit_rate, prop_attack, prop_attack]],
         [type_shadow,                      soul_crit,   0  , 230  ,    100, 3189, 11963, 109, 30+10, 150, '_gui1(105)', score_max_damage, [prop_crit_rate, prop_attack]],
         [type_kyoukotsu,                   soul_crit, 157  , 156  , 15+100, 3002, 10937, 115, 15+10, 150, '_xue (   )'],
-        [type_kyoukotsu,               [type_geisha], 157, 156, 15+100, 3511, 12532, 115,  0+12, 160, '_jin (180)'],
         cal_clear,
         [type_kyoukotsu,               [type_geisha], 157, 156, 15+100, 3055, 11735, 115,  0+10, 150, '_yuan(180)'],
         cal_clear,
