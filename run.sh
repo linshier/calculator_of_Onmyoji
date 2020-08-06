@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export PYTHONPATH=$(pwd)/requirements:$PYTHONPATH
-sn=$(echo $1|grep -o '2019[0-9A-Z\-]*')
+sn=$(echo $1|grep -o '2019[0-9A-Z\-]*\|2020[0-9A-Z\-]*')
 mkdir -p db
 echo https://yys.cbg.163.com/cgi/mweb/equip/$(echo $sn|cut -d"-" -f2)/$sn
 if [ ! -f db/$sn.json ]; then

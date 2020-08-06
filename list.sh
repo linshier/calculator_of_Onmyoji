@@ -1,7 +1,7 @@
 #!/bin/sh
 
 function getjson() {
-price='&price_min=250000&price_max=300000'
+price='&price_min=150000&price_max=200000'
 speed='270'
 serverid='&serverid=11'
 heroid='&hero_id=339'
