@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<script src="http://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script>
+var whdr = true;
+var str = '';
+function document_write(item, succ, min) {
+    if (item[3] == 0 || item[0] != succ || item[4] < min) {
+        return;
+    }   
+    if (whdr) {
+        hdr = '<br/><div>id: ' + item[1] + '</div>';
+        str += hdr;
+        whdr = false;
+    }
+    str += '<br/><div>';
+    if (item[0] == '1')
+        str += '<img src="img/succ.png" width="35px" height="30px"/>';
+    else
+        str += '<img src="img/fail.png" width="35px" height="30px"/>';
+    for (var j=2; j<7; j++) {
+        str += '<img src="img/' + item[5][j] + '.png" width="30px" height="30px"/>';
+    }
+    str += '<img src="img/vs.png" width="13px" height="17px"/>';
+    for (var j=2; j<7; j++) {
+        str += '<img src="img/' + item[6][j] + '.png" width="30px" height="30px"/>';
+    }
+    score = item[4];
+    if (score > 18000) {
+        score = Math.floor(500 + (item[4] - 18000) / 30);
+    }
+    str += item[2];
+    str += '<img src="img/clock.png" width="10px" height="10px"/>' + Math.ceil(item[3] / 60);
+    str += '<img src="img/star.png" width="10px" height="10px"/>' + score;
+    str += '</div>';
+}
+
+$.getJSON("test.txt", "", function(data) {
+        for (var i = data.length; i > 0; i--) {
+            document_write(data[i - 1], '0', 10000);
+        }
+        for (var i = data.length; i > 0; i--) {
+            document_write(data[i - 1], '1', 10000);
+        }
+        document.write(str);
+    }
+);
+</script>
+
+<title>dashen</title>
+</head>
+test
+<body>
+</body>
+
+</html>	
