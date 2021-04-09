@@ -38,6 +38,11 @@ function format_none()
 {
     grep .
 }
+function zepto()
+{
+    #grep .
+    grep 'Zepto'|sed 's/^Zepto[1-9]*(//;s/)$//'
+}
 function main()
 {
     awk '{print $1}' \
@@ -45,7 +50,7 @@ function main()
         date="$(date +%s)"
         curl -s 'https://bdapi.gameyw.netease.com/ky59/v1/g37_charts/oneuid?'${role_id}'&_='${date}'748&callback=Zepto'${date}'559' \
         --compressed \
-        |grep 'Zepto'|sed 's/^Zepto.*(//;s/)$//'\
+        |zepto \
         |jq_time \
         |format_none \
         |output_simple
