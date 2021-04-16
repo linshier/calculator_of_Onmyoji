@@ -5,7 +5,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script src="http://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="jquery-1.12.4.min.js"></script>
 <script>
 var whdr = true;
 var str = '';
@@ -31,8 +31,11 @@ function document_write(item, succ, min) {
         str += '<img src="img/' + item[6][j] + '.png" width="30px" height="30px"/>';
     }
     score = item[4];
-    if (score > 18000) {
+    if (score > 3000) {
+        score = Math.floor((item[4] - 3000) / 30);
+    } else if (score > 18000) {
         score = Math.floor(500 + (item[4] - 18000) / 30);
+    } else {
     }
     str += item[2];
     str += '<img src="img/clock.png" width="10px" height="10px"/>' + Math.ceil(item[3] / 60);
@@ -42,10 +45,10 @@ function document_write(item, succ, min) {
 
 $.getJSON("test.txt", "", function(data) {
         for (var i = data.length; i > 0; i--) {
-            document_write(data[i - 1], '0', 10000);
+            document_write(data[i - 1], '0', 0);
         }
         for (var i = data.length; i > 0; i--) {
-            document_write(data[i - 1], '1', 10000);
+            document_write(data[i - 1], '1', 0);
         }
         document.write(str);
     }

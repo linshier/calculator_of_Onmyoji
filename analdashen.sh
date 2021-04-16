@@ -2,6 +2,7 @@
 #https://cbg-yys.res.netease.com/game_res/hero/330/330.png
 function jq_all()
 {
+    #grep .
     jq -r '.result.extra.bl' 
 }
 function jq_name()
@@ -41,14 +42,14 @@ function format_none()
 function zepto()
 {
     #grep .
-    grep 'Zepto'|sed 's/^Zepto[1-9]*(//;s/)$//'
+    grep 'Zepto'|sed 's/^Zepto[1-9][0-9]*(//;s/)$//'
 }
 function main()
 {
     awk '{print $1}' \
     |while read role_id; do
         date="$(date +%s)"
-        curl -s 'https://bdapi.gameyw.netease.com/ky59/v1/g37_charts/oneuid?'${role_id}'&_='${date}'748&callback=Zepto'${date}'559' \
+        curl -m 5 -s 'https://bdapi.gameyw.netease.com/ky59/v1/g37_charts/oneuid?'${role_id}'&_='${date}'748&callback=Zepto'${date}'559' \
         --compressed \
         |zepto \
         |jq_time \
