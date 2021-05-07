@@ -57,5 +57,5 @@ function main()
         |output_simple
     done
 }
-cat xxx|main|tee test.txt
+cat xxx|main|tee test.txt &>/dev/null
 exit 0

@@ -14,7 +14,7 @@ function jq_simple()
     jq -r '.result|map(.|[.role_id,(.small_extra.count_win*100/.small_extra.count_all|floor),.small_extra.count_all,.small_extra.role_name,.rank,((500+(.score-18000)/30)|floor)])' \
         |sed 's/ //g' \
         |awk '{if($0~"\\],"){print $0}else{printf $0}}' \
-        |sed 's/^\[\["//;s/\["//;s/\]\]//;s/\],//;s/",/ /;s/,/ /;' \
+        |sed 's/^\[\["//;s/\["//;s/\]\]//;s/\],//;s/",/ /;s/,/ /g;' \
 
 }
 function output_simple()
@@ -36,19 +36,21 @@ function one_server()
             |sed 's/^Zepto[0-9]*(//;s/)$//' \
             |jq_simple \
             |output_simple
+        sleep 1
     done
 }
-one_server 10009 10
-exit 0
+#one_server 15002 1
+#exit 0
+#one_server 10006 1
+#exit 0
+#one_server 15005 10
+#one_server 10009 10
 one_server "all" 10
 exit 0
 for ((server=10001;server<=15033;server++))
 do
-    if [ ${server} -ne 10009 -a 1 -eq 0 ]; then
-        continue
-    fi
     if [ ${server} -eq 10031 ]; then
         server=15001
     fi
-    one_server ${server} 1
+    one_server ${server} 10
 done

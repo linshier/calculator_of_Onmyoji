@@ -8,11 +8,11 @@
 <script src="jquery-1.12.4.min.js"></script>
 <script>
 var whdr = true;
-var str = '';
 function document_write(item, succ, min) {
     if (item[3] == 0 || item[0] != succ || item[4] < min) {
-        return;
+        return '';
     }   
+    var str = '';
     if (whdr) {
         hdr = '<br/><div>id: ' + item[1] + '</div>';
         str += hdr;
@@ -23,12 +23,32 @@ function document_write(item, succ, min) {
         str += '<img src="img/succ.png" width="35px" height="30px"/>';
     else
         str += '<img src="img/fail.png" width="35px" height="30px"/>';
+    var x = '';
+    x = '261';
+    x = '356';
+    var hasx = false;
     for (var j=2; j<7; j++) {
         str += '<img src="img/' + item[5][j] + '.png" width="30px" height="30px"/>';
+        if (x == item[5][j]) {
+            hasx = true;
+        }
+    }
+    if (hasx) {
+        return '';
     }
     str += '<img src="img/vs.png" width="13px" height="17px"/>';
+    var y = '';
+    y = '351';
+    y = '334';
+    y = '341';
+    var hasy = false;
     for (var j=2; j<7; j++) {
         str += '<img src="img/' + item[6][j] + '.png" width="30px" height="30px"/>';
+        if (y == item[6][j]) {
+            hasy = true;
+        }
+    }
+    if (!hasy) {
     }
     score = item[4];
     if (score > 3000) {
@@ -41,14 +61,16 @@ function document_write(item, succ, min) {
     str += '<img src="img/clock.png" width="10px" height="10px"/>' + Math.ceil(item[3] / 60);
     str += '<img src="img/star.png" width="10px" height="10px"/>' + score;
     str += '</div>';
+    return str;
 }
 
 $.getJSON("test.txt", "", function(data) {
+        var str = '';
         for (var i = data.length; i > 0; i--) {
-            document_write(data[i - 1], '0', 0);
+            str += document_write(data[i - 1], '0', 0);
         }
         for (var i = data.length; i > 0; i--) {
-            document_write(data[i - 1], '1', 0);
+            str += document_write(data[i - 1], '1', 0);
         }
         document.write(str);
     }
