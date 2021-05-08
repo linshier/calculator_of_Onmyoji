@@ -7,8 +7,23 @@
 <meta http-equiv="Expires" content="0">
 <script src="jquery-1.12.4.min.js"></script>
 <script>
+function getUrlParam(name) {
+    var m = {};
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)", "g");
+    var p = window.location.search.substr(1);
+    var r = p.match(reg);
+    if (r != null) {
+        r.forEach(i => {
+            var v = unescape(i).substr(i.indexOf("=") + 1);
+            console.log(v);
+            m[v] = '';
+        });
+        return m;
+    }
+    return m;
+}
 var whdr = true;
-function document_write(item, succ, min) {
+function getRecord(item, succ, min, x0, x1, y0, y1) {
     if (item[3] == 0 || item[0] != succ || item[4] < min) {
         return '';
     }   
@@ -23,32 +38,34 @@ function document_write(item, succ, min) {
         str += '<img src="img/succ.png" width="35px" height="30px"/>';
     else
         str += '<img src="img/fail.png" width="35px" height="30px"/>';
-    var x = '';
-    x = '261';
-    x = '356';
-    var hasx = false;
+    var x0has = false;
+    var x1has = (Object.keys(x1).length == 0) ? true : false;
     for (var j=2; j<7; j++) {
         str += '<img src="img/' + item[5][j] + '.png" width="30px" height="30px"/>';
-        if (x == item[5][j]) {
-            hasx = true;
+        if (item[5][j] in x0) {
+            x0has = true;
+        }
+        if (item[5][j] in x1) {
+            x1has = true;
         }
     }
-    if (hasx) {
+    if (x0has || !x1has) {
         return '';
     }
     str += '<img src="img/vs.png" width="13px" height="17px"/>';
-    var y = '';
-    y = '351';
-    y = '334';
-    y = '341';
-    var hasy = false;
+    var y0has = false;
+    var y1has = (Object.keys(y1).length == 0) ? true : false;
     for (var j=2; j<7; j++) {
         str += '<img src="img/' + item[6][j] + '.png" width="30px" height="30px"/>';
-        if (y == item[6][j]) {
-            hasy = true;
+        if (item[6][j] in y0) {
+            y0has = true;
+        }
+        if (item[6][j] in y1) {
+            y1has = true;
         }
     }
-    if (!hasy) {
+    if (y0has || !y1has) {
+        return '';
     }
     score = item[4];
     if (score > 3000) {
@@ -66,11 +83,15 @@ function document_write(item, succ, min) {
 
 $.getJSON("test.txt", "", function(data) {
         var str = '';
+        var x0 = getUrlParam('x0');
+        var x1 = getUrlParam('x1');
+        var y0 = getUrlParam('y0');
+        var y1 = getUrlParam('y1');
         for (var i = data.length; i > 0; i--) {
-            str += document_write(data[i - 1], '0', 0);
+            str += getRecord(data[i - 1], '0', 0, x0, x1, y0, y1);
         }
         for (var i = data.length; i > 0; i--) {
-            str += document_write(data[i - 1], '1', 0);
+            str += getRecord(data[i - 1], '1', 0, x0, x1, y0, y1);
         }
         document.write(str);
     }
