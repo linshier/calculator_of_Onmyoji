@@ -22,35 +22,40 @@ function getUrlParam(name) {
     }
     return m;
 }
-var whdr = true;
+var player = '';
+var result = {"0":0, "1":0};
+var time = 0;
 function getRecord(item, succ, min, x0, x1, y0, y1) {
     if (item[3] == 0 || item[0] != succ || item[4] < min) {
         return '';
     }   
+    player = item[1];
     var str = '';
-    if (whdr) {
-        hdr = '<br/><div>id: ' + item[1] + '</div>';
-        str += hdr;
-        whdr = false;
-    }
     str += '<br/><div>';
     if (item[0] == '1')
         str += '<img src="img/succ.png" width="35px" height="30px"/>';
     else
         str += '<img src="img/fail.png" width="35px" height="30px"/>';
     var x0has = false;
-    var x1has = (Object.keys(x1).length == 0) ? true : false;
     for (var j=2; j<7; j++) {
         str += '<img src="img/' + item[5][j] + '.png" width="30px" height="30px"/>';
         if (item[5][j] in x0) {
             x0has = true;
         }
-        if (item[5][j] in x1) {
-            x1has = true;
-        }
     }
-    if (x0has || !x1has) {
+    if (x0has) {
         return '';
+    }
+    for (var k in x1) {
+        var x1has = false;
+        for (var j=2; j<7; j++) {
+            if (k == item[5][j]) {
+                x1has = true;
+            }
+        }
+        if (!x1has) {
+            return '';
+        }
     }
     str += '<img src="img/vs.png" width="13px" height="17px"/>';
     var y0has = false;
@@ -78,6 +83,8 @@ function getRecord(item, succ, min, x0, x1, y0, y1) {
     str += '<img src="img/clock.png" width="10px" height="10px"/>' + Math.ceil(item[3] / 60);
     str += '<img src="img/star.png" width="10px" height="10px"/>' + score;
     str += '</div>';
+    result[succ] += 1;
+    time += item[3];
     return str;
 }
 
@@ -93,7 +100,12 @@ $.getJSON("test.txt", "", function(data) {
         for (var i = data.length; i > 0; i--) {
             str += getRecord(data[i - 1], '1', 0, x0, x1, y0, y1);
         }
+        var hdr = '<br/><div>id: ' + player + '</div>';
+        hdr += '<br/><div>rate: ' + Math.floor(result['1']*100/(result['0']+result['1'])) + '% ';
+        hdr += 'time: ' + Math.ceil(time/60/(result['0']+result['1'])) + '</div>';
+        document.write(hdr);
         document.write(str);
+        console.log('done');
     }
 );
 </script>
