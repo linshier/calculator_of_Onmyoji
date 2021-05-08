@@ -59,18 +59,25 @@ function getRecord(item, succ, min, x0, x1, y0, y1) {
     }
     str += '<img src="img/vs.png" width="13px" height="17px"/>';
     var y0has = false;
-    var y1has = (Object.keys(y1).length == 0) ? true : false;
     for (var j=2; j<7; j++) {
         str += '<img src="img/' + item[6][j] + '.png" width="30px" height="30px"/>';
         if (item[6][j] in y0) {
             y0has = true;
         }
-        if (item[6][j] in y1) {
-            y1has = true;
-        }
     }
-    if (y0has || !y1has) {
+    if (y0has) {
         return '';
+    }
+    for (var k in y1) {
+        var y1has = false;
+        for (var j=2; j<7; j++) {
+            if (k == item[6][j]) {
+                y1has = true;
+            }
+        }
+        if (!y1has) {
+            return '';
+        }
     }
     score = item[4];
     if (score > 3000) {
