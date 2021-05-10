@@ -11,7 +11,7 @@ function jq_all()
 function jq_simple()
 {
     #jq -r '.result'
-    jq -r '.result|map(.|[.role_id,(.small_extra.count_win*100/.small_extra.count_all|floor),.small_extra.count_all,.small_extra.role_name,.rank,((500+(.score-18000)/30)|floor)])' \
+    jq -r '.result|map(.|[.role_id,(.small_extra.count_win*100/.small_extra.count_all|floor),.small_extra.count_all,.rank,.small_extra.role_name,((500+(.score-18000)/30)|floor)])' \
         |sed 's/ //g' \
         |awk '{if($0~"\\],"){print $0}else{printf $0}}' \
         |sed 's/^\[\["//;s/\["//;s/\]\]//;s/\],//;s/",/ /;s/,/ /g;' \
@@ -44,7 +44,12 @@ function one_server()
 #one_server 10006 1
 #exit 0
 #one_server 15005 10
+#one_server 10003 10 #yue
 #one_server 10009 10
+if [ $# -eq 2 ]; then
+    one_server $1 $2
+    exit 0
+fi
 one_server "all" 10
 exit 0
 for ((server=10001;server<=15033;server++))

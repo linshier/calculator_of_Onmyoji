@@ -57,5 +57,9 @@ function main()
         |output_simple
     done
 }
-cat xxx|main|tee test.txt &>/dev/null
+if [ $# -eq 2 ]; then
+    echo $1|main|tee $2 2>&1|wc -l
+    exit 0
+fi
+cat xxx|main|tee test.txt 2>&1|wc -l
 exit 0

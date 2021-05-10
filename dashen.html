@@ -94,8 +94,8 @@ function getRecord(item, succ, min, x0, x1, y0, y1) {
     time += item[3];
     return str;
 }
-
-$.getJSON("test.txt", "", function(data) {
+function writeDocument(file) {
+    $.getJSON(file, "", function(data) {
         var str = '';
         var x0 = getUrlParam('x0');
         var x1 = getUrlParam('x1');
@@ -113,8 +113,12 @@ $.getJSON("test.txt", "", function(data) {
         document.write(hdr);
         document.write(str);
         console.log('done');
-    }
-);
+    });
+}
+var file = getUrlParam('f');
+for (var f in file) {
+    writeDocument('dbds/' + f);
+}
 </script>
 
 <title>dashen</title>
