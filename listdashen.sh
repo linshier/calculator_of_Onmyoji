@@ -45,12 +45,12 @@ function one_server()
 #exit 0
 #one_server 15005 10
 #one_server 10003 10 #yue
-#one_server 10009 10
 if [ $# -eq 2 ]; then
     one_server $1 $2
     exit 0
 fi
-one_server "all" 10
+one_server 10009 10
+#one_server "all" 10
 exit 0
 for ((server=10001;server<=15033;server++))
 do
