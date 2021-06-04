@@ -1,4 +1,6 @@
 #!/bin/bash
+#https://ds.163.com/2019/yys/dj-rank/
+#https://cbg-yys.res.netease.com/game_res/hero/330/330.png
 function one_server() {
     server=$1
     topn0=$2
@@ -11,6 +13,7 @@ function one_server() {
     done < <(./listdashen.sh ${server} ${topn0}|tee dbds/${server}/list|awk '($NF>=40){print $1,$4}')
 }
 one_server all 10
+#exit 0
 for ((server=10001;server<=15031;server++))
 do
     if [ ${server} -eq 10010 ]; then

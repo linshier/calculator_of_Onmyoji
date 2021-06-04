@@ -1,4 +1,5 @@
 #!/bin/sh
+#https://ds.163.com/2019/yys/dj-rank/
 #https://cbg-yys.res.netease.com/game_res/hero/330/330.png
 function jq_all()
 {
