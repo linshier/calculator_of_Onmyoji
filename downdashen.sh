@@ -4,16 +4,19 @@
 function one_server() {
     server=$1
     topn0=$2
+    filter=$3
     mkdir -p dbds/${server}/
     while read id rank; do
         r=$(printf "%03d" ${rank})
         echo ${r} ${id}
         ./analdashen.sh ${id} dbds/${server}/${r}
         sleep $[RANDOM % 5 + 1]
-    done < <(./listdashen.sh ${server} ${topn0}|tee dbds/${server}/list|awk '($NF>=40){print $1,$4}')
+    done < <(./listdashen.sh ${server} ${topn0}|tee dbds/${server}/list|grep ${filter}|awk '($NF>=30){print $1,$4}')
 }
-one_server all 10
+one_server 10009 10 Canon
 #exit 0
+one_server all 10 .
+exit 0
 for ((server=10001;server<=15031;server++))
 do
     if [ ${server} -eq 10010 ]; then

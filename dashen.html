@@ -15,7 +15,7 @@ function getUrlParam(name) {
     if (r != null) {
         r.forEach(i => {
             var v = unescape(i).substr(i.indexOf("=") + 1);
-            console.log(v);
+            console.log(name, v);
             m[v] = '';
         });
         return m;
@@ -97,15 +97,24 @@ function getRecord(item, succ, min, x0, x1, y0, y1) {
 function writeDocument(file) {
     $.getJSON(file, "", function(data) {
         var str = '';
+        var mo = getUrlParam('mo');
         var x0 = getUrlParam('x0');
         var x1 = getUrlParam('x1');
         var y0 = getUrlParam('y0');
         var y1 = getUrlParam('y1');
-        for (var i = data.length; i > 0; i--) {
-            str += getRecord(data[i - 1], '0', 0, x0, x1, y0, y1);
-        }
-        for (var i = data.length; i > 0; i--) {
-            str += getRecord(data[i - 1], '1', 0, x0, x1, y0, y1);
+            console.log(mo);
+        if ('1' in mo) {
+            for (var i = data.length; i > 0; i--) {
+                str += getRecord(data[i - 1], '0', 0, x0, x1, y0, y1);
+                str += getRecord(data[i - 1], '1', 0, x0, x1, y0, y1);
+            }
+        } else {
+            for (var i = data.length; i > 0; i--) {
+                str += getRecord(data[i - 1], '0', 0, x0, x1, y0, y1);
+            }
+            for (var i = data.length; i > 0; i--) {
+                str += getRecord(data[i - 1], '1', 0, x0, x1, y0, y1);
+            }
         }
         var hdr = '<br/><div>id: ' + player + '</div>';
         hdr += '<br/><div>rate: ' + Math.floor(result['1']*100/(result['0']+result['1'])) + '% ';
