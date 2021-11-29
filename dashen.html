@@ -101,39 +101,38 @@ function writeSummary(file) {
         result = {"0":0, "1":0};
         time   = 0;
 
-        var str3map = {};
+        var topX = 4;
+        var strXmap = {};
         for (var i = data.length; i > 0; i--) {
             var succ = data[i - 1][0];
             result[succ] += 1;
             time += data[i - 1][3];
 
-            var str3 = '';
-            for (var j=2; j<5; j++) {
-                str3 += '<img src="img/' + data[i - 1][5][j] + '.png" width="30px" height="30px"/>';
+            var strX = '';
+            for (var j = 2; j < 2 + topX; j++) {
+                strX += '<img src="img/' + data[i - 1][5][j] + '.png" width="30px" height="30px"/>';
             }
-            if (str3 in str3map) {
-                str3map[str3] += 1;
+            if (strX in strXmap) {
+                strXmap[strX] += 1;
             } else {
-                str3map[str3] = 1;
+                strXmap[strX] = 1;
             }
         }
-        var str3arr = Object.keys(str3map).map(function(key) {
-            return [key, str3map[key]];
+        var strXarr = Object.keys(strXmap).map(function(key) {
+            return [key, strXmap[key]];
         });
-        str3arr.sort(function(first, second) {
+        strXarr.sort(function(first, second) {
             return second[1] - first[1];
         });
-        //console.log(str3arr[0]);
+        //console.log(strXarr[0]);
         var str = '';
-        //str += '<br/>'
         str += '<div>';
-        str += str3arr[0][0];
-        str += str3arr[0][1];
+        str += strXarr[0][0] + ' ';
+        //str += strXarr[0][1];
+        str += '<a href="dashen.html?f=' + file + '">' + 'id: ' + player + '</a> ';
+        str += 'rate: ' + Math.floor(result['1']*100/(result['0']+result['1'])) + '% ';
+        str += 'time: ' + Math.ceil(time/60/(result['0']+result['1'])) + ' ';
         str += '</div>';
-        var hdr = '<br/><div>id: ' + file + '</div>';
-        hdr += '<br/><div>rate: ' + Math.floor(result['1']*100/(result['0']+result['1'])) + '% ';
-        hdr += 'time: ' + Math.ceil(time/60/(result['0']+result['1'])) + '</div>';
-        //document.write(hdr);
         document.write(str);
     });
 }
