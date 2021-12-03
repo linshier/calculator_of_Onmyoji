@@ -25,6 +25,7 @@ function getUrlParam(name) {
 var player = '';
 var result = {"0":0, "1":0};
 var time = 0;
+var hero = {};
 function getRecord(item, succ, min, x0, x1, y0, y1) {
     if (item[3] == 0 || item[0] != succ || item[4] < min) {
         return '';
@@ -39,9 +40,13 @@ function getRecord(item, succ, min, x0, x1, y0, y1) {
         str += '<img src="img/fail.png" width="35px" height="30px"/>';
     var x0has = false;
     for (var j=2; j<7; j++) {
-        str += '<img src="img/' + item[5][j] + '.png" width="30px" height="30px"/>';
-        if (item[5][j] in x0) {
+        var h = item[5][j];
+        str += '<img src="img/' + h + '.png" width="30px" height="30px"/>';
+        if (h in x0) {
             x0has = true;
+        }
+        if (result['1'] < 10) {
+            hero[h] = 1;
         }
     }
     if (x0has) {
@@ -61,9 +66,13 @@ function getRecord(item, succ, min, x0, x1, y0, y1) {
     str += '<img src="img/vs.png" width="13px" height="17px"/>';
     var y0has = false;
     for (var j=2; j<7; j++) {
-        str += '<img src="img/' + item[6][j] + '.png" width="30px" height="30px"/>';
-        if (item[6][j] in y0) {
+        var h = item[6][j];
+        str += '<img src="img/' + h + '.png" width="30px" height="30px"/>';
+        if (h in y0) {
             y0has = true;
+        }
+        if (result['1'] < 10) {
+            hero[h] = 1;
         }
     }
     if (y0has) {
@@ -161,6 +170,23 @@ function writeSummary(file, mo, x0, x1) {
     });
 }
 function writeDocument(file) {
+    for (var i = 200; i <= 372; i++) {
+        hero[String(i)] = -1;
+    }
+    hero['229'] = -2;
+    hero['235'] = -2;
+    hero['239'] = -2;
+    hero['240'] = -2;
+    hero['255'] = 0;
+    hero['288'] = 0;
+    hero['330'] = 0;
+    hero['341'] = 0;
+    hero['352'] = 0;
+    hero['356'] = 0;
+    hero['357'] = 0;
+    hero['362'] = 0;
+    hero['363'] = 0;
+    hero['366'] = 0;
     $.getJSON(file, "", function(data) {
         var str = '';
         var mo = getUrlParam('mo');
@@ -186,6 +212,13 @@ function writeDocument(file) {
         hdr += '<div>rate: ' + Math.floor(result['1']*100/(result['0']+result['1'])) + '% ';
         hdr += 'time: ' + Math.ceil(time/60/(result['0']+result['1'])) + '</div>';
         hdr += '<br/>';
+        var ban = '';
+        for (var h = 372; h >= 200; h--) {
+            if (hero[String(h)] == 0) {
+                ban += '<img src="img/' + h + '.png" width="30px" height="30px"/>';
+            }
+        }
+        document.write(ban);
         document.write(hdr);
         document.write(str);
         console.log('done');
@@ -226,6 +259,7 @@ function process() {
             document.write(str);
         }
     }
+
     for (var s in se) {
         //writeSummary(s + '/001', mo, x0, x1);
         //continue;
@@ -238,6 +272,7 @@ function process() {
             writeSummary(f, mo, x0, x1);
         }
     }
+
     var file = getUrlParam('f');
     for (var f in file) {
         writeDocument(f);
