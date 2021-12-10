@@ -104,7 +104,7 @@ function getRecord(item, succ, min, x0, x1, y0, y1) {
     time += item[3];
     return str;
 }
-function writeSummary(file, mo, x0, x1) {
+function writeSummary(file, mo, x0, x1, y0, y1) {
     $.ajaxSettings.async = false;
     $.getJSON(file, "", function(data) {
 
@@ -235,6 +235,7 @@ function process() {
         for (var server = 10001; server <= 15031; server++) {
             xchg[server] = server;
         }
+        xchg[10007] = 10009;
         xchg[10010] = 10014;
         xchg[10015] = 10016;
         xchg[10031] = 15001;

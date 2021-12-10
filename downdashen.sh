@@ -1,6 +1,9 @@
 #!/bin/bash
 #https://ds.163.com/2019/yys/dj-rank/
+#hero
 #https://cbg-yys.res.netease.com/game_res/hero/330/330.png
+#yuhun
+#https://cbg-yys.res.netease.com/game_res/suit/300076.png
 function one_server() {
     server=$1
     topn0=$2
