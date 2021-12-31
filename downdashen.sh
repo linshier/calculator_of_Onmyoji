@@ -14,15 +14,21 @@ function one_server() {
         echo ${r} ${id}
         ./analdashen.sh ${id} dbds/${server}/${r}
         sleep $[RANDOM % 5 + 1]
-    done < <(./listdashen.sh ${server} ${topn0}|tee dbds/${server}/list|grep ${filter}|awk '($NF>=50){print $1,$4}')
+    done < <(./listdashen.sh ${server} ${topn0}|tee dbds/${server}/list|grep ${filter}|awk '($2>=40){print $1,$4}')
+}
+function fast()
+{
+    one_server all 10 .
 }
 function quick()
 {
-    one_server 10009 10 Canon
+    #one_server 10009 10 Canon
+    #one_server 10009 10 .
     one_server all 10 .
 }
 function allserver()
 {
+    #one_server all 10 .
     for ((server=10001;server<=15031;server++))
     do
         if [ ${server} -eq 10010 ]; then
@@ -52,6 +58,7 @@ function allserver()
         one_server ${server} 10 .
     done
 }
+#fast
 quick
-allserver
+#allserver
 exit 0

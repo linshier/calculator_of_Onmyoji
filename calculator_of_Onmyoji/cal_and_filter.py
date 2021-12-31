@@ -1074,6 +1074,10 @@ def filter_fast(data_dict):
         csoul.remove(bsoul)
         return csoul
     order = [
+        cal_freetype_max_speed,
+        cal_clear,
+        cal_fortune_max_speed,                          #lian  DO1
+        cal_exit,
         [type_kyoukotsu,          soul_crit,   0,   0, 115, 3189,11963, 109, 15+10,  0+150, '_gui()', score_max_damage, [prop_crit_damage]],
         cal_exit,
         [type_shadow,     [type_seductress],   0,   0, 100, 2948,    0, 109, 30+ 8, 30+150, '_jiu()', score_max_damage, [prop_crit_damage]],

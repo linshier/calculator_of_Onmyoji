@@ -164,7 +164,12 @@ function writeSummary(file, mo, x0, x1, y0, y1) {
         }
         str += 'f=' + file + '"> id: ' + player + '</a> ';
         str += 'rate: ' + Math.floor(result['1']*100/(result['0']+result['1'])) + '% ';
-        str += 'time: ' + Math.ceil(time/60/(result['0']+result['1'])) + ' ';
+        str += 'time: ' + Math.floor(time/60/(result['0']+result['1'])) + ':';
+        sec = Math.ceil(time/(result['0']+result['1'])) % 60;
+        if (sec < 10) {
+            str += '0';
+        }
+        str += sec + ' ';
         str += '</div>';
         document.write(str);
     });
@@ -210,7 +215,12 @@ function writeDocument(file) {
         }
         var hdr = '<br/><div>id: ' + player + '</div>';
         hdr += '<div>rate: ' + Math.floor(result['1']*100/(result['0']+result['1'])) + '% ';
-        hdr += 'time: ' + Math.ceil(time/60/(result['0']+result['1'])) + '</div>';
+        hdr += 'time: ' + Math.floor(time/60/(result['0']+result['1'])) + ':';
+        sec = Math.ceil(time/(result['0']+result['1'])) % 60;
+        if (sec < 10) {
+            hdr += '0';
+        }
+        hdr += sec + '</div>';
         hdr += '<br/>';
         var ban = '';
         for (var h = 372; h >= 200; h--) {

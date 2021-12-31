@@ -52,6 +52,7 @@ function main()
         date="$(date +%s)"
         curl -m 5 -s 'https://bdapi.gameyw.netease.com/ky59/v1/g37_charts/oneuid?'${role_id}'&_='${date}'748&callback=Zepto'${date}'559' \
         --compressed \
+        |tee $1.raw \
         |zepto \
         |jq_time \
         |format_none \
@@ -59,7 +60,7 @@ function main()
     done
 }
 if [ $# -eq 2 ]; then
-    echo $1|main|tee $2 2>&1|wc -l
+    echo $1|main $2|tee $2 2>&1|wc -l
     exit 0
 fi
 cat xxx|main|tee test.txt 2>&1|wc -l
