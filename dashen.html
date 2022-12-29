@@ -175,7 +175,7 @@ function writeSummary(file, mo, x0, x1, y0, y1) {
     });
 }
 function writeDocument(file) {
-    for (var i = 200; i <= 372; i++) {
+    for (var i = 200; i <= 393; i++) {
         hero[String(i)] = -1;
     }
     hero['229'] = -2;
@@ -186,12 +186,14 @@ function writeDocument(file) {
     hero['288'] = 0;
     hero['330'] = 0;
     hero['341'] = 0;
+    hero['343'] = 0;
     hero['352'] = 0;
     hero['356'] = 0;
     hero['357'] = 0;
     hero['362'] = 0;
     hero['363'] = 0;
     hero['366'] = 0;
+    hero['393'] = 0;
     $.getJSON(file, "", function(data) {
         var str = '';
         var mo = getUrlParam('mo');
@@ -223,7 +225,7 @@ function writeDocument(file) {
         hdr += sec + '</div>';
         hdr += '<br/>';
         var ban = '';
-        for (var h = 372; h >= 200; h--) {
+        for (var h = 393; h >= 200; h--) {
             if (hero[String(h)] == 0) {
                 ban += '<img src="img/' + h + '.png" width="30px" height="30px"/>';
             }
