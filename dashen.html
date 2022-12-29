@@ -114,6 +114,7 @@ function writeSummary(file, mo, x0, x1, y0, y1) {
 
         var topX = 4;
         var strXmap = {};
+        var x1hasmap = {};
         for (var i = data.length; i > 0; i--) {
             if (data[i - 1][5].length == 0) {
                 continue;
@@ -129,9 +130,11 @@ function writeSummary(file, mo, x0, x1, y0, y1) {
                     x0has = true;
                 }
                 if (data[i - 1][5][j] in x1) {
-                    x1has = true;
+                    //x1has = true;
+                    x1hasmap[data[i - 1][5][j]] = '';
                 }
             }
+            x1has = (Object.keys(x1).length == Object.keys(x1hasmap).length);
             if (x0has || (!x1has) || strX == '') {
                 continue;
             }
