@@ -63,4 +63,5 @@ function allserver()
 fast
 #quick
 #allserver
+date -R
 exit 0
