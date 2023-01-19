@@ -2,6 +2,8 @@
 #https://ds.163.com/2019/yys/dj-rank/
 #hero
 #https://cbg-yys.res.netease.com/game_res/hero/330/330.png
+#hero backup
+#https://yys.res.netease.com/pc/zt/20161108171335/data/before_awake/395.jpg
 #yuhun
 #https://cbg-yys.res.netease.com/game_res/suit/300076.png
 function one_server() {
@@ -13,8 +15,10 @@ function one_server() {
         r=$(printf "%03d" ${rank})
         echo ${r} ${id}
         ./analdashen.sh ${id} dbds/${server}/${r}
-        sleep $[RANDOM % 5 + 1]
-    done < <(./listdashen.sh ${server} ${topn0}|tee dbds/${server}/list|grep ${filter}|awk '($2>=40){print $1,$4}')
+    done < <( \
+        (([ -f dbds/${server}/list ] && cat dbds/${server}/list) || ./listdashen.sh ${server} ${topn0}|tee dbds/${server}/list) \
+        |grep ${filter}|awk '($2>=40){print $1,$4}' \
+    )
 }
 function fast()
 {

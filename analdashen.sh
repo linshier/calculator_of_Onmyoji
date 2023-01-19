@@ -50,9 +50,10 @@ function main()
     awk '{print $1}' \
     |while read role_id; do
         date="$(date +%s)"
-        curl -m 5 -s 'https://bdapi.gameyw.netease.com/ky59/v1/g37_charts/oneuid?'${role_id}'&_='${date}'748&callback=Zepto'${date}'559' \
-        --compressed \
-        |tee $1.raw \
+        (([ -f $1.raw ] && cat $1.raw) || \
+            (sleep $[RANDOM % 5 + 1] && \
+            curl -m 5 -s 'https://bdapi.gameyw.netease.com/ky59/v1/g37_charts/oneuid?'${role_id}'&_='${date}'748&callback=Zepto'${date}'559' \
+            --compressed|tee $1.raw)) \
         |zepto \
         |jq_time \
         |format_none \
