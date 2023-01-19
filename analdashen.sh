@@ -12,7 +12,7 @@ function jq_name()
 }
 function jq_time()
 {
-    jq -r '.result.extra.bl|map(.|[.battle_result,.role_name,.d_role_name,.total_battle_time,.score,(.battle_list|map(.|.shishen_id)),(.d_battle_list|map(.|.shishen_id))])' 
+    jq -r '.result.extra.bl|map(.|[.battle_result,.role_name,.d_role_name,.total_battle_time,.score,(.battle_list|map(.|.shishen_id)),(.d_battle_list|map(.|.shishen_id)),.battle_time])' 
 }
 function jq_simple()
 {
