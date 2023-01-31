@@ -131,6 +131,19 @@ function writeSummary(file, urlp, mo, x0, x1, y0, y1, ts, te) {
             if (data[i - 1][7] < ts) {
                 continue;
             }
+            var y0has = false;
+            var y1has = false;
+            for (var j = 2; j < 2 + 5; j++) {
+                if (data[i - 1][6][j] in y0) {
+                    y0has = true;
+                }
+                if (data[i - 1][6][j] in y1) {
+                    y1has = true;
+                }
+            }
+            if (y0has || (Object.keys(y1).length > 0 && !y1has)) {
+                continue;
+            }
             var x1hasmap = {};
             var x0has = false;
             var x1has = (Object.keys(x1).length == 0);
@@ -143,7 +156,6 @@ function writeSummary(file, urlp, mo, x0, x1, y0, y1, ts, te) {
                     x0has = true;
                 }
                 if (data[i - 1][5][j] in x1) {
-                    //x1has = true;
                     x1hasmap[data[i - 1][5][j]] = '';
                 }
             }
@@ -313,6 +325,12 @@ function process() {
         }
         for (var i in x0) {
             urlp += 'x0=' + i + '&';
+        }
+        for (var i in y1) {
+            urlp += 'y1=' + i + '&';
+        }
+        for (var i in y0) {
+            urlp += 'y0=' + i + '&';
         }
         for (var i in getUrlParam('ts')) {
             urlp += 'ts=' + i + '&';
