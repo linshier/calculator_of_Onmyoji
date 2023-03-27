@@ -226,6 +226,18 @@ function writeDocument(file, x0, x1, y0, y1, ts, te) {
     hero['363'] = 0;
     hero['366'] = 0;
     hero['393'] = 0;
+    $.get(file + '.cb', '', function(c) {
+        cb = c.replace(/\r|\n/ig,'')
+        $.ajax({
+            url: '/' + file + '.raw',
+            dataType: 'jsonp',
+            jsonp: 'callback',
+            jsonpCallback: cb,
+            success: function(r) {
+                console.log(r);
+            }
+        });
+    });
     $.getJSON(file, "", function(data) {
         var str = '';
         var mo = getUrlParam('mo');

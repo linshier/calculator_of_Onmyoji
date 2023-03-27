@@ -58,6 +58,7 @@ function main()
         |jq_time \
         |format_none \
         |output_simple
+        cat $1.raw|grep -o '^[^(]*' > $1.cb
     done
 }
 if [ $# -eq 2 ]; then
