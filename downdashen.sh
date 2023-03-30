@@ -6,6 +6,7 @@
 #https://yys.res.netease.com/pc/zt/20161108171335/data/before_awake/395.jpg
 #yuhun
 #https://cbg-yys.res.netease.com/game_res/suit/300076.png
+#https://cbg-yys.res.netease.com/game_res/suit/300007.png
 function one_server() {
     server=$1
     topn0=$2
