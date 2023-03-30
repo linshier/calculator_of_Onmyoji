@@ -27,6 +27,105 @@ var result = {"0":0, "1":0};
 var time = 0;
 var hero = {};
 function getRecord(item, succ, min, x0, x1, y0, y1, ts, te) {
+    if (item.total_battle_time == 0 || item.battle_result != succ || item.score < min) {
+        return '';
+    }   
+    if (item.battle_time < ts) {
+        return '';
+    }
+    player = item.role_name;
+    var str = '';
+    str += '<tr><td>';
+    if (item.battle_result == '1')
+        str += '<img src="img/succ.png" width="35px" height="30px"/>';
+    else
+        str += '<img src="img/fail.png" width="35px" height="30px"/>';
+    var x0has = false;
+    for (var j=2; j<item.battle_list.length; j++) {
+        var strx = '';
+        if (j < item.yuhun_list.length) {
+            for (var s in item.yuhun_list[j][1]) {
+                var pos = item.yuhun_list[j][1][s];
+                for (var x = 0; x < pos.length; x++) {
+                    strx += '&s' + pos[x][0] + '=' + s;
+                }
+            }
+        }
+        var h = item.battle_list[j].shishen_id;
+        str += '<a href="dashen.html?soul=1' + strx + '" target="_blank">';
+        str += '<img src="img/' + h + '.png" width="30px" height="30px"/>';
+        str += '</a>';
+        if (h in x0) {
+            x0has = true;
+        }
+        if (result['1'] < 10) {
+            hero[h] = 1;
+        }
+    }
+    if (x0has) {
+        return '';
+    }
+    for (var k in x1) {
+        var x1has = false;
+        for (var j=2; j<7; j++) {
+            if (k == item.battle_list[j].shishen_id) {
+                x1has = true;
+            }
+        }
+        if (!x1has) {
+            return '';
+        }
+    }
+    str += '<img src="img/vs.png" width="13px" height="17px"/>';
+    var y0has = false;
+    for (var j=2; j<7; j++) {
+        var h = item.d_battle_list[j].shishen_id;
+        str += '<img src="img/' + h + '.png" width="30px" height="30px"/>';
+        if (h in y0) {
+            y0has = true;
+        }
+        if (result['1'] < 10) {
+            hero[h] = 1;
+        }
+    }
+    if (y0has) {
+        return '';
+    }
+    for (var k in y1) {
+        var y1has = false;
+        for (var j=2; j<7; j++) {
+            if (k == item.d_battle_list[j].shishen_id) {
+                y1has = true;
+            }
+        }
+        if (!y1has) {
+            return '';
+        }
+    }
+    score = item.score;
+    if (score > 3000) {
+        score = Math.floor((item.score - 3000) / 30);
+    } else if (score > 18000) {
+        score = Math.floor(500 + (item.score - 18000) / 30);
+    } else {
+    }
+    str += '</td><td>';
+    str += item.d_role_name;
+    str += '</td><td>';
+    str += '<img src="img/clock.png" width="10px" height="10px"/>' + Math.ceil(item.total_battle_time / 60);
+    str += '</td><td>';
+    str += '<img src="img/star.png" width="10px" height="10px"/>' + score;
+    str += '</td><td>';
+    var ts = new Date(item.battle_time * 1000);
+    var MM = (ts.getMonth() + 1 < 10) ? '0' + (ts.getMonth() + 1) : (ts.getMont() + 1);
+    var DD = (ts.getDate() < 10) ? '0' + ts.getDate() : ts.getDate();
+    str += MM + '-' + DD;
+    str += '</td></tr>';
+    result[succ] += 1;
+    time += item.total_battle_time;
+    return str;
+}
+function getRecordMini(item, succ, min, x0, x1, y0, y1, ts, te) {
     if (item[3] == 0 || item[0] != succ || item[4] < min) {
         return '';
     }   
@@ -226,19 +325,7 @@ function writeDocument(file, x0, x1, y0, y1, ts, te) {
     hero['363'] = 0;
     hero['366'] = 0;
     hero['393'] = 0;
-    $.get(file + '.cb', '', function(c) {
-        cb = c.replace(/\r|\n/ig,'')
-        $.ajax({
-            url: '/' + file + '.raw',
-            dataType: 'jsonp',
-            jsonp: 'callback',
-            jsonpCallback: cb,
-            success: function(r) {
-                console.log(r);
-            }
-        });
-    });
-    $.getJSON(file, "", function(data) {
+    var handle = function(data) {
         var str = '';
         var mo = getUrlParam('mo');
         //console.log(mo);
@@ -276,7 +363,41 @@ function writeDocument(file, x0, x1, y0, y1, ts, te) {
         document.write(str);
         document.write('</table>');
         console.log('done');
+    };
+    //$.getJSON(file, "", handle);
+    $.get(file + '.cb', '', function(c) {
+        cb = c.replace(/\r|\n/ig,'')
+        $.ajax({
+            url: '/' + file + '.raw',
+            dataType: 'jsonp',
+            jsonp: 'callback',
+            jsonpCallback: cb,
+            success: function(r) {
+                console.log(r);
+                handle(r.result.extra.bl);
+            }
+        });
     });
+}
+function writeSoul() {
+    var sHas = false;
+    var str = '';
+    str += '<table>';
+    str += '<tr>';
+    for (var i = 0; i < 6; i++) {
+        for (var s in getUrlParam('s' + i)) {
+            str += '<td>'
+            str += '<img src="https://g.166.net/assets/img/yys/yuhun/' + s + '.png" width="30px" height="30px"/>';
+            str += '</td>'
+            sHas = true;
+            break;
+        }
+    }
+    str += '</tr>';
+    str += '</table>';
+    if (sHas) {
+        document.write(str);
+    }
 }
 function process() {
     var db = getUrlParam('db');
@@ -365,13 +486,13 @@ function process() {
     for (var f in file) {
         writeDocument(f, x0, x1, y0, y1, ts, te);
     }
+    writeSoul();
 }
 process()
 </script>
 
 <title>dashen</title>
 </head>
-test
 <body>
 </body>
 
