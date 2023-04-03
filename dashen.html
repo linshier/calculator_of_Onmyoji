@@ -125,94 +125,6 @@ function getRecord(item, succ, min, x0, x1, y0, y1, ts, te) {
     time += item.total_battle_time;
     return str;
 }
-function getRecordMini(item, succ, min, x0, x1, y0, y1, ts, te) {
-    if (item[3] == 0 || item[0] != succ || item[4] < min) {
-        return '';
-    }   
-    if (item[7] < ts) {
-        return '';
-    }
-    player = item[1];
-    var str = '';
-    str += '<tr><td>';
-    if (item[0] == '1')
-        str += '<img src="img/succ.png" width="35px" height="30px"/>';
-    else
-        str += '<img src="img/fail.png" width="35px" height="30px"/>';
-    var x0has = false;
-    for (var j=2; j<7; j++) {
-        var h = item[5][j];
-        str += '<img src="img/' + h + '.png" width="30px" height="30px"/>';
-        if (h in x0) {
-            x0has = true;
-        }
-        if (result['1'] < 10) {
-            hero[h] = 1;
-        }
-    }
-    if (x0has) {
-        return '';
-    }
-    for (var k in x1) {
-        var x1has = false;
-        for (var j=2; j<7; j++) {
-            if (k == item[5][j]) {
-                x1has = true;
-            }
-        }
-        if (!x1has) {
-            return '';
-        }
-    }
-    str += '<img src="img/vs.png" width="13px" height="17px"/>';
-    var y0has = false;
-    for (var j=2; j<7; j++) {
-        var h = item[6][j];
-        str += '<img src="img/' + h + '.png" width="30px" height="30px"/>';
-        if (h in y0) {
-            y0has = true;
-        }
-        if (result['1'] < 10) {
-            hero[h] = 1;
-        }
-    }
-    if (y0has) {
-        return '';
-    }
-    for (var k in y1) {
-        var y1has = false;
-        for (var j=2; j<7; j++) {
-            if (k == item[6][j]) {
-                y1has = true;
-            }
-        }
-        if (!y1has) {
-            return '';
-        }
-    }
-    score = item[4];
-    if (score > 3000) {
-        score = Math.floor((item[4] - 3000) / 30);
-    } else if (score > 18000) {
-        score = Math.floor(500 + (item[4] - 18000) / 30);
-    } else {
-    }
-    str += '</td><td>';
-    str += item[2];
-    str += '</td><td>';
-    str += '<img src="img/clock.png" width="10px" height="10px"/>' + Math.ceil(item[3] / 60);
-    str += '</td><td>';
-    str += '<img src="img/star.png" width="10px" height="10px"/>' + score;
-    str += '</td><td>';
-    var ts = new Date(item[7] * 1000);
-    var MM = (ts.getMonth() + 1 < 10) ? '0' + (ts.getMonth() + 1) : (ts.getMont() + 1);
-    var DD = (ts.getDate() < 10) ? '0' + ts.getDate() : ts.getDate();
-    str += MM + '-' + DD;
-    str += '</td></tr>';
-    result[succ] += 1;
-    time += item[3];
-    return str;
-}
 function writeSummary(file, urlp, mo, x0, x1, y0, y1, ts, te) {
     $.ajaxSettings.async = false;
     $.getJSON(file, "", function(data) {
@@ -236,8 +148,16 @@ function writeSummary(file, urlp, mo, x0, x1, y0, y1, ts, te) {
                 if (data[i - 1][6][j] in y0) {
                     y0has = true;
                 }
-                if (data[i - 1][6][j] in y1) {
-                    y1has = true;
+            }
+            for (var k in y1) {
+                y1has = false;
+                for (var j = 2; j < 2 + 5; j++) {
+                    if (k == data[i - 1][6][j]) {
+                        y1has = true;
+                    }
+                }
+                if (!y1has) {
+                    break;
                 }
             }
             if (y0has || (Object.keys(y1).length > 0 && !y1has)) {
@@ -325,6 +245,7 @@ function writeDocument(file, x0, x1, y0, y1, ts, te) {
     hero['363'] = 0;
     hero['366'] = 0;
     hero['393'] = 0;
+    hero['399'] = 0;
     var handle = function(data) {
         var str = '';
         var mo = getUrlParam('mo');
