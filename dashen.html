@@ -42,6 +42,7 @@ function getRecord(item, succ, min, x0, x1, y0, y1, ts, te) {
         str += '<img src="img/fail.png" width="35px" height="30px"/>';
     var x0has = false;
     for (var j = 2; j < item.battle_list.length; j++) {
+        var h = 0;
         if (item.hasOwnProperty('yuhun_list') && j < item.yuhun_list.length) {
             var strx = '';
             for (var s in item.yuhun_list[j][1]) {
@@ -51,8 +52,10 @@ function getRecord(item, succ, min, x0, x1, y0, y1, ts, te) {
                 }
             }
             str += '<a href="dashen.html?soul=1' + strx + '" target="_blank">';
+            h = item.yuhun_list[j][0];
+        } else {
+            h = item.battle_list[j].shishen_id;
         }
-        var h = item.battle_list[j].shishen_id;
         str += '<img src="img/' + h + '.png" width="30px" height="30px"/>';
         if (item.hasOwnProperty('yuhun_list') && j < item.yuhun_list.length) {
             str += '</a>';
@@ -150,12 +153,13 @@ function getRecord(item, succ, min, x0, x1, y0, y1, ts, te) {
         var DD = (ts.getDate() < 10) ? '0' + ts.getDate() : ts.getDate();
         str += MM + '-' + DD;
     } else if (item.hasOwnProperty('time')) {
-        str += item.time;
+        var tmpstr = item.time;
+        str += tmpstr.replace(/202.-/ig,'')
     } else {
     }
     str += '</td></tr>';
     result[succ] += 1;
-    time += item.total_battle_time;
+    time += Number(item.total_battle_time);
     return str;
 }
 function writeSummary(file, urlp, mo, x0, x1, y0, y1, ts, te) {
@@ -281,6 +285,10 @@ function writeDocument(file, x0, x1, y0, y1, ts, te) {
     hero['390'] = 0;
     hero['393'] = 0;
     hero['399'] = 0;
+
+    result = {"0":0, "1":0};
+    time = 0;
+
     var handle = function(data) {
         var str = '';
         var mo = getUrlParam('mo');
@@ -380,6 +388,9 @@ function writeUser(user, x0, x1, y0, y1, ts, te) {
     };
     $.ajaxSettings.async = false;
     $.getJSON(user + '/list', '', function(c) {
+        result = {"0":0, "1":0};
+        time = 0;
+
         var str = '';
         for (var o in c.result.douji_list) {
             $.getJSON(user + '/' + c.result.douji_list[o].team_id, '', function(r) {
@@ -387,6 +398,20 @@ function writeUser(user, x0, x1, y0, y1, ts, te) {
                 str += getRecord(r.result, '1', 0, x0, x1, y0, y1, ts, te);
             });
         };
+        var hdr = '<br/><div>id: ' + player + '</div>';
+        hdr += '<div>rate: ' + Math.floor(result['1']*100/(result['0']+result['1'])) + '% ';
+        hdr += 'time: ';
+        {
+            hdr += Math.floor(time/60/(result['0']+result['1'])) + ':';
+            sec = Math.ceil(time/(result['0']+result['1'])) % 60;
+            if (sec < 10) {
+                hdr += '0';
+            }
+            hdr += sec;
+        }
+        hdr += '</div><br/>';
+
+        document.write(hdr);
         document.write('<table>');
         document.write(str);
         document.write('</table>');
