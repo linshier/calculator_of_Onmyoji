@@ -32,27 +32,22 @@ function one_server()
     numpage=$2
     for ((pn=1;pn<=${numpage};pn++))
     do
+        (([ -f dbds/${server}/topuid${pn} ] && cat dbds/${server}/topuid${pn}) || (\
         curl 'https://bdapi.gameyw.netease.com/ky59/v1/g37_charts/topuids?server='${server}'&page='${pn}'&_='${date}'057&callback=Zepto'${date}'173' \
             --compressed 2>/dev/null \
             |sed 's/^Zepto[0-9]*(//;s/)$//' \
+        ))\
             |jq_simple \
             |output_simple
 	printf "\n"
-        sleep 1
+        #sleep 1
     done
 }
-#one_server 15002 1
-#exit 0
-#one_server 10006 1
-#exit 0
-#one_server 15005 10
-#one_server 10003 10 #yue
 if [ $# -eq 2 ]; then
     one_server $1 $2
     exit 0
 fi
 one_server 10009 10
-#one_server "all" 10
 exit 0
 for ((server=10001;server<=15033;server++))
 do

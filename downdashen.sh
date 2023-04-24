@@ -24,7 +24,8 @@ function one_server() {
 function fast()
 {
 #    one_server 10009 10 Canon
-    one_server all 10 .
+    #one_server all 10 .
+    one_server all 1 .
 }
 function quick()
 {
@@ -36,7 +37,7 @@ function quick()
 function allserver()
 {
     one_server all 10 .
-    for ((server=10001;server<=15031;server++))
+    for ((server=10001;server<=16002;server++))
     do
         if [ ${server} -eq 10010 ]; then
             server=10014
@@ -44,7 +45,7 @@ function allserver()
         if [ ${server} -eq 10015 ]; then
             server=10016
         fi
-        if [ ${server} -eq 10031 ]; then
+        if [ ${server} -eq 10051 ]; then
             server=15001
         fi
         if [ ${server} -eq 15010 ]; then
@@ -59,8 +60,8 @@ function allserver()
         if [ ${server} -eq 15027 ]; then
             server=15028
         fi
-        if [ ${server} -eq 15030 ]; then
-            server=15031
+        if [ ${server} -eq 15034 ]; then
+            server=16001
         fi
         one_server ${server} 10 .
     done
