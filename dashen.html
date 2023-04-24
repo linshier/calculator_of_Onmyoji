@@ -6,6 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script src="jquery-1.12.4.min.js"></script>
+<script src="jquery.tablesorter.min.js"></script>
 <script>
 function getUrlParam(name) {
     var m = {};
@@ -246,18 +247,26 @@ function writeSummary(file, urlp, mo, x0, x1, y0, y1, ts, te) {
         str += '</td><td>';
         str += '<a href="dashen.html?';
         str += urlp;
-        str += 'f=' + file + '"> id: ' + player + '</a> ';
+        str += 'f=' + file + '">' + player + '</a>';
         str += '</td><td>';
-        str += 'rate: ' + Math.floor(result['1']*100/(result['0']+result['1'])) + '% ';
+        if (result['0']+result['1'] != 0) {
+        str += '' + Math.floor(result['1']*100/(result['0']+result['1'])) + '%';
+        } else {
+        str += '0%';
+        }
         str += '</td><td>';
         str += 'x' + (result['0']+result['1']);
         str += '</td><td>';
-        str += 'time: ' + Math.floor(time/60/(result['0']+result['1'])) + ':';
-        sec = Math.ceil(time/(result['0']+result['1'])) % 60;
-        if (sec < 10) {
-            str += '0';
+        if (time != 0) {
+            str += '' + Math.floor(time/60/(result['0']+result['1'])) + ':';
+            sec = Math.ceil(time/(result['0']+result['1'])) % 60;
+            if (sec < 10) {
+                str += '0';
+            }
+            str += sec + '';
+        } else {
+            str += '0:0';
         }
-        str += sec + ' ';
         str += '</td>';
         str += '</tr>';
         document.write(str);
@@ -506,7 +515,17 @@ function process() {
         for (var i in getUrlParam('ts')) {
             urlp += 'ts=' + i + '&';
         }
-        document.write('<table>');
+        document.write('<table class="tablesorter" id="tbList" style="text-align: right;">');
+        var hdr = '';
+        hdr += '<thead><tr>';
+        hdr += '<th></th>';
+        hdr += '<th></th>';
+        hdr += '<th>R</th>';
+        hdr += '<th>#</th>';
+        hdr += '<th>T</th>';
+        hdr += '</tr></thead>';
+        document.write(hdr);
+        document.write('<tbody>');
         for (var s in se) {
             for (var i = 1; i < 10; i++) {
                 var f = s + '/00' + i;
@@ -517,7 +536,9 @@ function process() {
                 writeSummary(f, urlp, mo, x0, x1, y0, y1, ts, te);
             }
         }
+        document.write('</tbody>');
         document.write('</table>');
+        $('#tbList').tablesorter();
     }
 
     var file = getUrlParam('f');

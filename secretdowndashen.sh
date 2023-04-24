@@ -75,7 +75,7 @@ function getjson_oneuid_oneserver() {
         ./analdashen.sh ${id} dbds/${server}/${r}
     done < <( \
         (([ -f dbds/${server}/list ] && cat dbds/${server}/list) || ./listdashen.sh ${server} ${topn0}|tee dbds/${server}/list) \
-        |grep ${filter}|awk '($2>=40){print $1,$4}'|sort \
+        |grep ${filter}|awk '($2>=0){print $1,$4}'|sort \
     )
 }
 getjson_oneuid_oneserver all 10 .
