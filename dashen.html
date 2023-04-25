@@ -47,15 +47,20 @@ function getRecord(item, succ, min, x0, x1, y0, y1, ts, te) {
         h = item.battle_list[j].shishen_id;
         var strx = '';
         if (item.hasOwnProperty('yuhun_list')) {
-            for (var y = 2; y < item.yuhun_list.length; y++) {
-                if (h == item.yuhun_list[y][0]) {
-                    for (var s in item.yuhun_list[y][1]) {
-                        var pos = item.yuhun_list[y][1][s];
-                        for (var x = 0; x < pos.length; x++) {
-                            strx += '&s' + pos[x][0] + '=' + s;
-                        }
+            var y = j;
+            if (y >= item.yuhun_list.length || h != item.yuhun_list[y][0]) {
+                for (y = 2; y < item.yuhun_list.length; y++) {
+                    if (h == item.yuhun_list[y][0]) {
+                        break;
                     }
-                    break;
+                }
+            }
+            if (y < item.yuhun_list.length && h == item.yuhun_list[y][0]) {
+                for (var s in item.yuhun_list[y][1]) {
+                    var pos = item.yuhun_list[y][1][s];
+                    for (var x = 0; x < pos.length; x++) {
+                        strx += '&s' + pos[x][0] + '=' + s;
+                    }
                 }
             }
         }
