@@ -44,21 +44,26 @@ function getRecord(item, succ, min, x0, x1, y0, y1, ts, te) {
     var x0has = false;
     for (var j = 2; j < item.battle_list.length; j++) {
         var h = 0;
-        if (item.hasOwnProperty('yuhun_list') && j < item.yuhun_list.length) {
-            var strx = '';
-            for (var s in item.yuhun_list[j][1]) {
-                var pos = item.yuhun_list[j][1][s];
-                for (var x = 0; x < pos.length; x++) {
-                    strx += '&s' + pos[x][0] + '=' + s;
+        h = item.battle_list[j].shishen_id;
+        var strx = '';
+        if (item.hasOwnProperty('yuhun_list')) {
+            for (var y = 2; y < item.yuhun_list.length; y++) {
+                if (h == item.yuhun_list[y][0]) {
+                    for (var s in item.yuhun_list[y][1]) {
+                        var pos = item.yuhun_list[y][1][s];
+                        for (var x = 0; x < pos.length; x++) {
+                            strx += '&s' + pos[x][0] + '=' + s;
+                        }
+                    }
+                    break;
                 }
             }
+        }
+        if (strx.length > 0) {
             str += '<a href="dashen.html?soul=1' + strx + '" target="_blank">';
-            h = item.yuhun_list[j][0];
-        } else {
-            h = item.battle_list[j].shishen_id;
         }
         str += '<img src="img/' + h + '.png" width="30px" height="30px"/>';
-        if (item.hasOwnProperty('yuhun_list') && j < item.yuhun_list.length) {
+        if (strx.length > 0) {
             str += '</a>';
         }
         if (h in x0) {
@@ -171,7 +176,7 @@ function writeSummary(file, urlp, mo, x0, x1, y0, y1, ts, te) {
         result = {"0":0, "1":0};
         time   = 0;
 
-        var topX = 4;
+        var topX = 3;
         var strXmap = {};
         for (var i = data.length; i > 0; i--) {
             if (data[i - 1][5].length == 0) {

@@ -49,6 +49,7 @@ function getjson_topuid_oneserver() {
     for ((pn=1; pn<=10; pn++)); do
         (([ -f dbds/${server}/topuid${pn} ] && cat dbds/${server}/topuid${pn}) || (sleep $[RANDOM % 5 + 1] && getjson_topuid ${server} ${pn}|tee dbds/${server}/topuid${pn})) > /dev/null
     done
+    return $?
 }
 function getjson_oneuid() {
     server_and_roleid=$1
@@ -66,12 +67,13 @@ function getjson_oneuid_oneserver() {
     server=$1
     topn0=$2
     filter=$3
+    getjson_topuid_oneserver ${server}
     mkdir -p dbds/${server}/
     while read id rank; do
         r=$(printf "%03d" ${rank})
         raw="dbds/${server}/${r}.raw"
         echo ${r} ${id}
-        (([ -f ${raw} ] && cat ${raw}) || (sleep $[RANDOM % 10 + 1] && getjson_oneuid_zepto1 ${id}|tee ${raw})) >/dev/null
+        (([ -f ${raw} ] && cat ${raw}) || (sleep $[RANDOM % 15 + 1] && getjson_oneuid_zepto1 ${id}|tee ${raw})) >/dev/null
         ./analdashen.sh ${id} dbds/${server}/${r}
     done < <( \
         (([ -f dbds/${server}/list ] && cat dbds/${server}/list) || ./listdashen.sh ${server} ${topn0}|tee dbds/${server}/list) \
