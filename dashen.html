@@ -2,8 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Cache-Control" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script src="jquery-1.12.4.min.js"></script>
 <script src="jquery.tablesorter.min.js"></script>
@@ -142,10 +142,10 @@ function getRecord(item, succ, min, x0, x1, y0, y1, ts, te) {
     }
     if (item.hasOwnProperty('d_ban_select')) {
         var h = 0;
-        if (item.d_ban_select.hasOwnProperty(item.d_role_id)) {
+        if (item.ban_select.hasOwnProperty(item.d_role_id)) {
             h = item.ban_select[item.d_role_id];
         } else {
-            var tmpstr = item.d_ban_select.replace(/'/ig,'"')
+            var tmpstr = item.ban_select.replace(/'/ig,'"')
             h = JSON.parse(tmpstr)[item.d_role_id];
         }
         str += '<img src="img/' + h + '.png" width="30px" height="30px"/>';
@@ -215,9 +215,11 @@ function writeSummary(file, urlp, mo, x0, x1, y0, y1, ts, te) {
             var x0has = false;
             var x1has = (Object.keys(x1).length == 0);
             var strX = '';
+            var argX = '';
             for (var j = 2; j < 2 + 5; j++) {
                 if (j < 2 + topX) {
                     strX += '<img src="img/' + data[i - 1][5][j] + '.png" width="30px" height="30px"/>';
+                    argX += '&x1=' + data[i - 1][5][j];
                 }
                 if (data[i - 1][5][j] in x0) {
                     x0has = true;
@@ -232,44 +234,49 @@ function writeSummary(file, urlp, mo, x0, x1, y0, y1, ts, te) {
             }
             var succ = data[i - 1][0];
             if (succ == 1) {
-                if (strX in strXmap) {
-                    strXmap[strX] = strXmap[strX] + 1;
-                } else {
-                    strXmap[strX] = 1;
-                }
+                time += data[i - 1][3];
+            }
+            if (strX in strXmap) {
+                strXmap[strX][succ] = strXmap[strX][succ] + 1;
+            } else {
+                strXmap[strX] = [0, 0, argX];
+                strXmap[strX][succ] = 1;
             }
             result[succ] += 1;
-            time += data[i - 1][3];
         }
         if (Object.keys(strXmap).length == 0) {
-            strXmap[''] = 0;
+            strXmap[''] = [0, 0];
         }
         var strXarr = Object.keys(strXmap).map(function(key) {
             return [key, strXmap[key]];
         });
         strXarr.sort(function(first, second) {
-            return second[1] - first[1];
+            return second[1][1] - first[1][1];
         });
+        var topuse = strXarr[0];
         var str = '';
         str += '<tr>';
         str += '<td>';
-        str += strXarr[0][0];
+        str += topuse[0];
         str += '</td><td>';
         str += '<a href="dashen.html?';
         str += urlp;
-        str += 'f=' + file + '">' + player + '</a>';
+        str += 'f=' + file;
+        str += topuse[1][2];
+        str += '">' + player + '</a>';
         str += '</td><td>';
-        if (result['0']+result['1'] != 0) {
-        str += '' + Math.floor(result['1']*100/(result['0']+result['1'])) + '%';
+        var topuse_bn = topuse[1][0]+topuse[1][1];
+        if (topuse_bn != 0) {
+        str += '' + Math.floor(topuse[1][1] * 100 / topuse_bn) + '%';
         } else {
         str += '0%';
         }
         str += '</td><td>';
-        str += 'x' + (result['0']+result['1']);
+        str += 'x' + topuse_bn;
         str += '</td><td>';
         if (time != 0) {
-            str += '' + Math.floor(time/60/(result['0']+result['1'])) + ':';
-            sec = Math.ceil(time/(result['0']+result['1'])) % 60;
+            str += '' + Math.floor(time/60/(result['1'])) + ':'; //result['0']+result['1']
+            sec = Math.ceil(time/(result['1'])) % 60; //result['0']+result['1']
             if (sec < 10) {
                 str += '0';
             }
@@ -474,6 +481,8 @@ function process() {
         te = Date.parse(new Date(t)) / 1000;
         break;
     }
+    $.ajaxSetup({cache:false})
+
     for (var d in db) {
         var xchg = {};
         for (var server = 10001; server <= 15031; server++) {

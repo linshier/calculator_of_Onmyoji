@@ -30,6 +30,7 @@ function getjson_dj_detail() {
 function getjson_dj_mine() {
     mkdir -p mine
     while read team_id; do
+        [ -f mine/${team_id} ] || echo ${team_id}
         (([ -f mine/${team_id} ] && cat mine/${team_id}) || (sleep $[RANDOM % 10 + 1] && getjson_dj_detail ${team_id}|tee mine/${team_id})) >/dev/null
     done < <( \
         (([ -f mine/list ] && cat mine/list) || (getjson_dj_list|tee mine/list)) \
@@ -47,7 +48,7 @@ function getjson_topuid_oneserver() {
     server=$1
     mkdir -p dbds/${server}/
     for ((pn=1; pn<=10; pn++)); do
-        (([ -f dbds/${server}/topuid${pn} ] && cat dbds/${server}/topuid${pn}) || (sleep $[RANDOM % 5 + 1] && getjson_topuid ${server} ${pn}|tee dbds/${server}/topuid${pn})) > /dev/null
+        (([ -f dbds/${server}/topuid${pn} ] && cat dbds/${server}/topuid${pn}) || (sleep $[RANDOM % 2 + 1] && getjson_topuid ${server} ${pn}|tee dbds/${server}/topuid${pn})) > /dev/null
     done
     return $?
 }
@@ -80,8 +81,18 @@ function getjson_oneuid_oneserver() {
         |grep ${filter}|awk '($2>=0){print $1,$4}'|sort \
     )
 }
-getjson_oneuid_oneserver all 10 .
-#getjson_topuid all 1
-
-#getjson_dj_list
-#getjson_dj_mine
+function main() {
+    if [ "X$1" == "Xm" ]; then
+        rm mine/list
+        getjson_dj_mine
+        return $?
+    fi
+    if [ "X$1" == "Xtop" ]; then
+        #getjson_oneuid_oneserver 10009 10 .
+        #return $?
+        getjson_oneuid_oneserver all 10 .
+        return $?
+    fi
+}
+main $1
+exit $?
